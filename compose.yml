@@ -26,6 +26,8 @@ services:
       - "1111:3000"
     stdin_open: true
     tty: true
+    environment:
+      NODE_ENV: development
 
   db:
     image: mysql:8.0
