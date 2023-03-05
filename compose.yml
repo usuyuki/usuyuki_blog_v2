@@ -46,3 +46,8 @@ services:
 
 volumes:
   db-store:
+
+networks:
+  default:
+    external:
+      name: shared
