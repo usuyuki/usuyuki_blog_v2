@@ -24,13 +24,17 @@ services:
       - ./frontend:/usr/src/frontend
     ports:
       - "1111:3000"
-    stdin_open: true
-    tty: true
+    restart: always
     environment:
       NODE_ENV: development
 
   db:
     image: mysql:8.0
     restart: always
+    volumes:
+      - db-store:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: example
+
+volumes:
+  db-store:
