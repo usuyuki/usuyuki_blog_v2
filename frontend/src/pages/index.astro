@@ -6,11 +6,12 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 import { ghostClient } from '../lib/ghost';
 const posts = await ghostClient.posts
     .browse({
-        limit: 'all',
+        limit: 10,
     })
     .catch((err) => {
         console.error(err);
     });
+	console.log(await posts)
 ---
 
 <!DOCTYPE html>
