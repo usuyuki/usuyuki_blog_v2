@@ -13,6 +13,7 @@ services:
       database__connection__database: ghost
       url: http://localhost:1110
       NODE_ENV: development
+      VIRTUAL_HOST: blog.usuyuki.dev
     volumes:
       - ./backend:/var/lib/ghost/content
     user: "1000:1000"
@@ -30,6 +31,7 @@ services:
     tty: true
     environment:
       NODE_ENV: development
+      VIRTUAL_HOST: api.blog.usuyuki.dev
     user: "1000:1000"
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
     # command: sh -c "pnpm install && pnpm dev --host 0.0.0.0"
