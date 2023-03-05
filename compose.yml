@@ -49,5 +49,4 @@ volumes:
 
 networks:
   default:
-    external:
-      name: shared
+    name: shared
