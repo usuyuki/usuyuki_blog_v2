@@ -3,7 +3,7 @@ services:
     image: ghost:5-alpine
     restart: always
     ports:
-      - 1111:2368
+      - 1110:2368
     environment:
       # see https://ghost.org/docs/config/#configuration-options
       database__client: mysql
@@ -11,10 +11,22 @@ services:
       database__connection__user: root
       database__connection__password: example
       database__connection__database: ghost
-      url: http://localhost:1111
+      url: http://localhost:1110
       NODE_ENV: development
     volumes:
       - ./backend:/var/lib/ghost/content
+
+  astro:
+    build:
+      context: .
+      dockerfile: ./infra/dev/astro/Dockerfile
+    volumes:
+      - ./frontend:/usr/src/frontend
+    ports:
+      - "1111:3000"
+    stdin_open: true
+    tty: true
+
   db:
     image: mysql:8.0
     restart: always

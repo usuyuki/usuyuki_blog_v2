@@ -1,0 +1,3 @@
+```
+dc exec astro sh
+```
