@@ -4,12 +4,14 @@ services:
     restart: always
     environment:
       # see https://ghost.org/docs/config/#configuration-options
+      # 恐ろしく脆弱なDB設定だがコンテナの外に出していないやつなので、これでOKとする
       database__client: mysql
       database__connection__host: db
       database__connection__user: root
       database__connection__password: example
       database__connection__database: ghost
       NODE_ENV: production
+      url: ${API_URL}
     volumes:
       - ./backend:/var/lib/ghost/content
     user: "1000:1000"

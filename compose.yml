@@ -12,6 +12,7 @@ services:
       database__connection__password: example
       database__connection__database: ghost
       NODE_ENV: development
+      url: ${API_URL}
     volumes:
       - ./backend:/var/lib/ghost/content
     user: "1000:1000"
