@@ -1,10 +1,10 @@
 ---
-import { ghostClient } from '../../lib/ghost';
+import { ghostClient } from '../lib/ghost';
 
 export async function getStaticPaths() {
     const posts = await ghostClient.posts
         .browse({
-            limit: 'all',
+            limit: 1,
         })
         .catch((err) => {
             console.error(err);
