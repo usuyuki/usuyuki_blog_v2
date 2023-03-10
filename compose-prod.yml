@@ -21,7 +21,7 @@ services:
   astro:
     build:
       context: .
-      dockerfile: ./infra/dev/astro/Dockerfile
+      dockerfile: ./infra/prod/astro/Dockerfile
     volumes:
       - ./frontend:/usr/src/frontend
     restart: always
@@ -29,6 +29,8 @@ services:
     tty: true
     environment:
       NODE_ENV: production
+      ghost_content_key: ${ghost_content_key}
+      ghost_api_url: ${ghost_api_url}
     user: "1000:1000"
 
   db:
