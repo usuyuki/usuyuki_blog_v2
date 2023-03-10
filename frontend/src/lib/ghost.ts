@@ -6,5 +6,3 @@ export const ghostClient = new GhostContentAPI({
   key: import.meta.env.GHOST_CONTENT_KEY,
   version: "v5.0",
 });
-
-console.log(ghostClient);
