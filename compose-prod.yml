@@ -19,11 +19,7 @@ services:
       - db
 
   astro:
-    build:
-      context: .
-      dockerfile: ./infra/prod/astro/Dockerfile
-    volumes:
-      - ./frontend:/usr/src/frontend
+    image: ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
     restart: always
     stdin_open: true
     tty: true
