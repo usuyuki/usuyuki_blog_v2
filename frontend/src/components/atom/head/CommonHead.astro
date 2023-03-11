@@ -1,5 +1,5 @@
 ---
-import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, GA_TAG, SITE_SUB_TITLE } from '~/consts';
+import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
 const {title,slug,description,ogImage} = Astro.props;
 const url = SITE_URL + "/" + slug;
 const pageTitle = title + " | " + SITE_TITLE;
@@ -15,13 +15,13 @@ const pageTitle = title + " | " + SITE_TITLE;
 <link rel="icon" type="image/png"sizes="192x192" href="/images/favicon/icon-192x192.png">
 
 <!-- ga -->
-<script async src={"https://www.googletagmanager.com/gtag/js?id="+GA_TAG}></script>
-<script>
+<script type='text/partytown' async src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"></script>
+<script type='text/partytown'>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config',{GA_TAG});
+  gtag('config','G-ZB2SYBTNQQ');
 </script>
 
 <title>{pageTitle}</title>

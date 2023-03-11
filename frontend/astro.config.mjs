@@ -10,11 +10,8 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
+        // tsconfig.jsonにも定義
         '~': '/src',
-        $components: '/src/components',
-        $types: '/src/types',
-        $layouts: '/src/layouts',
-        $libs: '/src/libs',
       },
     },
   },

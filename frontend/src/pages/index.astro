@@ -1,21 +1,17 @@
 ---
-import BaseHead from '$components/BaseHead.astro';
-import Header from '$components/Header.astro';
-import Footer from '$components/Footer.astro';
 import { SITE_URL } from '~/consts';
-import { ghostClient } from '$libs/ghost';
+import { ghostClient } from '~/libs/ghost';
 import '~/styles/global.css';
-import IndexLayout from '$layouts/extends/IndexLayout.astro';
+import IndexLayout from '~/layouts/extends/IndexLayout.astro';
 const posts = await ghostClient.posts
     .browse({
         limit: 10,
     })
-    .catch((err) => {
+    .catch((err:any) => {
         console.error(err);
     });
     
-import type HeadMetaType from '$types/HeadMetaType';
-const headMeta:HeadMetaType = {
+const headMeta = {
     title:'とっぷ',
     slug:'',
     description:'「急須で入れたようななにか」のトップページです',
@@ -26,7 +22,7 @@ const headMeta:HeadMetaType = {
 <IndexLayout {...headMeta} >
 			<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
 		        {
-            posts.map((post) => (
+            posts.map((post:any) => (
                 <a href={`/${post.slug}`}>
 				<img src={post.feature_image} />
                     <h2 class="text-4xl text-black"> {post.title} </h2>
