@@ -19,10 +19,10 @@ services:
       - db
 
   astro:
-    build:
-      image: ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
-      # context: .
-      # dockerfile: ./infra/prod/astro/Dockerfile
+    image: ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+    # build:
+    # context: .
+    # dockerfile: ./infra/prod/astro/Dockerfile
     restart: always
     stdin_open: true
     tty: true
