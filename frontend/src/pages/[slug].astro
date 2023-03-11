@@ -2,10 +2,9 @@
 import BlogLayout from '~/layouts/extends/BlogLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import '~/styles/blogContent.css';
-
 const postRaw = await ghostClient.posts
 	.browse({
-		limit: 1
+		filter: `slug:${Astro.params.slug}`
 	})
 	.catch((err: any) => {
 		console.error(err);

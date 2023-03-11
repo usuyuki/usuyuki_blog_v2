@@ -9,13 +9,15 @@ postsData.posts.map((post: any) => {
 });
 ---
 
-<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">先月の記事</h2>
 <div class="flex flex-wrap items-start">
 	{
 		postsData.posts.map((post: any) => (
-			<a class="flex justify-center items-center flex-col w-1/5" href={`/${post.slug}`}>
+			<a
+				class="flex justify-center items-center flex-col w-1/2 md:w-1/5 mb-12"
+				href={`/${post.slug}`}
+			>
 				<SmallDate month={post.published_at.month} day={post.published_at.day} />
-				<img src={post.feature_image} class="aspect-square h-40" />
+				<img src={post.feature_image} class="aspect-square h-40 object-cover" />
 				<h3 class="text-xl text-black"> {post.title} </h3>
 			</a>
 		))

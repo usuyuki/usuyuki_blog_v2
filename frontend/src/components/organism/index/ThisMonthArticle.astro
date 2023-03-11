@@ -12,7 +12,7 @@ const formatDate = (date) => {
 
 const posts = await ghostClient.posts
 	.browse({
-		filter: `published_at:>='${formatDate(firstDay)}'+published_at:<='${formatDate(lastDay)}'`,
+		filter: `published_at:>='${formatDate(lastDay)}'`,
 		order: 'published_at ASC'
 	})
 	.catch((err: any) => {
@@ -23,5 +23,11 @@ const postsData = {
 };
 ---
 
-<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">先月の記事</h2>
-<ArticleArchive {...postsData} />
+<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">今月の記事</h2>
+{
+	postsData.posts && postsData.posts.length > 0 ? (
+		<ArticleArchive {...postsData} />
+	) : (
+		<p>きじなし</p>
+	)
+}
