@@ -2,8 +2,6 @@ services:
   ghost:
     image: ghost:5-alpine
     restart: always
-    ports:
-      - 1110:2368
     environment:
       # see https://ghost.org/docs/config/#configuration-options
       database__client: mysql
@@ -32,8 +30,8 @@ services:
     tty: true
     environment:
       NODE_ENV: development
-      ghost_content_key: ${ghost_content_key}
-      ghost_api_url: ${ghost_api_url}
+      GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
+      GHOST_API_URL: ${GHOST_API_URL}
     user: "1000:1000"
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
 
