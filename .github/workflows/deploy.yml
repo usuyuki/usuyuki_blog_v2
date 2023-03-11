@@ -29,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./
-          file: ./infra/dev/astro/Dockerfile
+          file: ./infra/prod/astro/Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
@@ -52,4 +52,4 @@ jobs:
           script: |
             cd ${{ secrets.BLOG_SERVER_PATH }}
             git pull origin main
-            docker compose up -d --build
+            docker compose -f compose-prod.yml up -d --build
