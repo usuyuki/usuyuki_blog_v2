@@ -1,0 +1,53 @@
+🗃components:
+  - frontend/src/components/*
+🖼layouts:
+  - frontend/src/layouts/*
+  - frontend/src/styles/global.css
+🧩types:
+  - frontend/src/types/*
+  - frontend/src/env.d.ts
+⚒libs:
+  - frontend/src/libs/*
+📄pages:
+  - frontend/src/pages/*
+🕵test:
+  - frontend/tests/*
+🗺config:
+  - .env.example
+  - frontend/astro.config.mjs
+  - frontend/src/consts.ts
+  - frontend/.env.example
+  - frontend/.eslintignore
+  - frontend/.eslintrc.cjs
+  - frontend/.gitattributes
+  - frontend/.gitignore
+  - frontend/.npmrc
+  - frontend/.prettierignore
+  - frontend/.prettierrc
+  - frontend/.playwright-ct.config.ts
+  - frontend/.playwright.config.ts
+  - frontend/.postcss.config.cjs
+  - frontend/.tailwind.config.cjs
+  - frontend/.tsconfig.json
+  - frontend/.vite.config.ts
+  - frontend/.vscode/*
+🎁package:
+  - frontend/package.json
+  - frontend/pnpm-lock.yaml
+👗static:
+  - frontend/public/*
+📄docs:
+  - README.md
+  - frontend/README.md
+  - backend/README.md
+  - LICENSE
+
+🐟infra:
+  - compose.yml
+  - compose-prod.yml
+  - infra/*
+  - .dockerignore
+
+✈ci:
+  - .github/workflows/*
+  - .github/labeler.yml
