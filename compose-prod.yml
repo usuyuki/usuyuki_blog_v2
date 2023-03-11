@@ -33,6 +33,8 @@ services:
     user: "1000:1000"
     depends_on:
       - ghost
+    # ports:
+    #   - "1000:1000"
 
   db:
     image: mysql:8.0

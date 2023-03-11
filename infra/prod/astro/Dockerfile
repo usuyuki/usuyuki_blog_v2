@@ -12,7 +12,6 @@ COPY frontend/tsconfig.json .
 COPY frontend/public ./public
 COPY frontend/src ./src
 RUN chown -R node:node .
-# RUNでやると環境変数取れないのでCMDでやる
-# PORTとHOSTもここでシェルフォームで指定しないと適応されない
+# RUNでbuildすると環境変数取れないのでCMDでbuildする
 CMD pnpm build && node ./dist/server/entry.mjs
 EXPOSE 1000 
