@@ -49,4 +49,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT }}
-          script: cd ${{ secrets.BLOG_SERVER_PATH }} && docker compose up -d --build
+          script: |
+            cd ${{ secrets.BLOG_SERVER_PATH }}
+            git pull origin main
+            docker compose up -d --build
