@@ -31,6 +31,8 @@ services:
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
       GHOST_API_URL: ${GHOST_API_URL}
     user: "1000:1000"
+    depends_on:
+      - ghost
 
   db:
     image: mysql:8.0

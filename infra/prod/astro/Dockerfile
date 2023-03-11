@@ -1,4 +1,5 @@
 FROM node:18-alpine AS prod
+RUN apk update
 RUN apk add curl
 RUN corepack enable
 WORKDIR /usr/src/frontend
