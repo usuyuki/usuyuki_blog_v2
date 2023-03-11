@@ -14,11 +14,6 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -52,4 +47,6 @@ jobs:
           script: |
             cd ${{ secrets.BLOG_SERVER_PATH }}
             git pull origin main
-            docker compose -f compose-prod.yml up -d --build
+            # docker compose upしても正しく降ってこないので、一旦最新を明示的にpullさせる
+            docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+            docker compose -f compose-prod.yml up -d
