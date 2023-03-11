@@ -16,9 +16,8 @@ const pageTitle = title + ' | ' + SITE_TITLE;
 <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/icon-192x192.png" />
 
 <!-- ga -->
-<script type="text/partytown" async src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"
-></script>
-<script type="text/partytown">
+<script is:inline src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"></script>
+<script is:inline>
 	window.dataLayer = window.dataLayer || [];
 	function gtag() {
 		//  'dataLayer' is not defined  no-undefのエラーが出るが、どうしようもできないのでコメントで無効化してる
@@ -28,7 +27,6 @@ const pageTitle = title + ' | ' + SITE_TITLE;
 
 	gtag('config', 'G-ZB2SYBTNQQ');
 </script>
-
 <title>{pageTitle}</title>
 <meta name="author" content={SITE_AUTHOR} />
 <meta name="description" content={description} />
