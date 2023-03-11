@@ -18,7 +18,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2
+          images: ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -28,12 +28,13 @@ jobs:
       - name: Build and Push to GitHub Container Registry
         uses: docker/build-push-action@v4
         with:
-          context: .
+          context: ./
+          dockerfile: ./infra/dev/astro/Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2:latest
+            ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:latest
           labels: latest
 
   deploy:
