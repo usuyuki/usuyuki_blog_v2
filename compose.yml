@@ -13,7 +13,9 @@ services:
       url: ${BACKEND_API_URL}
     volumes:
       - ./backend:/var/lib/ghost/content
-    user: "1000:2368"
+    user: "1000:1000"
+    ports:
+      - "1001:2368"
     depends_on:
       - db
 

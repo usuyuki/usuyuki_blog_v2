@@ -16,6 +16,7 @@ export default defineConfig({
 		}
 	},
 	integrations: [sitemap(), tailwind()],
+	server: { port: 1000, host: "0.0.0.0" },
 	output: 'server',
 	adapter: node({
 		// middlewareだとファイルをうまくできずFW作る必要あるのでstandaloneで動かす

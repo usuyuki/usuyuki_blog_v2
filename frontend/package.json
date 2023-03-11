@@ -12,8 +12,7 @@
 		"lint": "pnpm lint:eslint && pnpm lint:prettier",
 		"lint:prettier": "prettier --plugin-search-dir . --check **/*.{css,scss,ts,tsx,astro}",
 		"lint:eslint": "eslint \"./src/**/*.{js,jsx,ts,tsx,astro}\" --fix --ignore-path .gitignore",
-		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}",
-		"server": "HOST=0.0.0.0 PORT=1000 node ./dist/server/entry.mjs"
+		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
 	},
 	"dependencies": {
 		"@astrojs/node": "^5.1.0",
