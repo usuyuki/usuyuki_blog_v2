@@ -2,6 +2,8 @@ services:
   ghost:
     image: ghost:5-alpine
     restart: always
+    ports:
+      - 1000:2368
     environment:
       # see https://ghost.org/docs/config/#configuration-options
       # 恐ろしく脆弱なDB設定だがコンテナの外に出していないやつなので、これでOKとする
@@ -24,6 +26,8 @@ services:
     # context: .
     # dockerfile: ./infra/prod/astro/Dockerfile
     restart: always
+    ports:
+      - "1001:3000"
     stdin_open: true
     tty: true
     environment:
