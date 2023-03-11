@@ -1,31 +1,21 @@
 ---
 import { ghostClient } from '../lib/ghost';
+import BlogLayout from '~/layouts/BlogLayout.astro';
 
-export async function getStaticPaths() {
-    const posts = await ghostClient.posts
+const post = await ghostClient.posts
         .browse({
             limit: 1,
         })
         .catch((err) => {
             console.error(err);
         });
-
-    return posts.map((post) => {
-        return {
-            params: {
-                slug: post.slug,
-            },
-            props: {
-                post: post,
-            },
-        };
-    });
+        
+if(!post){
+return Astro.redirect('/404');
 }
-
-const { post } = Astro.props;
 ---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
     <head>
         <title>{post.title}</title>
     </head>
@@ -33,8 +23,8 @@ const { post } = Astro.props;
         <img src={post.feature_image} alt={post.title} />
 
         <h1>{post.title}</h1>
-        <p>{post.reading_time} min read</p>
+        <p>{post.reading_time} 分くらいで読めます</p>
 
-        <Fragment set:html={post.html} />
+    <Fragment output:server set:html={post.html} />
     </body>
 </html>
