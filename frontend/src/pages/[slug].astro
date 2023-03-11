@@ -1,31 +1,38 @@
 ---
 import BlogLayout from '~/layouts/extends/BlogLayout.astro';
-import { ghostClient } from '~/libs/ghost';
-
-const post = await ghostClient.posts
+import ISOTimeToDate from '~/libs/ISOTimeToDate';
+import { ghostClient } from '~/libs/ghostClient';
+import '~/styles/blogContent.css';
+const postRaw = await ghostClient.posts
 	.browse({
-		limit: 1
+		filter: `slug:${Astro.params.slug}`
 	})
 	.catch((err: any) => {
 		console.error(err);
 	});
-
-if (!post) {
+if (!postRaw) {
 	return Astro.redirect('/404');
 }
+const post = postRaw[0];
+post.published_at = ISOTimeToDate(post.published_at);
+
 const headMeta = {
 	title: post.title,
 	slug: post.slug,
-	description: post.description,
+	// excerptの名に反して全部出てくるので、改行して150字で切る。
+	description: post.excerpt.replace(/\r?\n/g, '').slice(0, 150),
 	ogImage: post.feature_image
 };
 ---
 
 <BlogLayout {...headMeta}>
-	<img src={post.feature_image} alt={post.title} />
+	<!-- <img src={post.feature_image} alt={post.title} /> -->
 
-	<h1>{post.title}</h1>
-	<p>{post.reading_time} 分くらいで読めます</p>
+	<h1 class="text-center mb-2">{post.title}</h1>
+	<p class="text-center my-2 text-green">
+		{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
+	</p>
+	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
 	<Fragment output:server set:html={post.html} />
 	{/* eslint-enable */}

@@ -1,0 +1,33 @@
+---
+import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
+import { ghostClient } from '~/libs/ghostClient';
+const today = new Date();
+const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
+// ここちゃんとする
+const formatDate = (date: any) => {
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+		date.getDate()
+	).padStart(2, '0')}`;
+};
+
+const posts = await ghostClient.posts
+	.browse({
+		filter: `published_at:>='${formatDate(lastDay)}'`,
+		order: 'published_at ASC'
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+const postsData = {
+	posts: posts
+};
+---
+
+<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">今月の記事</h2>
+{
+	postsData.posts && postsData.posts.length > 0 ? (
+		<ArticleArchive {...postsData} />
+	) : (
+		<p class="text-center text-xl mt-2 mb-8">今月はまだ記事を書いていません！ごめんなさい！</p>
+	)
+}

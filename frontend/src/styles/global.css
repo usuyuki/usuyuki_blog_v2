@@ -3,15 +3,64 @@
 @tailwind utilities;
 
 :root {
-	--white: '#FCF7F4';
-	--black: '#540610';
-	--brown: '#D4A680';
-	--pink: '#FF98B2';
-	--orange: '#FF785B';
-	--blue: '#00B5C0';
-	--green: '#5EBE98';
-	--red: '#FF300E';
+	--white: #fcf7f4;
+	--black: #540610;
+	--brown: #d4a680;
+	--pink: #ff98b2;
+	--orange: #ff785b;
+	--blue: #00b5c0;
+	--green: #5ebe98;
+	--red: #ff300e;
+
+	--heder-height: 60px;
+	--footer-height: 120px;
+	--main-padding-top: 20px;
+	--main-max-width: 1300px;
 }
-h2 {
-	color: red;
+@media screen and (max-width: 640px) {
+	:root {
+		--heder-height: 60px;
+		--footer-height: 120px;
+		--main-padding-top: 20px;
+		--main-max-width: 1300px;
+	}
+}
+body {
+	scroll-behavior: smooth;
+	background-color: var(--white);
+	color: var(--black);
+	color: var(--black);
+	tab-size: 4;
+	font-feature-settings: normal;
+	font-family: Merriweather, YakuHanJP, Noto Sans JP, ui-sans-serif, system-ui, -apple-system,
+		BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji', Segoe UI Symbol, 'Noto Color Emoji';
+}
+p {
+	font-size: 1rem;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	letter-spacing: 0.025em;
+	line-height: 1.25;
+	font-weight: 800;
+	font-family: Varela Round, Kosugi Maru, ui-sans-serif, system-ui, -apple-system,
+		BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji', Segoe UI Symbol, 'Noto Color Emoji';
+}
+
+main {
+	padding: 1rem;
+	max-width: var(--main-max-width);
+	margin: 0 auto;
+	min-height: calc(100vh - var(--heder-height) - var(--footer-height));
+	padding-top: var(--main-padding-top);
+}
+a:hover {
+	color: var(--blue);
+	transition-duration: 500ms;
 }
