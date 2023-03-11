@@ -28,8 +28,8 @@ services:
     tty: true
     environment:
       NODE_ENV: production
-      ghost_content_key: ${ghost_content_key}
-      ghost_api_url: ${ghost_api_url}
+      ghost_content_key: ${GHOST_CONTENT_KEY}
+      ghost_api_url: ${GHOST_API_URL}
     user: "1000:1000"
 
   db:
