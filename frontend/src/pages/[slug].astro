@@ -26,5 +26,7 @@ const headMeta = {
 
 	<h1>{post.title}</h1>
 	<p>{post.reading_time} 分くらいで読めます</p>
-	<Fragment output:server set:html={post.html} /> /** eslint-disable-line */
+	{/* eslint-disable */}
+	<Fragment output:server set:html={post.html} />
+	{/* eslint-enable */}
 </BlogLayout>
