@@ -14,5 +14,5 @@ COPY frontend/src ./src
 RUN chown -R node:node .
 # RUNでやると環境変数取れないのでCMDでやる
 # PORTとHOSTもここでシェルフォームで指定しないと適応されない
-CMD pnpm build && HOST=0.0.0.0 PORT=1000 node ./dist/server/entry.mjs
+CMD pnpm build && node ./dist/server/entry.mjs
 EXPOSE 1000 
