@@ -21,7 +21,7 @@ services:
   astro:
     build:
       context: .
-      dockerfile: ./infra/dev/astro/Dockerfile
+      dockerfile: ./infra/prod/astro/Dockerfile
     volumes:
       - ./frontend:/usr/src/frontend
     restart: always
@@ -29,9 +29,9 @@ services:
     tty: true
     environment:
       NODE_ENV: production
+      ghost_content_key: ${ghost_content_key}
+      ghost_api_url: ${ghost_api_url}
     user: "1000:1000"
-    # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
-    command: sh -c "pnpm install && pnpm start --host 0.0.0.0"
 
   db:
     image: mysql:8.0

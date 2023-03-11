@@ -1,0 +1,22 @@
+---
+import '~/styles/global.css';
+import CommonHead from '$components/atom/head/CommonHead.astro';
+import CommonFooter from '$components/atom/footer/CommonFooter.astro';
+import CommonHeader from '$components/atom/header/CommonHeader.astro';
+import type { HeadMetaType } from '$types/HeadMetaType';
+const  headMeta:HeadMetaType  = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <CommonHead {...headMeta} />
+        <slot name="head" />
+    </head>
+    <body>
+        <CommonHeader />
+        <main>
+            <slot />
+        </main>
+        <CommonFooter />
+    </body>
+</html>
