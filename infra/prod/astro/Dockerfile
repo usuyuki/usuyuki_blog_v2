@@ -11,5 +11,8 @@ COPY frontend/tsconfig.json .
 COPY frontend/public ./public
 COPY frontend/src ./src
 RUN chown -R node:node .
-EXPOSE 1111
-CMD ["pnpm", "run", "start", "--port", "1111","--host", "0.0.0.0"]
+RUN HOST=0.0.0.0
+RUN PORT=1000
+# RUNでやると環境変数取れないのでCMDでやる
+CMD pnpm build && HOST=0.0.0.0 PORT=1000 node ./dist/server/entry.mjs
+EXPOSE 1000 

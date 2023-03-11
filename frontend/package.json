@@ -12,7 +12,8 @@
 		"lint": "pnpm lint:eslint && pnpm lint:prettier",
 		"lint:prettier": "prettier --plugin-search-dir . --check **/*.{css,scss,ts,tsx,astro}",
 		"lint:eslint": "eslint \"./src/**/*.{js,jsx,ts,tsx,astro}\" --fix --ignore-path .gitignore",
-		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
+		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}",
+		"server": "HOST=0.0.0.0 PORT=1000 node ./dist/server/entry.mjs"
 	},
 	"dependencies": {
 		"@astrojs/node": "^5.1.0",
@@ -22,6 +23,7 @@
 		"@tailwindcss/line-clamp": "^0.4.2",
 		"@tryghost/content-api": "^1.11.6",
 		"astro": "^2.1.2",
+		"image-size": "^1.0.2",
 		"tailwindcss": "^3.0.24"
 	},
 	"devDependencies": {

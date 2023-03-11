@@ -18,6 +18,7 @@ export default defineConfig({
 	integrations: [sitemap(), tailwind()],
 	output: 'server',
 	adapter: node({
+		// middlewareだとファイルをうまくできずFW作る必要あるのでstandaloneで動かす
 		mode: 'standalone'
 	})
 });
