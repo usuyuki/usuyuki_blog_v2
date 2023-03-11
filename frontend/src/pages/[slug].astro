@@ -1,30 +1,30 @@
 ---
-import { ghostClient } from '~/libs/ghost';
 import BlogLayout from '~/layouts/extends/BlogLayout.astro';
+import { ghostClient } from '~/libs/ghost';
 
 const post = await ghostClient.posts
-        .browse({
-            limit: 1,
-        })
-        .catch((err:any) => {
-            console.error(err);
-        });
-        
-if(!post){
-return Astro.redirect('/404');
+	.browse({
+		limit: 1
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
+if (!post) {
+	return Astro.redirect('/404');
 }
 const headMeta = {
-    title: post.title,
-    slug: post.slug,
-    description: post.description,
-    ogImage: post.feature_image,
+	title: post.title,
+	slug: post.slug,
+	description: post.description,
+	ogImage: post.feature_image
 };
 ---
-<BlogLayout {...headMeta} >
-        <img src={post.feature_image} alt={post.title} />
 
-        <h1>{post.title}</h1>
-        <p>{post.reading_time} 分くらいで読めます</p>
+<BlogLayout {...headMeta}>
+	<img src={post.feature_image} alt={post.title} />
 
-    <Fragment output:server set:html={post.html} />
+	<h1>{post.title}</h1>
+	<p>{post.reading_time} 分くらいで読めます</p>
+	<Fragment output:server set:html={post.html} /> /** eslint-disable-line */
 </BlogLayout>

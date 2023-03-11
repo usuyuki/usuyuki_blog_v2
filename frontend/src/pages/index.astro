@@ -1,32 +1,32 @@
 ---
 import { SITE_URL } from '~/consts';
-import { ghostClient } from '~/libs/ghost';
-import '~/styles/global.css';
 import IndexLayout from '~/layouts/extends/IndexLayout.astro';
+import '~/styles/global.css';
+import { ghostClient } from '~/libs/ghost';
 const posts = await ghostClient.posts
-    .browse({
-        limit: 10,
-    })
-    .catch((err:any) => {
-        console.error(err);
-    });
-    
+	.browse({
+		limit: 10
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
 const headMeta = {
-    title:'とっぷ',
-    slug:'',
-    description:'「急須で入れたようななにか」のトップページです',
-    ogImage: SITE_URL+'/images/ogp/ogp.png',
+	title: 'とっぷ',
+	slug: '',
+	description: '「急須で入れたようななにか」のトップページです',
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
 ---
 
-<IndexLayout {...headMeta} >
-			<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
-		        {
-            posts.map((post:any) => (
-                <a href={`/${post.slug}`}>
+<IndexLayout {...headMeta}>
+	<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
+	{
+		posts.map((post: any) => (
+			<a href={`/${post.slug}`}>
 				<img src={post.feature_image} />
-                    <h2 class="text-4xl text-black"> {post.title} </h2>
-                </a>
-            ))
-        }
+				<h2 class="text-4xl text-black"> {post.title} </h2>
+			</a>
+		))
+	}
 </IndexLayout>

@@ -28,6 +28,7 @@
   - frontend/.playwright.config.ts
   - frontend/.postcss.config.cjs
   - frontend/.tailwind.config.cjs
+  - frontend/stylelint.config.cjs
   - frontend/.tsconfig.json
   - frontend/.vite.config.ts
   - frontend/.vscode/*

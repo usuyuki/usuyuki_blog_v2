@@ -1,4 +1,4 @@
-name: 静的解析 (astro-check)
+name: 凛としたLint
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   frontend_lint:
-    name: static analysis
+    name: frontend lint
     runs-on: ubuntu-latest
     env:
       NODE_ENV: development
@@ -46,5 +46,5 @@ jobs:
       - name: Install dependencies
         run: cd frontend && pnpm install
 
-      - name: astro-check
-        run: cd frontend && pnpm check
+      - name: lint
+        run: cd frontend && pnpm lint
