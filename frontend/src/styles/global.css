@@ -3,16 +3,15 @@
 @tailwind utilities;
 
 :root {
-	--white: #FCF7F4,
-	--black: #540610,
-	--brown: #D4A680,
-	--pink: #FF98B2,
-	--orange: #FF785B,
-	--blue: #00B5C0,
-	--green: #5EBE98,
-	--red: #FF300E,
+	--white: '#FCF7F4';
+	--black: '#540610';
+	--brown: '#D4A680';
+	--pink: '#FF98B2';
+	--orange: '#FF785B';
+	--blue: '#00B5C0';
+	--green: '#5EBE98';
+	--red: '#FF300E';
 }
-
-h2{
+h2 {
 	color: red;
 }

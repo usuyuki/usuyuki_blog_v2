@@ -1,3 +1,12 @@
 {
-  "cSpell.words": ["astro"]
+  "cSpell.words": [
+    "astro",
+    "astrojs",
+    "consts",
+    "postcss",
+    "stylelint",
+    "tailwindcss",
+    "tryghost",
+    "vite"
+  ]
 }
