@@ -16,8 +16,9 @@ module.exports = {
 				red: 'var(--red)'
 			},
 			fontFamily: {
-				serif: ['var(--heading-font)', ...fontFamily.serif],
-				sans: ['var(--body-font)', ...fontFamily.sans]
+				numbers:['Helvetica','Mongolian Baiti',...fontFamily.serif],
+				serif: ['Varela Round','Kosugi Maru','ui-sans-serif','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI,Roboto','Helvetica Neue','Arial,Noto Sans','sans-serif','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji', ...fontFamily.serif],
+				sans: ['Merriweather','YakuHanJP','Noto Sans JP','ui-sans-serif','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI','Roboto','Helvetica Neue','Arial,Noto Sans','sans-serif','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji', ...fontFamily.sans]
 			}
 		}
 	},

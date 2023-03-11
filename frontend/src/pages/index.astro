@@ -2,15 +2,7 @@
 import { SITE_URL } from '~/consts';
 import IndexLayout from '~/layouts/extends/IndexLayout.astro';
 import '~/styles/global.css';
-import { ghostClient } from '~/libs/ghost';
-const posts = await ghostClient.posts
-	.browse({
-		limit: 10
-	})
-	.catch((err: any) => {
-		console.error(err);
-	});
-
+import LastMonthArticle from '~/components/organism/index/LastMonthArticle.astro';
 const headMeta = {
 	title: 'とっぷ',
 	slug: '',
@@ -20,13 +12,8 @@ const headMeta = {
 ---
 
 <IndexLayout {...headMeta}>
-	<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
-	{
-		posts.map((post: any) => (
-			<a href={`/${post.slug}`}>
-				<img src={post.feature_image} />
-				<h2 class="text-4xl text-black"> {post.title} </h2>
-			</a>
-		))
-	}
+	<h2 class="text-2xl text-center mb-4 mx-2">うすゆきブログ</h2>
+	<h2 class="text-4xl">急須で入れたような</h2>
+	<h2 class="text-3xl">何か</h2>
+	<LastMonthArticle />
 </IndexLayout>
