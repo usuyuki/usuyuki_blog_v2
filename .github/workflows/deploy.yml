@@ -52,4 +52,4 @@ jobs:
           script: |
             cd ${{ secrets.BLOG_SERVER_PATH }}
             git pull origin main
-            docker compose up -d --build
+            docker compose -f compose-prod.yml up -d --build
