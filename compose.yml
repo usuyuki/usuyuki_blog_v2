@@ -32,8 +32,8 @@ services:
     tty: true
     environment:
       NODE_ENV: development
-      ghost_content_key: ${ghost_content_key}
-      ghost_api_url: ${ghost_api_url}
+      ghost_content_key: ${GHOST_CONTENT_KEY}
+      ghost_api_url: ${GHOST_API_URL}
     user: "1000:1000"
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
 
