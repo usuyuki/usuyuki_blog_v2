@@ -1,4 +1,5 @@
 FROM node:18-alpine AS prod
+RUN apk add curl
 RUN corepack enable
 WORKDIR /usr/src/frontend
 COPY frontend/package.json ./
@@ -10,5 +11,5 @@ COPY frontend/tsconfig.json .
 COPY frontend/public ./public
 COPY frontend/src ./src
 RUN chown -R node:node .
-EXPOSE 3000
-CMD ["pnpm", "run", "start", "--", "--host", "0.0.0.0"]
+EXPOSE 1111
+CMD ["pnpm", "run", "start", "--port", "1111","--host", "0.0.0.0"]
