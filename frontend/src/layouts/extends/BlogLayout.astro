@@ -1,8 +1,7 @@
 ---
 import BaseLayout from "$layouts/BaseLayout.astro";
-import BlogHead from "$components/atom/head/blogHead.astro";
+const  headMeta:HeadMetaType  = Astro.props;
 ---
-<BaseLayout>
-<BlogHead slot="head" />
+<BaseLayout {...headMeta}>
 <slot />
 </BaseLayout>

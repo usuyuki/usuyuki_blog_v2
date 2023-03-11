@@ -1,8 +1,8 @@
 ---
+import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, GA_TAG, SITE_SUB_TITLE } from '~/consts';
 const {title,slug,description,ogImage} = Astro.props;
-
-const url = "https://blog.usuyuki.net/"+slug;
-const pageTitle = title+" | うすゆきブログ";
+const url = SITE_URL + "/" + slug;
+const pageTitle = title + " | " + SITE_TITLE;
 ---
 <meta name="robots" content="index, follow">
 <meta charset="UTF-8">
@@ -11,27 +11,27 @@ const pageTitle = title+" | うすゆきブログ";
 <meta name="generator" content={Astro.generator} />
 
 <!-- favcion読み込み -->
-<link rel="apple-touch-icon" type="image/png" href="/favicon/apple-touch-icon-180x180.png">
-<link rel="icon" type="image/png"sizes="192x192" href="/favicon/icon-192x192.png">
+<link rel="apple-touch-icon" type="image/png" href="/images/favicon/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png"sizes="192x192" href="/images/favicon/icon-192x192.png">
 
 <!-- ga -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"></script>
+<script async src={"https://www.googletagmanager.com/gtag/js?id="+GA_TAG}></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-ZB2SYBTNQQ');
+  gtag('config',{GA_TAG});
 </script>
 
 <title>{pageTitle}</title>
-<meta name="author" content="usuyuki">
+<meta name="author" content={SITE_AUTHOR}>
 <meta name="description" content={description}>
 <meta name="thumbnail" content={ogImage} />
 
 <meta name="robots" content="max-image-preview:large" />
 <meta property="og:locale" content="ja_JP" />
-<meta property="og:site_name" content="うすゆきブログ – 急須で入れたような何か" />
+<meta property="og:site_name" content={SITE_TITLE+" - "+SITE_SUB_TITLE}/>
 <meta property="og:type" content="article" />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:url" content={url} />
@@ -41,7 +41,7 @@ const pageTitle = title+" | うすゆきブログ";
 <meta property="article:modified_time" content="2023-03-02T13:33:25+00:00" /> -->
 
 <meta name="twitter:card" content="summary" />
-<meta name="twitter:site" content="@usuyuki26" />
-<meta name="twitter:creator" content="@usuyuki26" />
+<meta name="twitter:site" content={TWITTER_ID} />
+<meta name="twitter:creator" content={TWITTER_ID} />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:image" content={ogImage}/>

@@ -1,10 +1,11 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
-import { ghostClient } from '../lib/ghost';
+import BaseHead from '$components/BaseHead.astro';
+import Header from '$components/Header.astro';
+import Footer from '$components/Footer.astro';
+import { SITE_URL } from '~/consts';
+import { ghostClient } from '$libs/ghost';
 import '~/styles/global.css';
+import IndexLayout from '$layouts/extends/IndexLayout.astro';
 const posts = await ghostClient.posts
     .browse({
         limit: 10,
@@ -12,21 +13,18 @@ const posts = await ghostClient.posts
     .catch((err) => {
         console.error(err);
     });
+    
+import type HeadMetaType from '$types/HeadMetaType';
+const headMeta:HeadMetaType = {
+    title:'とっぷ',
+    slug:'',
+    description:'「急須で入れたようななにか」のトップページです',
+    ogImage: SITE_URL+'/images/ogp/ogp.png',
+};
 ---
 
-<!DOCTYPE html>
-<html lang="ja">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-	</head>
-	<body>
-		<Header title={SITE_TITLE} />
-        
-        dadadad
-        
-        
-        aaaa
-        
+<IndexLayout {...headMeta} >
+			<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
 		        {
             posts.map((post) => (
                 <a href={`/${post.slug}`}>
@@ -35,14 +33,4 @@ const posts = await ghostClient.posts
                 </a>
             ))
         }
-		<main>
-			<h1>🧑‍🚀 Hello, usuyuki!!!!!adaddaa!a</h1>
-            
-            dadadad
-		</main>
-		
-		
-		
-		<Footer />
-	</body>
-</html>
+</IndexLayout>

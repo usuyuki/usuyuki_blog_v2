@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "$layouts/BaseLayout.astro";
+const  headMeta:HeadMetaType  = Astro.props;
 ---
-<BaseLayout>
+<BaseLayout {...headMeta}>
 <slot />
 </BaseLayout>
