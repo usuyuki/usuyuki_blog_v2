@@ -1,0 +1,34 @@
+h1 {
+	font-size: 3rem;
+}
+h2 {
+	font-size: 2rem;
+}
+h3 {
+	font-size: 1.7rem;
+}
+p {
+	font-size: 1.2rem;
+	margin-top: 1rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	margin-top: 3rem;
+	margin-bottom: 1rem;
+	letter-spacing: 0.025em;
+	line-height: 1.25;
+}
+
+figure {
+	margin-top: 1.5rem;
+	margin-bottom: 1rem;
+}
+iframe {
+	width: 90%;
+	aspect-ratio: 16/9;
+}
