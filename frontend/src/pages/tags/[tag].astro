@@ -47,7 +47,9 @@ const headMeta: HeadMetaType = {
 
 <ArchiveLayout {...headMeta}>
 	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">「{tag.name}」タグの付いたの記事</h2>
-	<p class="mb-12">{tag.description ?? ''}</p>
+	<div class="flex justify-center mb-12">
+		<p class="">{tag.description ?? ''}</p>
+	</div>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />

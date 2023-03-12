@@ -5,7 +5,8 @@ import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
 import '~/styles/blogContent.css';
 const post = await ghostClient.posts
 	.read({
-		slug: Astro.params.slug
+		slug: Astro.params.slug,
+		include: 'tags'
 	})
 	.catch((err: any) => {
 		console.error(err);
@@ -32,6 +33,23 @@ const headMeta = {
 	<p class="text-center my-2 text-green">
 		{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
 	</p>
+	{
+		post.tags ? (
+			<div class="flex justify-center flex-wrap">
+				{post.tags.map((tag: any) =>
+					tag.visibility === 'public' ? (
+						<a href={`/tags/${tag.slug}`} class="text-center my-2 text-green mx-2">
+							🏷{tag.name}
+						</a>
+					) : (
+						''
+					)
+				)}
+			</div>
+		) : (
+			''
+		)
+	}
 	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
 	<Fragment output:server set:html={post.html} />

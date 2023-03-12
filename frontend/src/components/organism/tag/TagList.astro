@@ -17,7 +17,7 @@ const tags = await ghostClient.tags
 		<ul>
 			{tags.map((tag: any) => (
 				<li>
-					<a href={`/tag/${tag.slug}`}>🧩{tag.name}</a>
+					<a href={`/tags/${tag.slug}`}>🏷{tag.name}</a>
 				</li>
 			))}
 		</ul>
