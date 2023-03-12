@@ -5,6 +5,7 @@
     "astrojs",
     "consts",
     "postcss",
+    "speakerdeck",
     "stylelint",
     "tailwindcss",
     "tryghost",

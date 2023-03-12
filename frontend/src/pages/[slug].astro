@@ -1,19 +1,20 @@
 ---
-import BlogLayout from '~/layouts/extends/BlogLayout.astro';
+import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
 import '~/styles/blogContent.css';
-const postRaw = await ghostClient.posts
-	.browse({
-		filter: `slug:${Astro.params.slug}`
+const post = await ghostClient.posts
+	.read({
+		slug: Astro.params.slug,
+		include: 'tags'
 	})
 	.catch((err: any) => {
 		console.error(err);
 	});
-if (postRaw[0] === undefined) {
+
+if (post === undefined) {
 	return Astro.redirect('/404');
 }
-const post = postRaw[0];
 post.published_at = iso8601TimeToDate(post.published_at);
 
 const headMeta = {
@@ -25,15 +26,32 @@ const headMeta = {
 };
 ---
 
-<BlogLayout {...headMeta}>
+<ArticleLayout {...headMeta}>
 	<!-- <img src={post.feature_image} alt={post.title} /> -->
 
 	<h1 class="text-center mb-2">{post.title}</h1>
 	<p class="text-center my-2 text-green">
 		{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
 	</p>
+	{
+		post.tags ? (
+			<div class="flex justify-center flex-wrap">
+				{post.tags.map((tag: any) =>
+					tag.visibility === 'public' ? (
+						<a href={`/tags/${tag.slug}`} class="text-center my-2 text-green mx-2">
+							🏷{tag.name}
+						</a>
+					) : (
+						''
+					)
+				)}
+			</div>
+		) : (
+			''
+		)
+	}
 	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
 	<Fragment output:server set:html={post.html} />
 	{/* eslint-enable */}
-</BlogLayout>
+</ArticleLayout>

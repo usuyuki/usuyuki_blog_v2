@@ -1,0 +1,29 @@
+---
+import { ghostClient } from '~/libs/ghostClient';
+
+const props = Astro.props;
+
+const tags = await ghostClient.tags
+	.browse({
+		limit: 'all',
+		order: 'slug ASC',
+		filter: 'visibility:public'
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+---
+
+{
+	tags && tags.length > 0 ? (
+		<ul class={props.ulClass}>
+			{tags.map((tag: any) => (
+				<li class={`text-lg my-2 ${props.liClass}`}>
+					<a href={`/tags/${tag.slug}`}>🏷{tag.name}</a>
+				</li>
+			))}
+		</ul>
+	) : (
+		<p>タグはありません</p>
+	)
+}

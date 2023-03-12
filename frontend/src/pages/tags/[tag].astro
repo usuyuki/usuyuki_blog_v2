@@ -1,5 +1,6 @@
 ---
 import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
+import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
@@ -21,20 +22,35 @@ const posts = await ghostClient.posts
 		console.error(err);
 	});
 
+const tag = await ghostClient.tags
+	.read({
+		slug: tagSlug
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
+if (!tag) {
+	return Astro.redirect('/404');
+}
+
 const postsData = {
 	posts: posts
 };
 
 const headMeta: HeadMetaType = {
-	title: `${tagSlug}タグの記事一覧`,
+	title: `${tag.name}タグの記事一覧`,
 	slug: `/tag/${tagSlug}`,
-	description: `うすゆきブログの${tagSlug}タグの記事一覧です。`,
+	description: tag.description ?? `うすゆきブログの${tag.name}タグの記事一覧です。`,
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{tagSlug}タグの付いたの記事</h2>
+	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">「{tag.name}」タグの付いたの記事</h2>
+	<div class="flex justify-center mb-12">
+		<p class="">{tag.description ?? ''}</p>
+	</div>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />
@@ -42,4 +58,12 @@ const headMeta: HeadMetaType = {
 			<p class="text-center text-xl mt-2 mb-8">このタグの記事をはありません！</p>
 		)
 	}
+	<div class="mt-12 mb-2">
+		<h2 class="text-2xl font-bold mb-4 text-center">タグ一覧</h2>
+		<TagList
+			class="mx-auto"
+			liClass="ml-2"
+			ulClass="flex justify-center flex-wrap md:flex-row flex-col"
+		/>
+	</div>
 </ArchiveLayout>
