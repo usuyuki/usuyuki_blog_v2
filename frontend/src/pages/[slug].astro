@@ -1,7 +1,7 @@
 ---
 import BlogLayout from '~/layouts/extends/BlogLayout.astro';
-import ISOTimeToDate from '~/libs/ISOTimeToDate';
 import { ghostClient } from '~/libs/ghostClient';
+import isoTimeToDate from '~/libs/isoTimeToDate';
 import '~/styles/blogContent.css';
 const postRaw = await ghostClient.posts
 	.browse({
@@ -14,7 +14,7 @@ if (postRaw[0] === undefined) {
 	return Astro.redirect('/404');
 }
 const post = postRaw[0];
-post.published_at = ISOTimeToDate(post.published_at);
+post.published_at = isoTimeToDate(post.published_at);
 
 const headMeta = {
 	title: post.title,
