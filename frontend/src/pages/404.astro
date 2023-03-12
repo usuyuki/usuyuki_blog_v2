@@ -1,9 +1,10 @@
 ---
 import { SITE_URL } from '~/consts';
 import PageLayout from '~/layouts/extends/PageLayout.astro';
-const headMeta = {
+import type { HeadMetaType } from '~/types/HeadMetaType';
+const headMeta: HeadMetaType = {
 	title: '404',
-	slug: '',
+	slug: '/404',
 	description: 'このページは存在しません',
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
