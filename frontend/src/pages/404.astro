@@ -1,0 +1,18 @@
+---
+import { SITE_URL } from '~/consts';
+import PageLayout from '~/layouts/extends/PageLayout.astro';
+const headMeta = {
+	title: '404',
+	slug: '',
+	description: 'このページは存在しません',
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
+};
+---
+
+<PageLayout {...headMeta}>
+	<h1 class="text-center text-3xl">
+		404 Not Found<h1>
+			<p class="text-center">このページは存在しません！</p>
+		</h1>
+	</h1>
+</PageLayout>

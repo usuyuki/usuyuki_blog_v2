@@ -10,7 +10,7 @@ const postRaw = await ghostClient.posts
 	.catch((err: any) => {
 		console.error(err);
 	});
-if (!postRaw) {
+if (postRaw[0] === undefined) {
 	return Astro.redirect('/404');
 }
 const post = postRaw[0];
