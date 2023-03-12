@@ -1,7 +1,7 @@
 ---
 import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
 const { title, slug, description, ogImage } = Astro.props;
-const url = SITE_URL + '/' + slug;
+const url = SITE_URL + slug;
 const pageTitle = title + ' | ' + SITE_TITLE;
 ---
 

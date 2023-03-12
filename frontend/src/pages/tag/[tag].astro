@@ -1,0 +1,45 @@
+---
+import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
+import { SITE_URL } from '~/consts';
+import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
+import { ghostClient } from '~/libs/ghostClient';
+import { isTag } from '~/libs/validation/isTag';
+import type { HeadMetaType } from '~/types/HeadMetaType';
+//バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
+const tagSlug = Astro.params.tag;
+if (!(tagSlug === undefined) && !isTag(tagSlug)) {
+	return Astro.redirect('/404');
+}
+
+const posts = await ghostClient.posts
+	.browse({
+		filter: `tag:${tagSlug}`,
+		limit: 'all',
+		order: 'published_at ASC'
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
+const postsData = {
+	posts: posts
+};
+
+const headMeta: HeadMetaType = {
+	title: `${tagSlug}タグの記事一覧`,
+	slug: `/tag/${tagSlug}`,
+	description: `うすゆきブログの${tagSlug}タグの記事一覧です。`,
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
+};
+---
+
+<ArchiveLayout {...headMeta}>
+	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{tagSlug}タグの付いたの記事</h2>
+	{
+		postsData.posts && postsData.posts.length > 0 ? (
+			<ArticleArchive {...postsData} />
+		) : (
+			<p class="text-center text-xl mt-2 mb-8">このタグの記事をはありません！</p>
+		)
+	}
+</ArchiveLayout>
