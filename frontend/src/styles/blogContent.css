@@ -1,45 +1,46 @@
-h1 {
-	font-size: 3rem;
+/* なぜか本番のビルドだとこれらのファイルの後にTailwindが読み込まれて、優先度的に反映されないためクラス指定で行う */
+.blog-content > h1 {
+	font-size: 3rem !important;
 }
-h2 {
-	font-size: 2rem;
+.blog-content > h2 {
+	font-size: 2rem !important;
 }
-h3 {
-	font-size: 1.7rem;
+.blog-content > h3 {
+	font-size: 1.7rem !important;
 }
-p {
-	font-size: 1.2rem;
-	margin-top: 1rem;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-	margin-top: 3rem;
-	margin-bottom: 1rem;
-	letter-spacing: 0.025em;
-	line-height: 1.25;
+.blog-content > p {
+	font-size: 1.2rem !important;
+	margin-top: 1rem !important;
 }
 
-figure {
-	margin-top: 1.5rem;
-	margin-bottom: 1rem;
+.blog-content > h1,
+.blog-content > h2,
+.blog-content > h3,
+.blog-content > h4,
+.blog-content > h5,
+.blog-content > h6 {
+	margin-top: 3rem !important;
+	margin-bottom: 1rem !important;
+	letter-spacing: 0.025em !important;
+	line-height: 1.25 !important;
 }
-iframe {
-	width: 90%;
-	aspect-ratio: 16 / 9;
+
+.blog-content > figure {
+	margin-top: 1.5rem !important;
+	margin-bottom: 1rem !important;
 }
-.speakerdeck-iframe {
-	width: 70%;
-	aspect-ratio: 16 / 9;
+.blog-content > iframe {
+	width: 90% !important;
+	aspect-ratio: 16 / 9 !important;
+}
+.blog-content > .speakerdeck-iframe {
+	width: 70% !important;
+	aspect-ratio: 16 / 9 !important;
 }
 
 /* 下記がサイズ無視するので抑える */
-.wp-block-verse,
-.wp-block-preformatted {
-	overflow-x: scroll;
-	padding: 1em 1em;
+.blog-content > .wp-block-verse,
+.blog-content > .wp-block-preformatted {
+	overflow-x: scroll !important;
+	padding: 1em 1em !important;
 }
