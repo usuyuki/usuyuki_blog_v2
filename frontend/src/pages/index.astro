@@ -1,6 +1,8 @@
 ---
+import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
 import LastMonthArticle from '~/components/organism/article/LastMonthArticle.astro';
 import ThisMonthArticle from '~/components/organism/article/ThisMonthArticle.astro';
+import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
 import IndexLayout from '~/layouts/extends/IndexLayout.astro';
 import type { HeadMetaType } from '~/types/HeadMetaType';
@@ -18,4 +20,13 @@ const headMeta: HeadMetaType = {
 	<h2 class="text-3xl">何か</h2> -->
 	<ThisMonthArticle />
 	<LastMonthArticle />
+	<div class="mt-4 mb-12">
+		<h2 class="text-2xl font-bold">Tags</h2>
+		<TagList class="mx-auto" />
+	</div>
+
+	<div class="">
+		<h2 class="text-2xl font-bold">Archive</h2>
+		<ArchiveList class="mx-auto" />
+	</div>
 </IndexLayout>

@@ -3,6 +3,7 @@
  * /archive/year/monthのリンク一覧を作る
  * 1番最新の月はアクセスされた月、最古の月は手動で設定(変わらないものなのでAPI叩かずハードコーディングする)
  */
+const props = Astro.props;
 
 type ListContent = {
 	year: number;
@@ -38,7 +39,7 @@ for (let year = latestYear; year >= oldestYear; year--) {
 }
 ---
 
-<ul>
+<ul class={props.ulClass}>
 	{
 		archiveList.map((content: ListContent) => (
 			<li class="text-lg">
@@ -49,9 +50,10 @@ for (let year = latestYear; year >= oldestYear; year--) {
 		))
 	}
 </ul>
+
 <style>
 	/* 長すぎるの嫌なので、スクロールさせる */
-	ul {
+	.slim-archive {
 		padding-left: 1rem !important;
 		padding-right: 3rem !important;
 		width: 100%;
