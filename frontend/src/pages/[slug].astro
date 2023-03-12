@@ -1,8 +1,8 @@
 ---
+import '~/styles/blogContent.css';
 import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
-import '~/styles/blogContent.css';
 const post = await ghostClient.posts
 	.read({
 		slug: Astro.params.slug,
@@ -29,7 +29,7 @@ const headMeta = {
 <ArticleLayout {...headMeta}>
 	<!-- <img src={post.feature_image} alt={post.title} /> -->
 
-	<h1 class="text-center mb-2">{post.title}</h1>
+	<h2 class="text-center mb-2 text-4xl">{post.title}</h2>
 	<p class="text-center my-2 text-green">
 		{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
 	</p>
@@ -52,6 +52,6 @@ const headMeta = {
 	}
 	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
-	<Fragment output:server set:html={post.html} />
+	<div class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}
 </ArticleLayout>
