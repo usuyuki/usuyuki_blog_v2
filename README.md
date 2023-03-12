@@ -22,7 +22,7 @@ Astro
 
 ```mermaid
 flowchart LR
-  Start([Start])-->if1{状態を持つ?}
+  Start([Start])-->if1{外部からのデータ取得or状態を持つ?}
   if1-->|True|organism[organism]
   if1-->|False|if2{他コンポーネントへの依存がある?}
   if2-->|True|molecule[molecule]
