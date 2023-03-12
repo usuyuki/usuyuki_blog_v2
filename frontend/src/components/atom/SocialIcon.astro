@@ -1,0 +1,39 @@
+---
+// import { Image } from '@astrojs/image/components';
+// なぜかnodeではpublicまたはsrc内の画像を入れると読み込みが終わらなくなるので廃止
+---
+
+<div class="flex justify-center flex-wrap">
+	<a
+		href="https://twitter.com/usuyuki26"
+		class="mx-4 flex items-center"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		<img
+			src="/images/icon/Twitter-social-icons-circle-blue.png"
+			alt="twitter"
+			class="w-6 aspect-square"
+		/>
+		<p class="ml-2 mt-0">Twitter</p>
+	</a>
+	<a
+		href="https://m5y.usuyuki.net/@usuyuki"
+		class="mx-4 flex items-center"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		<!-- misskey logoじゃっかん余白多めなので大きく取る -->
+		<img src="/images/icon/misskey-logo.png" alt="misskey" class="w-8 aspect-square" />
+		<p class="ml-2 mt-0">Misskey</p>
+	</a>
+	<a
+		href="https://github.com/usuyuki"
+		class="mx-4 flex items-center"
+		target="_blank"
+		rel="noopener noreferrer"
+	>
+		<img src="/images/icon/github-mark.png" alt="github" class="w-6 aspect-square" />
+		<p class="ml-2 mt-0">GitHub</p>
+	</a>
+</div>
