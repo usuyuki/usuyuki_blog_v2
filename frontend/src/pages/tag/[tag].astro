@@ -21,20 +21,33 @@ const posts = await ghostClient.posts
 		console.error(err);
 	});
 
+const tag = await ghostClient.tags
+	.read({
+		slug: tagSlug
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
+if (!tag) {
+	return Astro.redirect('/404');
+}
+
 const postsData = {
 	posts: posts
 };
 
 const headMeta: HeadMetaType = {
-	title: `${tagSlug}タグの記事一覧`,
+	title: `${tag.name}タグの記事一覧`,
 	slug: `/tag/${tagSlug}`,
-	description: `うすゆきブログの${tagSlug}タグの記事一覧です。`,
+	description: tag.description ?? `うすゆきブログの${tag.name}タグの記事一覧です。`,
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{tagSlug}タグの付いたの記事</h2>
+	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">「{tag.name}」タグの付いたの記事</h2>
+	<p class="mb-12">{tag.description ?? ''}</p>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />
