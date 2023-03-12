@@ -1,6 +1,8 @@
 ---
 import { ghostClient } from '~/libs/ghostClient';
 
+const props = Astro.props;
+
 const tags = await ghostClient.tags
 	.browse({
 		limit: 'all',
@@ -14,9 +16,9 @@ const tags = await ghostClient.tags
 
 {
 	tags && tags.length > 0 ? (
-		<ul>
+		<ul class={props.ulClass}>
 			{tags.map((tag: any) => (
-				<li>
+				<li class={`text-lg my-2 ${props.liClass}`}>
 					<a href={`/tags/${tag.slug}`}>🏷{tag.name}</a>
 				</li>
 			))}

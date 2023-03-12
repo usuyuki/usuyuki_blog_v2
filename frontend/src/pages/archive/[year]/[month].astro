@@ -36,6 +36,10 @@ const posts = await ghostClient.posts
 		console.error(err);
 	});
 
+//先月と来月の算出
+const prevMonth = new Date(yearSlug, monthSlug - 2, 1);
+const nextMonth = new Date(yearSlug, monthSlug, 1);
+
 const postsData = {
 	posts: posts
 };
@@ -49,7 +53,17 @@ const headMeta: HeadMetaType = {
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
+	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
+	<div class="flex justify-center mb-12">
+		<a
+			href={`/archive/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}`}
+			class="text-blue text-xl mx-2">←次の月</a
+		>
+		<a
+			href={`/archive/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}`}
+			class="text-blue text-xl mx-2">前の月→</a
+		>
+	</div>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />

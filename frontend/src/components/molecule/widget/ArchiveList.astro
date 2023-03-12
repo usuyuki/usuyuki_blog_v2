@@ -42,7 +42,7 @@ for (let year = latestYear; year >= oldestYear; year--) {
 <ul class={props.ulClass}>
 	{
 		archiveList.map((content: ListContent) => (
-			<li class="text-lg">
+			<li class={`text-lg my-2 ${props.liClass}`}>
 				<a href={content.link}>
 					📂{content.year}年{content.month}月
 				</a>
@@ -56,7 +56,6 @@ for (let year = latestYear; year >= oldestYear; year--) {
 	.slim-archive {
 		padding-left: 1rem !important;
 		padding-right: 3rem !important;
-		width: 100%;
 		overflow-y: scroll;
 		height: 600px;
 	}

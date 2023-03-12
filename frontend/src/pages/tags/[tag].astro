@@ -1,5 +1,6 @@
 ---
 import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
+import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
@@ -57,4 +58,12 @@ const headMeta: HeadMetaType = {
 			<p class="text-center text-xl mt-2 mb-8">このタグの記事をはありません！</p>
 		)
 	}
+	<div class="mt-12 mb-2">
+		<h2 class="text-2xl font-bold mb-4 text-center">タグ一覧</h2>
+		<TagList
+			class="mx-auto"
+			liClass="ml-2"
+			ulClass="flex justify-center flex-wrap md:flex-row flex-col"
+		/>
+	</div>
 </ArchiveLayout>

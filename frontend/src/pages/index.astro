@@ -20,13 +20,17 @@ const headMeta: HeadMetaType = {
 	<h2 class="text-3xl">何か</h2> -->
 	<ThisMonthArticle />
 	<LastMonthArticle />
-	<div class="mt-4 mb-12">
-		<h2 class="text-2xl font-bold">Tags</h2>
-		<TagList class="mx-auto" />
+	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
+		<h2 class="text-2xl font-bold mb-4">Tags</h2>
+		<TagList
+			class="mx-auto"
+			liClass="ml-2"
+			ulClass="flex justify-center flex-wrap md:flex-row flex-col"
+		/>
 	</div>
 
-	<div class="">
-		<h2 class="text-2xl font-bold">Archive</h2>
+	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
+		<h2 class="text-2xl font-bold mb-4">Archive</h2>
 		<ArchiveList class="mx-auto" />
 	</div>
 </IndexLayout>
