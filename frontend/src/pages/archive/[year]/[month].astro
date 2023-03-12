@@ -1,0 +1,62 @@
+---
+import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
+import { SITE_URL } from '~/consts';
+import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
+import { ghostClient } from '~/libs/ghostClient';
+import { isMonth } from '~/libs/validation/isMonth';
+import { isYear } from '~/libs/validation/isYear';
+import type { HeadMetaType } from '~/types/HeadMetaType';
+//バリデーション
+const yearSlug = Number(Astro.params.year);
+const monthSlug = Number(Astro.params.month);
+if (!(isYear(yearSlug) && isMonth(monthSlug))) {
+	return Astro.redirect('/404');
+}
+
+/**
+ * 月の終わりの日は年と月によって異なるのでdataオブジェクト経由で取得
+ * Dateオブジェクトで0を使うと前の月の最終日を取得できるので、1月足した上でその月の0日を取得→前の月の最終日がわかる
+ * 月が12月でも動作する。
+ */
+let date = new Date(yearSlug, monthSlug + -1, 1);
+date.setMonth(date.getMonth() + 1);
+date.setDate(date.getDate() - 1);
+const lastDay = date.getDate();
+const posts = await ghostClient.posts
+	.browse({
+		filter: `published_at:>='${yearSlug}-${monthSlug
+			.toString()
+			.padStart(2, '0')}-01 00:00:00'+published_at:<='${yearSlug}-${monthSlug
+			.toString()
+			.padStart(2, '0')}-${lastDay} 23:59:59'`,
+		limit: 'all',
+		order: 'published_at ASC'
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+
+const postsData = {
+	posts: posts
+};
+
+const headMeta: HeadMetaType = {
+	title: `${yearSlug}年${monthSlug}月の記事`,
+	slug: `/archive/${yearSlug}/${monthSlug}`,
+	description: `うすゆきブログ${yearSlug}年の${monthSlug}アーカイブです`,
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
+};
+---
+
+<ArchiveLayout {...headMeta}>
+	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
+	{
+		postsData.posts && postsData.posts.length > 0 ? (
+			<ArticleArchive {...postsData} />
+		) : (
+			<p class="text-center text-xl mt-2 mb-8">
+				{yearSlug}年{monthSlug}月はまだ記事を書いていません！ごめんなさい！
+			</p>
+		)
+	}
+</ArchiveLayout>

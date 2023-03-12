@@ -3,20 +3,18 @@ import ArticleArchive from '~/components/molecule/index/ArticleArchive.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
+import { isYear } from '~/libs/validation/isYear';
 import type { HeadMetaType } from '~/types/HeadMetaType';
 //バリデーション
-const slug = Number(Astro.params.year);
+const yearSlug = Number(Astro.params.year);
 //数字かつ整数かつ4桁であるか
-if (isNaN(slug) || !Number.isInteger(slug) || slug < 1000 || slug > 9999) {
+if (!isYear(yearSlug)) {
 	return Astro.redirect('/404');
 }
 
-const date = new Date(slug, 0, 1);
-const year = date.getFullYear();
-
 const posts = await ghostClient.posts
 	.browse({
-		filter: `published_at:>='${year}-1-1 00:00:00'+published_at:<='${year}-12-31 23:59:59'`,
+		filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
 		limit: 'all',
 		order: 'published_at ASC'
 	})
@@ -29,21 +27,21 @@ const postsData = {
 };
 
 const headMeta: HeadMetaType = {
-	title: `${year}年の記事`,
-	slug: `/archive/${year}`,
-	description: `うすゆきブログ${year}年のアーカイブです`,
+	title: `${yearSlug}年の記事`,
+	slug: `/archive/${yearSlug}`,
+	description: `うすゆきブログ${yearSlug}年のアーカイブです`,
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{slug}年の記事</h2>
+	<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">{yearSlug}年の記事</h2>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />
 		) : (
 			<p class="text-center text-xl mt-2 mb-8">
-				{slug}年はまだ記事を書いていません！ごめんなさい！
+				{yearSlug}年はまだ記事を書いていません！ごめんなさい！
 			</p>
 		)
 	}
