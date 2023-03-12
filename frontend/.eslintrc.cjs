@@ -9,6 +9,10 @@ module.exports = {
 	globals: {
 		astroHTML: true
 	},
+	env: {
+    	browser: true,
+    	node: true,
+	},
 	plugins: ['@typescript-eslint', 'import'],
 	rules: {
 		'@typescript-eslint/consistent-type-imports': [
