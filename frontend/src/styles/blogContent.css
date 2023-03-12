@@ -36,3 +36,10 @@ iframe {
 	width: 70%;
 	aspect-ratio: 16 / 9;
 }
+
+/* 下記がサイズ無視するので抑える */
+.wp-block-verse,
+.wp-block-preformatted {
+	overflow-x: scroll;
+	padding: 1em 1em;
+}
