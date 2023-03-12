@@ -1,5 +1,5 @@
 ---
-import BlogLayout from '~/layouts/extends/BlogLayout.astro';
+import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
 import '~/styles/blogContent.css';
@@ -25,7 +25,7 @@ const headMeta = {
 };
 ---
 
-<BlogLayout {...headMeta}>
+<ArticleLayout {...headMeta}>
 	<!-- <img src={post.feature_image} alt={post.title} /> -->
 
 	<h1 class="text-center mb-2">{post.title}</h1>
@@ -36,4 +36,4 @@ const headMeta = {
 	{/* eslint-disable */}
 	<Fragment output:server set:html={post.html} />
 	{/* eslint-enable */}
-</BlogLayout>
+</ArticleLayout>

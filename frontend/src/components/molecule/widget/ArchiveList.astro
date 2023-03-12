@@ -1,0 +1,51 @@
+---
+/**
+ * /archive/year/monthのリンク一覧を作る
+ * 1番最新の月はアクセスされた月、最古の月は手動で設定(変わらないものなのでAPI叩かずハードコーディングする)
+ */
+
+type ListContent = {
+	year: number;
+	month: number;
+	link: string;
+};
+
+// 現在の年と月を取得
+const date = new Date();
+const latestYear = date.getFullYear();
+const latestMonth = date.getMonth() + 1;
+
+//最古の年と月を定義
+const oldestYear = 2020;
+const oldestMonth = 10;
+
+//最新から最古までの月ごとのリンクを作成
+const archiveList: ListContent[] = [];
+for (let year = latestYear; year >= oldestYear; year--) {
+	for (let month = 12; month >= 1; month--) {
+		if (year === oldestYear && month < oldestMonth) {
+			break;
+		}
+		if (year === latestYear && month > latestMonth) {
+			continue;
+		}
+		archiveList.push({
+			year: year,
+			month: month,
+			link: `/archive/${year}/${month}`
+		});
+	}
+}
+---
+
+<ul>
+	{
+		archiveList.map((content: ListContent) => (
+			<li class="text-lg">
+				<a href={content.link}>
+					📂{content.year}年{content.month}月
+				</a>
+			</li>
+		))
+	}
+</ul>
