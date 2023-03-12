@@ -1,11 +1,11 @@
 ---
 import SmallD from '~/components/atom/date/SmallD.astro';
-import ISOTimeToDate from '~/libs/ISOTimeToDate';
+import isoTimeToDate from '~/libs/isoTimeToDate';
 const postsData = Astro.props;
 
 //日付の変換
 postsData.posts.map((post: any) => {
-	post.published_at = ISOTimeToDate(post.published_at);
+	post.published_at = isoTimeToDate(post.published_at);
 });
 ---
 
