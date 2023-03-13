@@ -13,7 +13,7 @@ postsData.posts.map((post: any) => {
 	{
 		postsData.posts.map((post: any) => (
 			<a
-				class="flex justify-center items-center flex-col w-1/2 md:w-1/5 mb-12"
+				class="flex justify-center items-center flex-col w-1/2 md:w-1/5 p-2 mb-12"
 				href={`/${post.slug}`}
 			>
 				<CircleMD month={post.published_at.month} day={post.published_at.day} />

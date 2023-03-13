@@ -1,0 +1,39 @@
+/* なぜか本番のビルドだとこれらのファイルの後にTailwindが読み込まれて、優先度的に反映されないためクラス指定で行う */
+.blog-content > h1 {
+	font-size: 3rem !important;
+}
+.blog-content > h2 {
+	font-size: 2rem !important;
+}
+.blog-content > h3 {
+	font-size: 1.7rem !important;
+}
+.blog-content > p {
+	font-size: 1.2rem !important;
+	margin-top: 1rem !important;
+}
+
+.blog-content > h1,
+.blog-content > h2,
+.blog-content > h3,
+.blog-content > h4,
+.blog-content > h5,
+.blog-content > h6 {
+	margin-top: 3rem !important;
+	margin-bottom: 1rem !important;
+	letter-spacing: 0.025em !important;
+	line-height: 1.25 !important;
+}
+
+.blog-content > figure {
+	margin-top: 1.5rem !important;
+	margin-bottom: 1rem !important;
+}
+.blog-content > iframe {
+	width: 90% !important;
+	aspect-ratio: 16 / 9 !important;
+}
+.speakerdeck-iframe {
+	width: 70% !important;
+	aspect-ratio: 16 / 9 !important;
+}
