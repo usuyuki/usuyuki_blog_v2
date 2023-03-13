@@ -30,7 +30,7 @@
 		@apply my-6 mx-4;
 	}
 	.blog-content > blockquote {
-		@apply border-l-2 border-black p-2 m-2 italic;
+		@apply border-l-2 border-black p-2 m-2 italic text-lg;
 	}
 	.blog-content > em {
 		@apply italic;

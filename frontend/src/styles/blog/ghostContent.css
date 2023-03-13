@@ -2,19 +2,25 @@
 @tailwind components;
 @layer components {
 	.kg-bookmark-card {
-		@apply mx-4 my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+		@apply mx-auto my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+	}
+	.kg-image-card {
+		@apply md:px-12;
 	}
 	.kg-callout-card {
-		@apply flex m-2 p-2 rounded-lg border-2 md:w-2/3 w-full items-center;
+		@apply flex mx-2 my-4 px-2 py-4 rounded-lg border-2 w-full items-center;
 	}
 	.kg-callout-emoji {
-		@apply p-2 text-2xl font-bold mr-4;
+		@apply p-2 text-2xl font-bold mr-2;
 	}
 	.kg-callout-text {
-		@apply text-xl;
+		@apply text-lg;
+	}
+	.kg-embed-card {
+		@apply md:w-2/3 mx-auto;
 	}
 	.kg-embed-card > iframe {
-		@apply !aspect-video w-full md:w-2/3 h-fit;
+		@apply !aspect-video w-full h-fit;
 	}
 	.kg-bookmark-icon {
 		@apply object-contain w-6 h-6 mr-2;
