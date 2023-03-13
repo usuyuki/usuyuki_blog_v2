@@ -8,7 +8,8 @@ const props: Props = Astro.props;
 
 {
 	props.tocList.length !== 0 ? (
-		<>
+		// 一旦実装保留
+		<div class="hidden">
 			<h3 class="text-xl">目次</h3>
 			<ul class="">
 				{props.tocList.map((toc: TOCType) => (
@@ -17,7 +18,7 @@ const props: Props = Astro.props;
 					</li>
 				))}
 			</ul>
-		</>
+		</div>
 	) : (
 		''
 	)
