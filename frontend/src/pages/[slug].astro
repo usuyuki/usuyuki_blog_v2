@@ -1,9 +1,7 @@
 ---
 import '~/styles/blogContent.css';
 import '~/styles/ghostKG.css';
-import { Markup } from 'astro-remote';
 import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
-import { components, sanitize } from '~/libs/componentsForAstroRemote';
 import { ghostClient } from '~/libs/ghostClient';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
 const post = await ghostClient.posts
@@ -53,7 +51,6 @@ const headMeta = {
 	}
 	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
-	<!-- <div class="blog-content" set:html={post.html} /> -->
-	<Markup content={post.html} {sanitize} {components} />
+	<div class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}
 </ArticleLayout>

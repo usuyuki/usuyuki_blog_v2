@@ -65,21 +65,3 @@ a:hover {
 	color: var(--blue);
 	transition-duration: 500ms;
 }
-
-@layer components {
-	.kg-bookmark-container {
-		@apply flex;
-	}
-	.kg-bookmark-content {
-		@apply grow;
-	}
-	.kg-bookmark-thumbnail {
-		@apply h-40 flex-initial basis-1/4;
-	}
-	.kg-bookmark-description {
-		@apply hidden;
-	}
-	.kg-bookmark-metadata {
-		@apply flex h-20 w-full;
-	}
-}

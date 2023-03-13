@@ -1,9 +1,0 @@
----
-const props = Astro.props;
-const classMap: any = {
-	'kg-bookmark-container': 'flex'
-};
-const newClass = Object.hasOwn(classMap, props.class) ? classMap[props.class] : props.class;
----
-
-<a class={newClass} href={props.href}><slot /></a>

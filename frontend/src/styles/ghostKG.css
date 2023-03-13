@@ -1,0 +1,27 @@
+@tailwind components;
+@layer components {
+	.kg-card {
+		@apply mx-4 my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+	}
+	.kg-bookmark-icon {
+		@apply object-contain w-6 h-6 mr-2;
+	}
+	.kg-bookmark-container {
+		@apply flex md:flex-row flex-col;
+	}
+	.kg-bookmark-content {
+		@apply grow;
+	}
+	.kg-bookmark-thumbnail > img {
+		@apply object-cover w-96 rounded-lg aspect-video;
+	}
+	.kg-bookmark-title {
+		@apply text-xl font-bold;
+	}
+	.kg-bookmark-description {
+		@apply flex h-20 text-sm;
+	}
+	.kg-bookmark-metadata {
+		@apply items-center mb-2 w-full md:flex hidden md:h-6;
+	}
+}
