@@ -2,6 +2,8 @@
 import '~/styles/blog/ghostContent.css';
 import '~/styles/blog/wordpressContent.css';
 import '~/styles/blog/blogCommon.css';
+import YMDMolecule from '~/components/atom/date/YMDMolecule.astro';
+import TagList from '~/components/atom/tag/TagList.astro';
 import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
@@ -22,44 +24,31 @@ post.published_at = iso8601TimeToDate(post.published_at);
 const headMeta = {
 	title: post.title,
 	slug: post.slug,
-	// excerptの名に反して全部出てくるので、改行して150字で切る。
+	// excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
 	description: post.excerpt.replace(/\r?\n/g, '').slice(0, 150),
 	ogImage: post.feature_image
 };
 ---
 
 <ArticleLayout {...headMeta}>
-	<div class="flex">
+	<div class="flex justify-end mx-auto w-full lg:w-4/5 xl:w-5/7">
 		<div class="md:w-1/5 hidden md:block">
-			<div class="w-12 h-12 rounded-full">{post.published_at.year}年</div>
-			<div class="w-12 h-12 rounded-full">{post.published_at.month}月</div>
-			<div class="w-12 h-12 rounded-full">{post.published_at.day}日</div>
+			<YMDMolecule
+				year={post.published_at.year}
+				month={post.published_at.month}
+				day={post.published_at.day}
+			/>
 		</div>
 		<div class="md:w-4/5">
 			<h2 class="text-center mb-2 text-4xl">{post.title}</h2>
-			<p class="text-center my-2 text-green"></p>
-			{
-				post.tags ? (
-					<div class="flex justify-center flex-wrap">
-						{post.tags.map((tag: any) =>
-							tag.visibility === 'public' ? (
-								<a
-									href={`/tags/${tag.slug}`}
-									class="text-center my-2 text-green mx-2"
-								>
-									🏷{tag.name}
-								</a>
-							) : (
-								''
-							)
-						)}
-					</div>
-				) : (
-					''
-				)
-			}
-			<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
+			<p class="text-center my-2 text-orange text-lg md:hidden block">
+				{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
+			</p>
+			<p class="text-right">{post.reading_time} 分くらいで読めます！</p>
 		</div>
+	</div>
+	<div class="mb-8 mt-4 p-2 m-2">
+		<TagList tags={post.tags} />
 	</div>
 	{/* eslint-disable */}
 	<article class="blog-content" set:html={post.html} />

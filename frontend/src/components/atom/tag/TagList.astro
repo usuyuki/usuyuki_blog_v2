@@ -1,0 +1,21 @@
+---
+const props = Astro.props;
+---
+
+{
+	props.tags ? (
+		<div class="flex justify-center flex-wrap">
+			{props.tags.map((tag: any) =>
+				tag.visibility === 'public' ? (
+					<a href={`/tags/${tag.slug}`} class="text-center my-2 mx-2">
+						🏷{tag.name}
+					</a>
+				) : (
+					''
+				)
+			)}
+		</div>
+	) : (
+		''
+	)
+}
