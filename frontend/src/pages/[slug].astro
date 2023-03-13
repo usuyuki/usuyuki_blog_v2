@@ -52,6 +52,6 @@ const headMeta = {
 	}
 	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
 	{/* eslint-disable */}
-	<div class="blog-content" set:html={post.html} />
+	<article class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}
 </ArticleLayout>
