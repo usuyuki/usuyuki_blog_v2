@@ -9,30 +9,34 @@ postsData.posts.map((post: any) => {
 });
 ---
 
-<div class="flex flex-wrap items-start">
+<div class="flex flex-wrap items-stretch">
 	{
 		postsData.posts.map((post: any) => (
-			<a
-				class="flex justify-center items-center flex-col w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 p-2 mb-12"
-				href={`/${post.slug}`}
-			>
-				<CircleMD month={post.published_at.month} day={post.published_at.day} />
-				<div class="aspect-square h-40 object-cover overflow-hidden">
-					{post.feature_image ? (
-						<Image
-							src={post.feature_image}
-							width={500}
-							aspectRatio={1 / 1}
-							format="avif"
-							class="rounded-md"
-							alt="記事サムネイル"
-						/>
-					) : (
-						<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
-					)}
-				</div>
-				<h3 class="text-xl text-black"> {post.title} </h3>
-			</a>
+			<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
+				<a
+					class="hover:shadow-xl p-2 block rounded-xl h-full duration-300  "
+					href={`/${post.slug}`}
+				>
+					<div class="flex justify-center items-center flex-col">
+						<CircleMD month={post.published_at.month} day={post.published_at.day} />
+						<div class="aspect-square h-40 object-cover overflow-hidden">
+							{post.feature_image ? (
+								<Image
+									src={post.feature_image}
+									width={500}
+									aspectRatio={1 / 1}
+									format="avif"
+									class="rounded-md"
+									alt="記事サムネイル"
+								/>
+							) : (
+								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+							)}
+						</div>
+						<h3 class="text-xl text-black"> {post.title} </h3>
+					</div>
+				</a>
+			</div>
 		))
 	}
 </div>
