@@ -7,6 +7,9 @@ import TagList from '~/components/atom/tag/TagList.astro';
 import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
+import { generateTOC } from '~/libs/helper/generateTOC';
+import type { TOCType } from '~/types/TOCType';
+import TOC from '~/components/atom/TOC.astro';
 const post = await ghostClient.posts
 	.read({
 		slug: Astro.params.slug,
@@ -28,6 +31,8 @@ const headMeta = {
 	description: post.excerpt.replace(/\r?\n/g, '').slice(0, 150),
 	ogImage: post.feature_image
 };
+
+const tocList: TOCType[] = generateTOC(post.html);
 ---
 
 <ArticleLayout {...headMeta}>
@@ -50,6 +55,7 @@ const headMeta = {
 	<div class="mb-8 mt-4 p-2 m-2">
 		<TagList tags={post.tags} />
 	</div>
+	<TOC tocList={tocList} />
 	{/* eslint-disable */}
 	<article class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}
