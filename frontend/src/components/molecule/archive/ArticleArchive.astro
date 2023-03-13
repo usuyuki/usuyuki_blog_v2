@@ -1,7 +1,7 @@
 ---
 import { Image } from '@astrojs/image/components';
 import CircleMD from '~/components/atom/date/CircleMD.astro';
-import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
+import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
 const postsData = Astro.props;
 //日付の変換
 postsData.posts.map((post: any) => {

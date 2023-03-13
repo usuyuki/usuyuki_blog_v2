@@ -1,7 +1,7 @@
 ---
 import { Image } from '@astrojs/image/components';
 import SquareDay from '~/components/atom/date/SquareDay.astro';
-import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
+import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
 const postsData = Astro.props;
 
 //日付の変換
