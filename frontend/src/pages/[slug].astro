@@ -29,28 +29,38 @@ const headMeta = {
 ---
 
 <ArticleLayout {...headMeta}>
-	<h2 class="text-center mb-2 text-4xl">{post.title}</h2>
-	<p class="text-center my-2 text-green">
-		{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
-	</p>
-	{
-		post.tags ? (
-			<div class="flex justify-center flex-wrap">
-				{post.tags.map((tag: any) =>
-					tag.visibility === 'public' ? (
-						<a href={`/tags/${tag.slug}`} class="text-center my-2 text-green mx-2">
-							🏷{tag.name}
-						</a>
-					) : (
-						''
-					)
-				)}
-			</div>
-		) : (
-			''
-		)
-	}
-	<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
+	<div class="flex">
+		<div class="md:w-1/5 hidden md:block">
+			<div class="w-12 h-12 rounded-full">{post.published_at.year}年</div>
+			<div class="w-12 h-12 rounded-full">{post.published_at.month}月</div>
+			<div class="w-12 h-12 rounded-full">{post.published_at.day}日</div>
+		</div>
+		<div class="md:w-4/5">
+			<h2 class="text-center mb-2 text-4xl">{post.title}</h2>
+			<p class="text-center my-2 text-green"></p>
+			{
+				post.tags ? (
+					<div class="flex justify-center flex-wrap">
+						{post.tags.map((tag: any) =>
+							tag.visibility === 'public' ? (
+								<a
+									href={`/tags/${tag.slug}`}
+									class="text-center my-2 text-green mx-2"
+								>
+									🏷{tag.name}
+								</a>
+							) : (
+								''
+							)
+						)}
+					</div>
+				) : (
+					''
+				)
+			}
+			<p class="text-center mb-12">{post.reading_time} 分くらいで読めます！</p>
+		</div>
+	</div>
 	{/* eslint-disable */}
 	<article class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}
