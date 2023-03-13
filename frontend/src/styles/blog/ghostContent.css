@@ -5,7 +5,7 @@
 		@apply mx-4 my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
 	}
 	.kg-callout-card {
-		@apply flex p-2 rounded-lg border-2 md:w-2/3 w-full items-center;
+		@apply flex m-2 p-2 rounded-lg border-2 md:w-2/3 w-full items-center;
 	}
 	.kg-callout-emoji {
 		@apply p-2 text-2xl font-bold mr-4;
