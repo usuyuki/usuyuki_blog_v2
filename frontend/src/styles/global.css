@@ -28,7 +28,7 @@
 }
 body {
 	word-break: break-all;
-	scroll-behavior: smooth;
+	scroll-behavior: smooth !important;
 	background-color: var(--white);
 	color: var(--black);
 	color: var(--black);

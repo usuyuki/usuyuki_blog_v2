@@ -1,0 +1,24 @@
+---
+import type { TOCType } from '~/types/TOCType';
+type Props = {
+	tocList: TOCType[];
+};
+const props: Props = Astro.props;
+---
+
+{
+	props.tocList.length !== 0 ? (
+		<>
+			<h3 class="text-xl">目次</h3>
+			<ul class="">
+				{props.tocList.map((toc: TOCType) => (
+					<li class={`text-${toc.heading}`}>
+						<a href={`#${toc.id}`}>{toc.title}</a>
+					</li>
+				))}
+			</ul>
+		</>
+	) : (
+		''
+	)
+}

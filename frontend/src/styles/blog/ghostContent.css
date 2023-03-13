@@ -2,13 +2,13 @@
 @tailwind components;
 @layer components {
 	.kg-bookmark-card {
-		@apply mx-auto my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+		@apply mx-auto my-2 p-4 md:w-4/5 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
 	}
 	.kg-image-card {
 		@apply md:px-12;
 	}
 	.kg-callout-card {
-		@apply flex mx-2 my-4 px-2 py-4 rounded-lg border-2 w-full items-center;
+		@apply flex my-4 px-2 py-4 rounded-lg border-2 w-full items-center;
 	}
 	.kg-callout-emoji {
 		@apply p-2 text-2xl font-bold mr-2;
@@ -29,10 +29,13 @@
 		@apply flex md:flex-row flex-col;
 	}
 	.kg-bookmark-content {
-		@apply grow;
+		@apply md:w-3/5;
+	}
+	.kg-bookmark-thumbnail {
+		@apply md:w-2/5;
 	}
 	.kg-bookmark-thumbnail > img {
-		@apply object-cover w-96 rounded-lg aspect-video;
+		@apply object-cover w-full rounded-lg aspect-video;
 	}
 	.kg-bookmark-title {
 		@apply text-xl font-bold;
@@ -41,6 +44,6 @@
 		@apply flex h-20 text-sm;
 	}
 	.kg-bookmark-metadata {
-		@apply items-center mb-2 w-full md:flex hidden md:h-6;
+		@apply items-center flex-wrap mb-2 w-full md:flex hidden md:h-6;
 	}
 }

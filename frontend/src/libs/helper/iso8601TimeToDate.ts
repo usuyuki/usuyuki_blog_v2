@@ -8,7 +8,7 @@ type DateType = {
  * 正規表現で取ろうとしないこと！！！
  * @param dateString ISO 8601 format
  */
-export default function iso8601TimeToDate(dateString: string): DateType {
+export const iso8601TimeToDate = (dateString: string): DateType => {
 	const dataObj = new Date(dateString);
 	const data: DateType = {
 		year: dataObj.getFullYear(),
@@ -16,4 +16,4 @@ export default function iso8601TimeToDate(dateString: string): DateType {
 		day: dataObj.getDate()
 	};
 	return data;
-}
+};
