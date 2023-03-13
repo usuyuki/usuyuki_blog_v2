@@ -1,8 +1,9 @@
 /* 下記がサイズ無視するので抑える */
 .wp-block-verse,
 .wp-block-preformatted {
-	overflow-x: scroll !important;
 	padding: 1em 1em !important;
+	white-space: pre-wrap;
+	overflow-x: hidden;
 }
 .wp-block-code {
 	background-color: #e4e4e4;
@@ -20,8 +21,18 @@
 	margin: 1em auto;
 }
 
+.wp-block-embed {
+	font-size: 1.25em;
+}
+.wp-block-embed a:before {
+	content: '🔗';
+}
+
 /* 埋め込みリンクを中央揃えにする */
 .wp-embedded-content {
+	margin: 0 auto;
+}
+.wp-block-embed__wrapper {
 	margin: 0 auto;
 }
 .wp-block-embed__wrapper iframe {

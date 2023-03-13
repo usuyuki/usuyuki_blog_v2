@@ -22,7 +22,13 @@
 	.blog-content > p {
 		@apply mt-4 text-lg;
 	}
-
+	.blog-content > iframe {
+		@apply mx-auto;
+	}
+	/* 画像の説明 */
+	.blog-content > figure > figcaption {
+		@apply text-center;
+	}
 	.blog-content > table {
 		@apply my-2;
 	}
@@ -53,7 +59,7 @@
 	.blog-content > h4,
 	.blog-content > h5,
 	.blog-content > h6 {
-		@apply mt-12 mb-4 tracking-wide leading-5;
+		@apply mt-12 mb-4 tracking-wide;
 	}
 
 	.blog-content > figure {
@@ -61,8 +67,5 @@
 	}
 	.blog-content > iframe {
 		@apply w-5/6 aspect-video;
-	}
-	.speakerdeck-iframe {
-		@apply w-4/6 aspect-video;
 	}
 }
