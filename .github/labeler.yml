@@ -2,7 +2,7 @@
   - frontend/src/components/*
 🖼layouts:
   - frontend/src/layouts/*
-  - frontend/src/styles/global.css
+  - frontend/src/styles/*
 🧩types:
   - frontend/src/types/*
   - frontend/src/env.d.ts
