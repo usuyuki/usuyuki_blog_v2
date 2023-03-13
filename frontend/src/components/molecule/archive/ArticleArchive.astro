@@ -1,9 +1,8 @@
 ---
 import { Image } from '@astrojs/image/components';
-import SmallMD from '~/components/atom/date/SmallMD.astro';
+import CircleMD from '~/components/atom/date/CircleMD.astro';
 import iso8601TimeToDate from '~/libs/iso8601TimeToDate';
 const postsData = Astro.props;
-
 //日付の変換
 postsData.posts.map((post: any) => {
 	post.published_at = iso8601TimeToDate(post.published_at);
@@ -14,18 +13,23 @@ postsData.posts.map((post: any) => {
 	{
 		postsData.posts.map((post: any) => (
 			<a
-				class="flex justify-center items-center flex-col w-1/2 md:w-1/5 mb-12"
+				class="flex justify-center items-center flex-col w-1/2 md:w-1/5 p-2 mb-12"
 				href={`/${post.slug}`}
 			>
-				<SmallMD month={post.published_at.month} day={post.published_at.day} />
-				<div class="aspect-square h-40 object-cover">
-					<Image
-						src={post.feature_image}
-						width={500}
-						aspectRatio={1 / 1}
-						format="avif"
-						alt="記事サムネイル"
-					/>
+				<CircleMD month={post.published_at.month} day={post.published_at.day} />
+				<div class="aspect-square h-40 object-cover overflow-hidden">
+					{post.feature_image ? (
+						<Image
+							src={post.feature_image}
+							width={500}
+							aspectRatio={1 / 1}
+							format="avif"
+							class="rounded-md"
+							alt="記事サムネイル"
+						/>
+					) : (
+						<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+					)}
 				</div>
 				<h3 class="text-xl text-black"> {post.title} </h3>
 			</a>

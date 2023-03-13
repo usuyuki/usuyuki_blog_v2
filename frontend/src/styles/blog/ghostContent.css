@@ -1,0 +1,40 @@
+/* ghost/Div.astroにクラスを記述すると何故か使える */
+@tailwind components;
+@layer components {
+	.kg-bookmark-card {
+		@apply mx-4 my-2 p-4 md:w-2/3 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+	}
+	.kg-callout-card {
+		@apply flex p-2 rounded-lg border-2 md:w-2/3 w-full items-center;
+	}
+	.kg-callout-emoji {
+		@apply p-2 text-2xl font-bold mr-4;
+	}
+	.kg-callout-text {
+		@apply text-xl;
+	}
+	.kg-embed-card > iframe {
+		@apply !aspect-video w-full md:w-2/3 h-fit;
+	}
+	.kg-bookmark-icon {
+		@apply object-contain w-6 h-6 mr-2;
+	}
+	.kg-bookmark-container {
+		@apply flex md:flex-row flex-col;
+	}
+	.kg-bookmark-content {
+		@apply grow;
+	}
+	.kg-bookmark-thumbnail > img {
+		@apply object-cover w-96 rounded-lg aspect-video;
+	}
+	.kg-bookmark-title {
+		@apply text-xl font-bold;
+	}
+	.kg-bookmark-description {
+		@apply flex h-20 text-sm;
+	}
+	.kg-bookmark-metadata {
+		@apply items-center mb-2 w-full md:flex hidden md:h-6;
+	}
+}

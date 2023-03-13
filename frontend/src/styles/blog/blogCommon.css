@@ -33,14 +33,7 @@
 	width: 90% !important;
 	aspect-ratio: 16 / 9 !important;
 }
-.blog-content > .speakerdeck-iframe {
+.speakerdeck-iframe {
 	width: 70% !important;
 	aspect-ratio: 16 / 9 !important;
-}
-
-/* 下記がサイズ無視するので抑える */
-.blog-content > .wp-block-verse,
-.blog-content > .wp-block-preformatted {
-	overflow-x: scroll !important;
-	padding: 1em 1em !important;
 }

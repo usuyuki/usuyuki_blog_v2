@@ -26,6 +26,7 @@
 	}
 }
 body {
+	word-break: break-all;
 	scroll-behavior: smooth;
 	background-color: var(--white);
 	color: var(--black);
