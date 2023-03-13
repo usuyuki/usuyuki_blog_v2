@@ -31,6 +31,7 @@
 /* 埋め込みリンクを中央揃えにする */
 .wp-embedded-content {
 	margin: 0 auto;
+	max-width: 100vw;
 }
 .wp-block-embed__wrapper {
 	margin: 0 auto;
