@@ -18,5 +18,9 @@ const headMeta = Astro.props;
 			<slot />
 		</main>
 		<CommonFooter />
+		<script>
+			import { snsLinkProvider } from '~/libs/console/snsLinkProvider';
+			snsLinkProvider();
+		</script>
 	</body>
 </html>
