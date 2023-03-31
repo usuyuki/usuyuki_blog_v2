@@ -81,3 +81,9 @@ th {
 	text-align: center;
 	font-weight: bold;
 }
+.toc_list ul {
+	margin-left: 1rem !important;
+}
+.toc_list li {
+	margin: 0.5rem 0;
+}
