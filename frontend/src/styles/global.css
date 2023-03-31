@@ -64,7 +64,6 @@ main {
 	margin: 0 auto;
 	min-height: calc(100vh - var(--heder-height) - var(--footer-height));
 	padding-top: var(--main-padding-top);
-	overflow-x: hidden;
 }
 a:hover {
 	color: var(--blue);
