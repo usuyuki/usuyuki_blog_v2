@@ -1,4 +1,5 @@
 ---
+import NormalInternalLinkButton from '~/components/atom/button/NormalInternalLinkButton.astro';
 import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
 import LatestArticle from '~/components/organism/article/LatestArticle.astro';
 import TagList from '~/components/organism/tag/TagList.astro';
@@ -11,6 +12,9 @@ const headMeta: HeadMetaType = {
 	description: '「急須で入れたようななにか」のトップページです',
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
+
+//今月のアーカイブURL
+const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth() + 1}`;
 ---
 
 <IndexLayout {...headMeta}>
@@ -18,6 +22,7 @@ const headMeta: HeadMetaType = {
 	<!-- <h2 class="text-4xl">急須で入れたような</h2>
 	<h2 class="text-3xl">何か</h2> -->
 	<LatestArticle />
+	<NormalInternalLinkButton title="もっとみる" url={archiveUrl} />
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Tags</h2>
 		<TagList
