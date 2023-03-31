@@ -1,7 +1,6 @@
 ---
 import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
-import LastMonthArticle from '~/components/organism/article/LastMonthArticle.astro';
-import ThisMonthArticle from '~/components/organism/article/ThisMonthArticle.astro';
+import LatestArticle from '~/components/organism/article/LatestArticle.astro';
 import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
 import IndexLayout from '~/layouts/extends/IndexLayout.astro';
@@ -18,8 +17,7 @@ const headMeta: HeadMetaType = {
 	<h2 class="text-2xl text-center mb-4 mx-2">うすゆきブログ</h2>
 	<!-- <h2 class="text-4xl">急須で入れたような</h2>
 	<h2 class="text-3xl">何か</h2> -->
-	<ThisMonthArticle />
-	<LastMonthArticle />
+	<LatestArticle />
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Tags</h2>
 		<TagList

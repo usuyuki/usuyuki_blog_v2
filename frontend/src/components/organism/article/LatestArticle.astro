@@ -1,0 +1,19 @@
+---
+import ArticleArchive from '~/components/molecule/archive/ArticleArchive.astro';
+import { ghostClient } from '~/libs/ghostClient';
+
+const posts = await ghostClient.posts
+	.browse({
+		order: 'published_at DESC',
+		limit: 10
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+const postsData = {
+	posts: posts
+};
+---
+
+<h2 class="text-blue text-2xl mt-4 mb-8 mx-2 text-center">最近の記事</h2>
+<ArticleArchive {...postsData} />
