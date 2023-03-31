@@ -1,0 +1,26 @@
+@tailwind components;
+@layer components {
+	.ghost-toc {
+		max-width: var(--article-max-width);
+		font-family: 'TsukuBRdGothic-Regular', 'メイリオ', Meiryo, 'Hiragino Kaku Gothic ProN',
+			'ヒラギノ角ゴ ProN W3', sans-serif;
+	}
+	.ghost-toc .text-1 {
+		@apply text-xl md:text-2xl;
+	}
+	.ghost-toc .text-2 {
+		@apply text-xl md:text-2xl;
+	}
+	.ghost-toc .text-3 {
+		@apply text-lg md:text-xl ml-2 md:ml-4;
+	}
+	.ghost-toc .text-4 {
+		@apply md:text-lg ml-4 md:ml-6;
+	}
+	.ghost-toc .text-5 {
+		@apply ml-6 md:ml-8;
+	}
+	.ghost-toc .text-6 {
+		@apply ml-8 md:ml-10;
+	}
+}

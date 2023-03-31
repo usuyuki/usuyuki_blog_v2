@@ -1,6 +1,7 @@
 ---
 import '~/styles/blog/ghostContent.css';
 import '~/styles/blog/wordpressContent.css';
+import '~/styles/blog/ghostToc.css';
 import '~/styles/blog/blogCommon.css';
 import TOC from '~/components/atom/TOC.astro';
 import YMDMolecule from '~/components/atom/date/YMDMolecule.astro';
@@ -55,7 +56,9 @@ const tocList: TOCType[] = generateTOC(post.html);
 	<div class="mb-8 mt-4 p-2 m-2">
 		<TagList tags={post.tags} />
 	</div>
-	<TOC tocList={tocList} />
+	<div class="flex justify-center">
+		<TOC tocList={tocList} />
+	</div>
 	{/* eslint-disable */}
 	<article class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}

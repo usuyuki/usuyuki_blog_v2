@@ -70,7 +70,20 @@ th {
 	font-size: 16px;
 	margin: 8px auto;
 	padding: 16px;
+	border: 2px dotted var(--pink);
+	border-radius: 0.75rem;
 }
 #toc_container a {
 	font-size: 20px;
+}
+.toc_title {
+	font-size: 1.4rem;
+	text-align: center;
+	font-weight: bold;
+}
+.toc_list ul {
+	margin-left: 1rem !important;
+}
+.toc_list li {
+	margin: 0.5rem 0;
 }
