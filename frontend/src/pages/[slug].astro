@@ -10,6 +10,7 @@ import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
 import { ghostClient } from '~/libs/ghostClient';
 import { generateTOC } from '~/libs/helper/generateTOC';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
+import { judgeWpArticle } from '~/libs/helper/judgeWpArticle';
 import type { TOCType } from '~/types/TOCType';
 const post = await ghostClient.posts
 	.read({
@@ -34,6 +35,7 @@ const headMeta = {
 };
 
 const tocList: TOCType[] = generateTOC(post.html);
+const isWpArticle = judgeWpArticle(post.html);
 ---
 
 <ArticleLayout {...headMeta}>
@@ -56,9 +58,19 @@ const tocList: TOCType[] = generateTOC(post.html);
 	<div class="mb-8 mt-4 p-2 m-2">
 		<TagList tags={post.tags} />
 	</div>
-	<div class="flex justify-center">
-		<TOC tocList={tocList} />
-	</div>
+	<h2>
+		{isWpArticle}
+	</h2>
+	<!-- 基本的にWordPress記事では目次生成の正規表現でマッチしないが、WordPressから移行した記事を一度Ghostで保存すると目次生成が可能になってしまい、spanタグの付いたぶっ壊れ目次が生まれるので防ぐ -->
+	{
+		isWpArticle ? (
+			''
+		) : (
+			<div class="flex justify-center">
+				<TOC tocList={tocList} />
+			</div>
+		)
+	}
 	{/* eslint-disable */}
 	<article class="blog-content" set:html={post.html} />
 	{/* eslint-enable */}

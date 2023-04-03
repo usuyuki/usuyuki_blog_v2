@@ -1,5 +1,5 @@
 ---
-import ArticleArchive from '~/components/molecule/archive/ArticleArchive.astro';
+import ArticleArchive from '~/components/molecule/articleArchive/YMDArticleArchive.astro';
 import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
@@ -16,7 +16,7 @@ const posts = await ghostClient.posts
 	.browse({
 		filter: `tag:${tagSlug}`,
 		limit: 'all',
-		order: 'published_at ASC'
+		order: 'published_at DESC'
 	})
 	.catch((err: any) => {
 		console.error(err);
