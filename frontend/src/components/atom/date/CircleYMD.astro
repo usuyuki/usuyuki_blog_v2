@@ -1,0 +1,21 @@
+---
+const props = Astro.props;
+---
+
+<div class="relative">
+	<div
+		class="absolute rotate-6 -top-9 right-5 w-16 h-6 rounded-full text-white font-numbers bg-pink flex items-center justify-center"
+	>
+		<p class="text-lg">{props.year}</p>
+	</div>
+	<div
+		class="absolute -top-4 right-8 w-12 h-12 rounded-full text-white font-numbers bg-blue flex items-center justify-center"
+	>
+		<p class="text-xl">{props.day}</p>
+	</div>
+	<div
+		class="absolute -top-6 right-16 w-8 h-8 rounded-full text-white font-numbers bg-green flex items-center justify-center"
+	>
+		<p class="text-lg">{props.month}</p>
+	</div>
+</div>
