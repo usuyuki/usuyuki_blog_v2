@@ -58,9 +58,6 @@ const isWpArticle = judgeWpArticle(post.html);
 	<div class="mb-8 mt-4 p-2 m-2">
 		<TagList tags={post.tags} />
 	</div>
-	<h2>
-		{isWpArticle}
-	</h2>
 	<!-- 基本的にWordPress記事では目次生成の正規表現でマッチしないが、WordPressから移行した記事を一度Ghostで保存すると目次生成が可能になってしまい、spanタグの付いたぶっ壊れ目次が生まれるので防ぐ -->
 	{
 		isWpArticle ? (
