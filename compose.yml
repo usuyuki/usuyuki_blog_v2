@@ -21,10 +21,10 @@ services:
 
   astro:
     build:
-      context: .
-      dockerfile: ./infra/dev/astro/Dockerfile
+      context: ./frontend
+      dockerfile: ../infra/dev/astro/Dockerfile
     volumes:
-      - ./frontend:/usr/src/frontend
+      - ./frontend:/frontend
     ports:
       - "1000:1000"
     restart: always

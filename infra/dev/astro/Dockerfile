@@ -1,4 +1,4 @@
 FROM node:18-alpine
-WORKDIR /usr/src/frontend
+WORKDIR /frontend
 RUN corepack enable
 EXPOSE 1000 
