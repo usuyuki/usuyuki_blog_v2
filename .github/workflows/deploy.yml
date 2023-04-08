@@ -1,10 +1,10 @@
 name: 自動デプロイと初期構築
-on: [pull_request]
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#     types: [closed]
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
 
 jobs:
   push_to_registry:
