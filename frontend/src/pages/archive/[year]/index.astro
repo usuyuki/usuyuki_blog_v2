@@ -35,11 +35,7 @@ const headMeta: HeadMetaType = {
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">{yearSlug}年の記事</h2>
-	<div class="flex justify-center mb-12">
-		<a href={`/archive/${yearSlug + 1}`} class="text-blue text-xl mx-2">←次の年</a>
-		<a href={`/archive/${yearSlug - 1}`} class="text-blue text-xl mx-2">前の年→</a>
-	</div>
+	<h2 class="text-blue text-2xl mt-4 mb-12 mx-2 text-center">{yearSlug}年の記事</h2>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />
@@ -49,4 +45,8 @@ const headMeta: HeadMetaType = {
 			</p>
 		)
 	}
+	<div class="flex justify-center mt-12">
+		<a href={`/archive/${yearSlug + 1}`} class="text-blue text-xl mx-2">←次の年</a>
+		<a href={`/archive/${yearSlug - 1}`} class="text-blue text-xl mx-2">前の年→</a>
+	</div>
 </ArchiveLayout>
