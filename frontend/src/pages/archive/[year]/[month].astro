@@ -53,17 +53,7 @@ const headMeta: HeadMetaType = {
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
-	<div class="flex justify-center mb-12">
-		<a
-			href={`/archive/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}`}
-			class="text-blue text-xl mx-2">←次の月</a
-		>
-		<a
-			href={`/archive/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}`}
-			class="text-blue text-xl mx-2">前の月→</a
-		>
-	</div>
+	<h2 class="text-blue text-2xl mt-4 mb-12 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
 	{
 		postsData.posts && postsData.posts.length > 0 ? (
 			<ArticleArchive {...postsData} />
@@ -73,4 +63,14 @@ const headMeta: HeadMetaType = {
 			</p>
 		)
 	}
+	<div class="flex justify-center mt-12">
+		<a
+			href={`/archive/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}`}
+			class="text-blue text-xl mx-2">←次の月</a
+		>
+		<a
+			href={`/archive/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}`}
+			class="text-blue text-xl mx-2">前の月→</a
+		>
+	</div>
 </ArchiveLayout>
