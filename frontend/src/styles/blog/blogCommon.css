@@ -1,6 +1,13 @@
 /* なぜか本番のビルドだとこれらのファイルの後にTailwindが読み込まれて、優先度的に反映されないためクラス指定で行う */
 @tailwind components;
 @layer components {
+	/* ghostもwordpressもpタグの中にaタグを入れるのでそれを利用してスタイルを当てる */
+	p a {
+		@apply text-dark-blue duration-500;
+	}
+	p a:hover {
+		@apply text-blue duration-500;
+	}
 	.blog-content > h1 {
 		@apply text-5xl font-bold;
 	}
