@@ -75,4 +75,6 @@ jobs:
             git pull origin main
             # docker compose upしても正しく降ってこないので、一旦最新を明示的にpullさせる
             docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+            # このタイミングでghostも更新できるようにする
+            docker pull ghost:5-alpine
             docker compose -f compose-prod.yml up -d --build
