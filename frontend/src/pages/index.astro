@@ -1,6 +1,7 @@
 ---
 import NormalInternalLinkButton from '~/components/atom/button/NormalInternalLinkButton.astro';
 import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
+import FeaturedArticle from '~/components/organism/article/FeaturedArticle.astro';
 import LatestArticle from '~/components/organism/article/LatestArticle.astro';
 import TagList from '~/components/organism/tag/TagList.astro';
 import { SITE_URL } from '~/consts';
@@ -23,6 +24,7 @@ const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth()
 	<h2 class="text-3xl">何か</h2> -->
 	<LatestArticle />
 	<NormalInternalLinkButton title="月間ごとのアーカイブ" url={archiveUrl} />
+	<FeaturedArticle />
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Tags</h2>
 		<TagList
