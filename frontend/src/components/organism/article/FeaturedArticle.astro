@@ -1,0 +1,19 @@
+---
+import ArticleArchive from '~/components/molecule/articleArchive/YMDArticleArchive.astro';
+import { ghostClient } from '~/libs/ghostClient';
+
+const posts = await ghostClient.posts
+	.browse({
+		order: 'published_at DESC',
+		filter: 'featured:true'
+	})
+	.catch((err: any) => {
+		console.error(err);
+	});
+const postsData = {
+	posts: posts
+};
+---
+
+<h2 class="text-blue text-2xl mt-20 mb-12 mx-2 text-center">初めての方におすすめ記事✨</h2>
+<ArticleArchive {...postsData} />
