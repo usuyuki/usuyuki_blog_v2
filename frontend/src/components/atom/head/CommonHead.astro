@@ -1,4 +1,5 @@
 ---
+import { GoogleFontsOptimizer } from 'astro-google-fonts-optimizer';
 import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
 const { title, slug, description, ogImage } = Astro.props;
 const url = SITE_URL + slug;
@@ -15,6 +16,10 @@ const pageTitle = title + ' | ' + SITE_TITLE;
 <link rel="apple-touch-icon" type="image/png" href="/images/favicon/apple-touch-icon-180x180.png" />
 <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon/icon-192x192.png" />
 
+<!-- Google Fonts -->
+<GoogleFontsOptimizer
+	url="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
+/>
 <!-- ga -->
 <script is:inline src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"></script>
 <script is:inline>
