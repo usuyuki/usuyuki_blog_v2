@@ -29,6 +29,9 @@ dependencies:
   astro:
     specifier: ^2.5.7
     version: 2.5.7(sharp@0.31.3)
+  astro-google-fonts-optimizer:
+    specifier: ^0.2.2
+    version: 0.2.2
   image-size:
     specifier: ^1.0.2
     version: 1.0.2
@@ -1191,6 +1194,10 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /astro-google-fonts-optimizer@0.2.2:
+    resolution: {integrity: sha512-YQxp/ExF3NzUomAGuu1VKecO7/ETRnhnE50gqwAqfpbGPZFj4MYa4XxK1ukBg3R63QmKuE5uurOiKmXiLzttuw==}
+    dev: false
 
   /astro@2.5.7(sharp@0.31.3):
     resolution: {integrity: sha512-qYKMIN4tXAOAsm10vU4f+Q7LfC05JmEbQiJmSBqIEhp+wnQcEUFkGLrHMSsps3oBzMtjErUdDDW5tGJcn5eVlA==}

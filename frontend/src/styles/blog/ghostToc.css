@@ -2,8 +2,7 @@
 @layer components {
 	.ghost-toc {
 		max-width: var(--article-max-width);
-		font-family: 'TsukuBRdGothic-Regular', 'メイリオ', Meiryo, 'Hiragino Kaku Gothic ProN',
-			'ヒラギノ角ゴ ProN W3', sans-serif;
+		font-family: Noto Sans JP, sans-serif;
 	}
 	.ghost-toc .text-1 {
 		@apply text-xl md:text-2xl;
