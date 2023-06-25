@@ -73,3 +73,6 @@ a:hover {
 	color: var(--blue);
 	transition-duration: 500ms;
 }
+a {
+	transition-duration: 500ms;
+}

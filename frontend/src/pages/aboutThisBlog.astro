@@ -1,0 +1,42 @@
+---
+import AboutThisBlogWrapper from '~/components/atom/wrapper/AboutThisBlogWrapper.astro';
+import { SITE_URL } from '~/consts';
+import PageLayout from '~/layouts/extends/PageLayout.astro';
+import type { HeadMetaType } from '~/types/HeadMetaType';
+const headMeta: HeadMetaType = {
+	title: 'このブログについて',
+	slug: '/aboutThisBlog',
+	description: 'このブログについての説明です。',
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
+};
+---
+
+<PageLayout {...headMeta}>
+	<h1 class="text-center text-3xl">このブログについて</h1>
+	<AboutThisBlogWrapper title="筆者">
+		<p>
+			このブログはうすゆきによってすべて書かれています。広告なども付けておらず完全に個人の趣味です。<br
+			/>
+		</p>
+		<a
+			href="https://usuyuki.net"
+			class="mx-2 my-2 flex items-center"
+			target="_blank"
+			rel="noopener noreferrer">usuyuki.net</a
+		>
+	</AboutThisBlogWrapper>
+	<AboutThisBlogWrapper title="ソースコード">
+		<p>ソースコードはGitHubにて公開しています。</p>
+		<a
+			href="https://github.com/usuyuki/usuyuki_blog_v2"
+			class="mx-2 my-2 flex items-center"
+			target="_blank"
+			rel="noopener noreferrer">github.com/usuyuki/usuyuki_blog_v2</a
+		>
+	</AboutThisBlogWrapper>
+	<AboutThisBlogWrapper title="Google Analytics">
+		<p>
+			本ブログでは、Googleによるアクセス解析ツール「GoogleAnalytics」を利用しています。このGoogleAnalyticsはトラフィックデータの収集のためにクッキー（Cookie）を使用しております。トラフィックデータは匿名で収集されており、個人を特定するものではありません。この機能はCookieを無効にすることで収集を拒否することが出来ますので、お使いのブラウザの設定をご確認ください。
+		</p>
+	</AboutThisBlogWrapper>
+</PageLayout>
