@@ -1,6 +1,10 @@
 ---
 import { ghostClient } from '~/libs/ghostClient';
-const props = Astro.props;
+interface Props {
+	ulClass?: string;
+	liClass?: string;
+}
+const { ulClass = '', liClass = '' } = Astro.props;
 
 const posts = await ghostClient.posts
 	.browse({
@@ -14,9 +18,9 @@ const posts = await ghostClient.posts
 
 {
 	posts && posts.length > 0 ? (
-		<ul class={props.ulClass}>
+		<ul class={ulClass}>
 			{posts.map((post: any) => (
-				<li class={`text-lg my-2 ${props.liClass}`}>
+				<li class={`text-lg my-2 ${liClass}`}>
 					<a href={`/${post.slug}`}>📰{post.title}</a>
 				</li>
 			))}

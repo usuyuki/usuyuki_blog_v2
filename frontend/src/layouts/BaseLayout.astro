@@ -3,7 +3,9 @@ import '~/styles/global.css';
 import CommonFooter from '~/components/atom/footer/CommonFooter.astro';
 import CommonHead from '~/components/atom/head/CommonHead.astro';
 import CommonHeader from '~/components/atom/header/CommonHeader.astro';
-const headMeta = Astro.props;
+import type { HeadMetaType } from '~/types/HeadMetaType';
+interface Props extends HeadMetaType {}
+const headMeta: Props = Astro.props;
 ---
 
 <!DOCTYPE html>

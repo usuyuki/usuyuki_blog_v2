@@ -2,16 +2,20 @@
 import { Image } from '@astrojs/image/components';
 import CircleYMD from '~/components/atom/date/CircleYMD.astro';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-const postsData = Astro.props;
+import type { ArticleArchiveType } from '~/types/ArticleArchiveType';
+interface Props {
+	posts: ArticleArchiveType[];
+}
+const { posts } = Astro.props;
 //日付の変換
-postsData.posts.map((post: any) => {
+posts.map((post: any) => {
 	post.published_at = iso8601TimeToDate(post.published_at);
 });
 ---
 
 <div class="flex flex-wrap items-stretch">
 	{
-		postsData.posts.map((post: any) => (
+		posts.map((post: any) => (
 			<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
 				<a
 					class="hover:shadow-xl p-2 block rounded-xl h-full duration-300  "
