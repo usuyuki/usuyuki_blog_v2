@@ -27,15 +27,11 @@ const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth()
 	<FeaturedArticle />
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Tags</h2>
-		<TagList
-			class="mx-auto"
-			liClass="ml-2"
-			ulClass="flex justify-center flex-wrap md:flex-row flex-col"
-		/>
+		<TagList liClass="ml-2" ulClass="flex justify-center flex-wrap md:flex-row flex-col" />
 	</div>
 
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Archive</h2>
-		<ArchiveList class="mx-auto" />
+		<ArchiveList ulClass="mx-auto" />
 	</div>
 </IndexLayout>

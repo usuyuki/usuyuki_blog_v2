@@ -1,6 +1,8 @@
 ---
 import { GoogleFontsOptimizer } from 'astro-google-fonts-optimizer';
 import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
+import type { HeadMetaType } from '~/types/HeadMetaType';
+interface Props extends HeadMetaType {}
 const { title, slug, description, ogImage } = Astro.props;
 const url = SITE_URL + slug;
 const pageTitle = title + ' | ' + SITE_TITLE;

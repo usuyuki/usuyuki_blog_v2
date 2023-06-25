@@ -1,11 +1,15 @@
 ---
-const props = Astro.props;
+import type { TagType } from '~/types/TagType';
+interface Props {
+	tags: TagType[];
+}
+const { tags } = Astro.props;
 ---
 
 {
-	props.tags ? (
+	tags ? (
 		<div class="flex justify-center flex-wrap">
-			{props.tags.map((tag: any) =>
+			{tags.map((tag: any) =>
 				tag.visibility === 'public' ? (
 					<a href={`/tags/${tag.slug}`} class="text-center my-2 mx-2">
 						🏷{tag.name}

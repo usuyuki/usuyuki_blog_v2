@@ -1,11 +1,14 @@
 ---
-const props = Astro.props;
+interface Props {
+	day: number;
+}
+const { day } = Astro.props;
 ---
 
 <div class="relative">
 	<div
 		class="absolute -top-4 right-12 w-10 h-10 rounded-md text-white font-numbers bg-blue flex items-center justify-center"
 	>
-		<p class="text-xl">{props.day}</p>
+		<p class="text-xl">{day}</p>
 	</div>
 </div>

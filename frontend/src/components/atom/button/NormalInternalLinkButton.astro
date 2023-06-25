@@ -1,13 +1,18 @@
 ---
-const props = Astro.props;
+interface Props {
+	title: string;
+	url: string;
+	className?: string;
+}
+const { title, url, className = '' } = Astro.props;
 ---
 
-<div class={`flex items-center justify-center ${props.className}`}>
-	<a href={props.url}>
+<div class={`flex items-center justify-center ${className}`}>
+	<a href={url}>
 		<div
 			class="flex rounded-xl bg-green px-4 py-3 hover:bg-blue hover:text-white text-white duration-500"
 		>
-			<p>{props.title}</p>
+			<p>{title}</p>
 		</div>
 	</a>
 </div>
