@@ -87,3 +87,8 @@ th {
 .toc_list li {
 	margin: 0.5rem 0;
 }
+
+/* blogCommonのaタグ青色の上書き */
+.toc_list a {
+	color: var(--black);
+}
