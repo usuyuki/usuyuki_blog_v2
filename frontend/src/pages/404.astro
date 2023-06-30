@@ -2,6 +2,10 @@
 import { SITE_URL } from '~/consts';
 import PageLayout from '~/layouts/extends/PageLayout.astro';
 import type { HeadMetaType } from '~/types/HeadMetaType';
+
+// 静的に描画して良いところ
+export const prerender = true;
+
 const headMeta: HeadMetaType = {
 	title: '404',
 	slug: '/404',
