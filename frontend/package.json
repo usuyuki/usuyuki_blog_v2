@@ -23,15 +23,15 @@
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@tryghost/content-api": "^1.11.13",
 		"@tryghost/helpers": "^1.1.81",
-		"astro": "^2.7.0",
+		"astro": "^2.7.2",
 		"astro-google-fonts-optimizer": "^0.2.2",
 		"image-size": "^1.0.2",
 		"sharp": "^0.31.3",
 		"tailwindcss": "^3.3.2"
 	},
 	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^5.60.0",
-		"@typescript-eslint/parser": "^5.60.0",
+		"@typescript-eslint/eslint-plugin": "^5.60.1",
+		"@typescript-eslint/parser": "^5.60.1",
 		"eslint": "^8.43.0",
 		"eslint-plugin-astro": "^0.24.0",
 		"eslint-plugin-import": "^2.27.5",
