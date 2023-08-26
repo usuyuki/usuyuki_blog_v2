@@ -41,7 +41,7 @@
 		@apply text-xl font-bold;
 	}
 	.kg-bookmark-description {
-		@apply flex h-20 text-sm;
+		@apply flex h-20 text-sm overflow-y-hidden;
 	}
 	.kg-bookmark-metadata {
 		@apply items-center flex-wrap mb-2 w-full md:flex hidden md:h-6;
