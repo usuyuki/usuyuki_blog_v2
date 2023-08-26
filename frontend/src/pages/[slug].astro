@@ -47,12 +47,15 @@ const isWpArticle = judgeWpArticle(post.html);
 				day={post.published_at.day}
 			/>
 		</div>
-		<div class="w-full md:w-4/5">
-			<h2 class="text-center mb-2 text-4xl">{post.title}</h2>
+		<div class="w-full md:w-3/5">
+			<h2 class="text-center mb-2 text-4xl text-wrap-balance">{post.title}</h2>
 			<p class="text-center my-2 text-orange text-lg md:hidden block">
 				{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
 			</p>
 			<p class="text-right">{post.reading_time} 分くらいで読めます！</p>
+		</div>
+		<div class="w-full md:w-1/5 hidden md:block">
+			<!-- バランス調整 -->
 		</div>
 	</div>
 	<div class="mb-8 mt-4 p-2 m-2">
