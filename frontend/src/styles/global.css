@@ -76,3 +76,7 @@ a:hover {
 a {
 	transition-duration: 500ms;
 }
+/* text-wrap: balance; Chrome114から追加、今のところはChromeのみだけど適応されなくてマイナスが少ないので入れる */
+.text-wrap-balance {
+	text-wrap: balance;
+}
