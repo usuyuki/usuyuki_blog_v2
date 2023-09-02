@@ -19,7 +19,6 @@
 		"@astrojs/node": "^6.0.0",
 		"@astrojs/rss": "^2.4.4",
 		"@astrojs/tailwind": "^5.0.0",
-		"@tailwindcss/line-clamp": "^0.4.4",
 		"@tryghost/content-api": "^1.11.16",
 		"@tryghost/helpers": "^1.1.85",
 		"astro": "^3.0.7",
@@ -37,6 +36,6 @@
 		"postcss-html": "^1.5.0",
 		"prettier": "^2.8.8",
 		"prettier-plugin-astro": "^0.8.1",
-		"typescript": "^4.9.5"
+		"typescript": "^5.2.2"
 	}
 }
