@@ -16,7 +16,7 @@ const headMeta: Props = Astro.props;
 	</head>
 	<body>
 		<CommonHeader />
-		<main>
+		<main transition:animate="slide">
 			<slot />
 		</main>
 		<CommonFooter />
