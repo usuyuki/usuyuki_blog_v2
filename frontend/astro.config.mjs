@@ -2,8 +2,6 @@ import { defineConfig } from 'astro/config';
 import tailwind from '@astrojs/tailwind';
 import node from '@astrojs/node';
 
-import image from '@astrojs/image';
-
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://blog.usuyuki.net',
@@ -15,12 +13,7 @@ export default defineConfig({
 			}
 		}
 	},
-	integrations: [
-		tailwind(),
-		image({
-			serviceEntryPoint: '@astrojs/image/sharp'
-		})
-	],
+	integrations: [tailwind()],
 	server: {
 		port: 1000,
 		host: '0.0.0.0'

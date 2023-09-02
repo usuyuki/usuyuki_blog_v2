@@ -17,11 +17,26 @@ module.exports = {
 				red: 'var(--red)'
 			},
 			fontFamily: {
-				numbers:['Helvetica','Mongolian Baiti',...fontFamily.serif],
-				serif: ['Varela Round','Kosugi Maru','ui-sans-serif','system-ui','-apple-system','BlinkMacSystemFont','Segoe UI,Roboto','Helvetica Neue','Arial,Noto Sans','sans-serif','Apple Color Emoji','Segoe UI Emoji','Segoe UI Symbol','Noto Color Emoji', ...fontFamily.serif],
-				sans: ['Noto Sans JP','sans-serif', ...fontFamily.sans]
+				numbers: ['Helvetica', 'Mongolian Baiti', ...fontFamily.serif],
+				serif: [
+					'Varela Round',
+					'Kosugi Maru',
+					'ui-sans-serif',
+					'system-ui',
+					'-apple-system',
+					'BlinkMacSystemFont',
+					'Segoe UI,Roboto',
+					'Helvetica Neue',
+					'Arial,Noto Sans',
+					'sans-serif',
+					'Apple Color Emoji',
+					'Segoe UI Emoji',
+					'Segoe UI Symbol',
+					'Noto Color Emoji',
+					...fontFamily.serif
+				],
+				sans: ['Noto Sans JP', 'sans-serif', ...fontFamily.sans]
 			}
 		}
-	},
-	plugins: [require('@tailwindcss/line-clamp')]
+	}
 };

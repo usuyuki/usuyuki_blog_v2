@@ -1,5 +1,5 @@
 ---
-import { Image } from '@astrojs/image/components';
+import { Image } from 'astro:assets';
 import CircleMD from '~/components/atom/date/CircleMD.astro';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
 import type { ArticleArchiveType } from '~/types/ArticleArchiveType';
@@ -23,14 +23,14 @@ posts.map((post: any) => {
 				>
 					<div class="flex justify-center items-center flex-col">
 						<CircleMD month={post.published_at.month} day={post.published_at.day} />
-						<div class="aspect-square h-40 object-cover overflow-hidden">
+						<div>
 							{post.feature_image ? (
 								<Image
 									src={post.feature_image}
 									width={500}
-									aspectRatio={1 / 1}
+									height={500}
 									format="avif"
-									class="rounded-md"
+									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
 								/>
 							) : (

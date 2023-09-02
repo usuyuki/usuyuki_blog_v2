@@ -2,7 +2,9 @@
 @layer components {
 	.ghost-toc {
 		max-width: var(--article-max-width);
-		font-family: Noto Sans JP, sans-serif;
+		font-family:
+			Noto Sans JP,
+			sans-serif;
 	}
 	.ghost-toc .text-1 {
 		@apply text-xl md:text-2xl;
