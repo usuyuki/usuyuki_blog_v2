@@ -8,26 +8,28 @@ const { year, month, day } = Astro.props;
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 ---
 
-<div class="relative">
-	<div
-		class="w-16 h-16 rounded-full text-white font-bold bg-blue absolute top-16 left-4 flex justify-center items-center"
-	>
-		<p class="text-xl">
-			{year}
-		</p>
-	</div>
-	<div
-		class="w-16 h-16 rounded-full text-white font-bold bg-green absolute top-16 left-24 flex justify-center items-center"
-	>
-		<p class="text-xl">
-			{day}
-		</p>
-	</div>
-	<div
-		class="w-20 h-20 rounded-full text-white font-bold bg-red absolute top-2 left-12 flex justify-center items-center"
-	>
-		<p class="text-2xl">
-			{months[month - 1]}
-		</p>
+<div class="relative z-10">
+	<div class="relative">
+		<div
+			class="w-16 h-16 rounded-full text-white font-bold bg-blue absolute top-16 left-4 flex justify-center items-center"
+		>
+			<p class="text-xl">
+				{year}
+			</p>
+		</div>
+		<div
+			class="w-16 h-16 rounded-full text-white font-bold bg-green absolute top-16 left-24 flex justify-center items-center"
+		>
+			<p class="text-xl">
+				{day}
+			</p>
+		</div>
+		<div
+			class="w-20 h-20 rounded-full text-white font-bold bg-red absolute top-2 left-12 flex justify-center items-center"
+		>
+			<p class="text-2xl">
+				{months[month - 1]}
+			</p>
+		</div>
 	</div>
 </div>
