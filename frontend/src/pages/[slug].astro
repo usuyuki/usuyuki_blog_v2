@@ -46,12 +46,12 @@ const isWpArticle = judgeWpArticle(post.html);
 				post.feature_image ? (
 					<Image
 						src={post.feature_image}
-						width={500}
-						height={500}
+						width={1000}
+						height={1000}
 						format="avif"
-						class="object-cover w-120 h-120 rounded-md"
+						class="object-cover w-96 h-96 rounded-md"
 						alt="記事サムネイル"
-						transition:name={post.slug + '-image'}
+						transition:name={'image-' + post.slug}
 					/>
 				) : (
 					''
@@ -69,7 +69,7 @@ const isWpArticle = judgeWpArticle(post.html);
 		<div class="w-full md:w-3/5">
 			<h2
 				class="text-center mb-2 text-4xl text-wrap-balance"
-				transition:name={post.slug + '-title'}
+				transition:name={'title-' + post.slug}
 			>
 				{post.title}
 			</h2>

@@ -13,7 +13,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 	<div class="relative">
 		<div
 			class="w-16 h-16 rounded-full text-white font-bold bg-blue absolute top-16 left-4 flex justify-center items-center"
-			transition:name={slug + '-year'}
+			transition:name={'year-' + slug}
 		>
 			<p class="text-xl">
 				{year}
@@ -21,7 +21,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 		</div>
 		<div
 			class="w-16 h-16 rounded-full text-white font-bold bg-green absolute top-16 left-24 flex justify-center items-center"
-			transition:name={slug + '-day'}
+			transition:name={'day-' + slug}
 		>
 			<p class="text-xl">
 				{day}
@@ -29,7 +29,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 		</div>
 		<div
 			class="w-20 h-20 rounded-full text-white font-bold bg-red absolute top-2 left-12 flex justify-center items-center"
-			transition:name={slug + '-month'}
+			transition:name={'month-' + slug}
 		>
 			<p class="text-2xl">
 				{months[month - 1]}

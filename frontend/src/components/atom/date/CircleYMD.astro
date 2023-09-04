@@ -11,19 +11,19 @@ const { year, day, month, slug } = Astro.props;
 <div class="relative z-10">
 	<div
 		class="absolute rotate-6 -top-9 right-5 w-16 h-6 rounded-full text-white font-numbers bg-green flex items-center justify-center"
-		transition:name={slug + '-year'}
+		transition:name={'year-' + slug}
 	>
 		<p class="text-lg">{year}</p>
 	</div>
 	<div
 		class="absolute -top-4 right-8 w-12 h-12 rounded-full text-white font-numbers bg-blue flex items-center justify-center"
-		transition:name={slug + '-day'}
+		transition:name={'day-' + slug}
 	>
 		<p class="text-xl">{day}</p>
 	</div>
 	<div
 		class="absolute -top-6 right-16 w-8 h-8 rounded-full text-white font-numbers bg-pink flex items-center justify-center"
-		transition:name={slug + '-month'}
+		transition:name={'month-' + slug}
 	>
 		<p class="text-lg">{month}</p>
 	</div>

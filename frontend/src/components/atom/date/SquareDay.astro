@@ -10,7 +10,7 @@ const { day, slug } = Astro.props;
 	<div class="relative">
 		<div
 			class="absolute -top-4 right-12 w-10 h-10 rounded-md text-white font-numbers bg-blue flex items-center justify-center"
-			transition:name={slug + '-day'}
+			transition:name={'day-' + slug}
 		>
 			<p class="text-xl">{day}</p>
 		</div>
