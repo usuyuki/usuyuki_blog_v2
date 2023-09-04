@@ -26,6 +26,7 @@ posts.map((post: any) => {
 							year={post.published_at.year}
 							month={post.published_at.month}
 							day={post.published_at.day}
+							slug={post.slug}
 						/>
 						<div>
 							{post.feature_image ? (
@@ -36,6 +37,7 @@ posts.map((post: any) => {
 									format="avif"
 									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
+									transition:name={post.slug + '-image'}
 								/>
 							) : (
 								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />

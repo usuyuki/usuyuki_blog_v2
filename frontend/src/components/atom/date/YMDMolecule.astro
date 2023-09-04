@@ -3,8 +3,9 @@ interface Props {
 	year: number;
 	month: number;
 	day: number;
+	slug: string;
 }
-const { year, month, day } = Astro.props;
+const { year, month, day, slug } = Astro.props;
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 ---
 
@@ -12,6 +13,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 	<div class="relative">
 		<div
 			class="w-16 h-16 rounded-full text-white font-bold bg-blue absolute top-16 left-4 flex justify-center items-center"
+			transition:name={slug + '-year'}
 		>
 			<p class="text-xl">
 				{year}
@@ -19,6 +21,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 		</div>
 		<div
 			class="w-16 h-16 rounded-full text-white font-bold bg-green absolute top-16 left-24 flex justify-center items-center"
+			transition:name={slug + '-day'}
 		>
 			<p class="text-xl">
 				{day}
@@ -26,6 +29,7 @@ const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 		</div>
 		<div
 			class="w-20 h-20 rounded-full text-white font-bold bg-red absolute top-2 left-12 flex justify-center items-center"
+			transition:name={slug + '-month'}
 		>
 			<p class="text-2xl">
 				{months[month - 1]}

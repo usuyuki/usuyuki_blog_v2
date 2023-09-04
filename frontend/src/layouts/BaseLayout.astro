@@ -16,7 +16,9 @@ const headMeta: Props = Astro.props;
 	</head>
 	<body>
 		<CommonHeader />
-		<main transition:animate="slide">
+		<!-- <main transition:animate="slide"> -->
+		<!-- <main transition:animate={fade({ duration: '2.0s' })}> -->
+		<main>
 			<slot />
 		</main>
 		<CommonFooter />

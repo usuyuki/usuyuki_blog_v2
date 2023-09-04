@@ -22,7 +22,11 @@ posts.map((post: any) => {
 					href={`/${post.slug}`}
 				>
 					<div class="flex justify-center items-center flex-col">
-						<CircleMD month={post.published_at.month} day={post.published_at.day} />
+						<CircleMD
+							month={post.published_at.month}
+							day={post.published_at.day}
+							slug={post.slug}
+						/>
 						<div>
 							{post.feature_image ? (
 								<Image
@@ -32,6 +36,7 @@ posts.map((post: any) => {
 									format="avif"
 									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
+									transition:name={post.slug + '-image'}
 								/>
 							) : (
 								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
