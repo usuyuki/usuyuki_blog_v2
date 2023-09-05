@@ -21,7 +21,7 @@
 		"@astrojs/tailwind": "^5.0.0",
 		"@tryghost/content-api": "^1.11.16",
 		"@tryghost/helpers": "^1.1.85",
-		"astro": "^3.0.7",
+		"astro": "^3.0.8",
 		"astro-google-fonts-optimizer": "^0.2.2",
 		"image-size": "^1.0.2",
 		"sharp": "^0.31.3",
