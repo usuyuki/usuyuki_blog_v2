@@ -3,6 +3,7 @@ import '~/styles/blog/ghostContent.css';
 import '~/styles/blog/wordpressContent.css';
 import '~/styles/blog/ghostToc.css';
 import '~/styles/blog/blogCommon.css';
+import { Image } from 'astro:assets';
 import TOC from '~/components/atom/TOC.astro';
 import YMDMolecule from '~/components/atom/date/YMDMolecule.astro';
 import TagList from '~/components/atom/tag/TagList.astro';
@@ -39,24 +40,45 @@ const isWpArticle = judgeWpArticle(post.html);
 ---
 
 <ArticleLayout {...headMeta}>
-	<div class="flex justify-end mx-auto w-full lg:w-4/5 xl:w-5/7">
+	<div class="flex justify-end mx-auto w-full lg:w-4/5 xl:w-5/7 flex-wrap">
+		<div class="w-full pb-4 flex justify-center">
+			{
+				post.feature_image ? (
+					<Image
+						src={post.feature_image}
+						width={1000}
+						height={1000}
+						format="avif"
+						class="object-cover w-96 h-96 rounded-md"
+						alt="記事サムネイル"
+						transition:name={'image-' + post.slug}
+					/>
+				) : (
+					''
+				)
+			}
+		</div>
 		<div class="md:w-1/5 hidden md:block">
 			<YMDMolecule
 				year={post.published_at.year}
 				month={post.published_at.month}
 				day={post.published_at.day}
+				slug={post.slug}
 			/>
 		</div>
 		<div class="w-full md:w-3/5">
-			<h2 class="text-center mb-2 text-4xl text-wrap-balance">{post.title}</h2>
+			<h2
+				class="text-center mb-2 text-4xl text-wrap-balance"
+				transition:name={'title-' + post.slug}
+			>
+				{post.title}
+			</h2>
 			<p class="text-center my-2 text-orange text-lg md:hidden block">
 				{post.published_at.year}年{post.published_at.month}月{post.published_at.day}日
 			</p>
 			<p class="text-right">{post.reading_time} 分くらいで読めます！</p>
 		</div>
-		<div class="w-full md:w-1/5 hidden md:block">
-			<!-- バランス調整 -->
-		</div>
+		<div class="w-full md:w-1/5 hidden md:block pl-4"></div>
 	</div>
 	<div class="mb-8 mt-4 p-2 m-2">
 		<TagList tags={post.tags} />

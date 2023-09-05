@@ -25,7 +25,7 @@ posts.map((post: any) => {
 					href={`/${post.slug}`}
 				>
 					<div class="flex justify-center items-center flex-col">
-						<SquareDay day={post.published_at.day} />
+						<SquareDay day={post.published_at.day} slug={post.slug} />
 						<div>
 							{post.feature_image ? (
 								<Image
@@ -35,14 +35,17 @@ posts.map((post: any) => {
 									format="avif"
 									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
+									transition:name={'image-' + post.slug}
 								/>
 							) : (
 								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
 							)}
 						</div>
-						<h3 class="text-xl text-black pt-2 text-wrap-balance text-center">
-							{' '}
-							{post.title}{' '}
+						<h3
+							class="text-xl text-black pt-2 text-wrap-balance text-center"
+							transition:name={'title-' + post.slug}
+						>
+							{post.title}
 						</h3>
 					</div>
 				</a>
