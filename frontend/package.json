@@ -11,9 +11,9 @@
 		"check": "astro check",
 		"astro": "astro",
 		"lint": "bun lint:eslint && bun lint:prettier",
-		"lint:prettier": "prettier --check **/*.{css,scss,ts,tsx,astro}",
-		"lint:eslint": "eslint \"./src/**/*.{js,jsx,ts,tsx,astro}\" --fix --ignore-path .gitignore",
-		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
+		"lint:prettier": "prettier --check **/*.{css,ts,astro}",
+		"lint:eslint": "eslint \"./src/**/*.{ts,astro}\" --fix --ignore-path .gitignore",
+		"format": "prettier --write **/*.{css,ts,astro}"
 	},
 	"dependencies": {
 		"@astrojs/node": "^6.0.0",
