@@ -3,14 +3,14 @@
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
-		"1": "pnpm format && pnpm lint && pnpm check && pnpm build",
+		"1": "bun format && bun lint && bun check && bun build",
 		"dev": "astro dev",
 		"start": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
 		"check": "astro check",
 		"astro": "astro",
-		"lint": "pnpm lint:eslint && pnpm lint:prettier",
+		"lint": "bun lint:eslint && bun lint:prettier",
 		"lint:prettier": "prettier --check **/*.{css,scss,ts,tsx,astro}",
 		"lint:eslint": "eslint \"./src/**/*.{js,jsx,ts,tsx,astro}\" --fix --ignore-path .gitignore",
 		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
