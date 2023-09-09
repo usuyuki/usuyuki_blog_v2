@@ -1,6 +1,6 @@
 dev:
-	docker compose exec astro pnpm dev
+	docker compose exec astro bun dev
 sh:
-	docker compose exec astro sh
+	docker compose exec astro bash
 1:
-	docker compose exec astro pnpm 1
+	docker compose exec astro bun 1
