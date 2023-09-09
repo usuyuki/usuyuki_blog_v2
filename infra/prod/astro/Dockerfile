@@ -1,13 +1,11 @@
-FROM node:18-alpine AS prod
-RUN apk update
-RUN apk add curl
-RUN corepack enable
+FROM oven/bun:1.0 AS prod
 WORKDIR /frontend
 COPY package.json ./
-COPY pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+COPY bun.lockb ./
+RUN bun install --frozen-lockfile
 COPY . .
-RUN chown -R node:node .
+# -R frontendすると確実だが、node_modulesとか含めた莫大になるので、最低限だけやる
+RUN chown bun:bun /frontend && chown -R bun:bun /frontend/node_modules/proxy-from-env
 # RUNでbuildすると環境変数取れないのでCMDでbuildする
-CMD pnpm build && node ./dist/server/entry.mjs
+CMD bun run build && bun ./dist/server/entry.mjs
 EXPOSE 1000 
