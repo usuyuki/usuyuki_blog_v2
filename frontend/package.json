@@ -3,17 +3,17 @@
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
-		"1": "bun format && bun lint && bun check && bun build",
+		"1": "pnpm format && pnpm lint && pnpm check && pnpm build",
 		"dev": "astro dev",
 		"start": "astro dev",
 		"build": "astro build",
 		"preview": "astro preview",
 		"check": "astro check",
 		"astro": "astro",
-		"lint": "bun lint:eslint && bun lint:prettier",
-		"lint:prettier": "prettier --check **/*.{css,ts,astro}",
-		"lint:eslint": "eslint \"./src/**/*.{ts,astro}\" --fix --ignore-path .gitignore",
-		"format": "prettier --write **/*.{css,ts,astro}"
+		"lint": "pnpm lint:eslint && pnpm lint:prettier",
+		"lint:prettier": "prettier --check **/*.{css,scss,ts,tsx,astro}",
+		"lint:eslint": "eslint \"./src/**/*.{js,jsx,ts,tsx,astro}\" --fix --ignore-path .gitignore",
+		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
 	},
 	"dependencies": {
 		"@astrojs/node": "^6.0.0",

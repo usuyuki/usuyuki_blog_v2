@@ -1,6 +1,6 @@
 ```
-dc exec astro bun install
-dc exec astro bun dev
+dc exec astro pnpm install
+dc exec astro pnpm dev
 ```
 
 本番用のビルドを試す
