@@ -1,5 +1,4 @@
-FROM oven/bun:1.0
+FROM node:18-alpine
 WORKDIR /frontend
-CMD bun install --frozen-lockfile
-ENTRYPOINT bun dev
+RUN corepack enable
 EXPOSE 1000 
