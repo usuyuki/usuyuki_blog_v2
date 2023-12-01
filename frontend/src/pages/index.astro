@@ -10,7 +10,7 @@ import type { HeadMetaType } from '~/types/HeadMetaType';
 const headMeta: HeadMetaType = {
 	title: 'とっぷ',
 	slug: '',
-	description: '「急須で入れたようななにか」のトップページです',
+	description: '「うすゆきブログ」のトップページです',
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
 
@@ -19,9 +19,7 @@ const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth()
 ---
 
 <IndexLayout {...headMeta}>
-	<h2 class="text-2xl text-center mb-4 mx-2">うすゆきブログ</h2>
-	<!-- <h2 class="text-4xl">急須で入れたような</h2>
-	<h2 class="text-3xl">何か</h2> -->
+	<h2 class="text-3xl text-center mb-4 mx-2">雑記</h2>
 	<LatestArticle />
 	<NormalInternalLinkButton title="月間ごとのアーカイブ" url={archiveUrl} />
 	<FeaturedArticle />
