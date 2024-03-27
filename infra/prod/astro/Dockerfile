@@ -1,7 +1,5 @@
-FROM node:18-alpine AS prod
-RUN apk update
-RUN apk add curl
-RUN corepack enable
+FROM node:20-slim AS prod
+RUN npm install -g pnpm
 WORKDIR /frontend
 COPY package.json ./
 COPY pnpm-lock.yaml ./
