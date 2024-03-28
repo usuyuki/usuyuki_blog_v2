@@ -2,7 +2,7 @@ import rss from '@astrojs/rss';
 import { SITE_TITLE, SITE_DESCRIPTION, SITE_URL } from '~/consts';
 import { ghostClient } from '~/libs/ghostClient';
 
-export async function get() {
+export async function GET() {
 	const posts = await ghostClient.posts
 		.browse({
 			limit: 'all'
