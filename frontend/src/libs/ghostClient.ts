@@ -1,3 +1,5 @@
+// 本当は型定義ライブラリを追加すべきだが、追加すると自前で定義した型と競合して大改修必要なので保留
+// @ts-ignore
 import GhostContentAPI from '@tryghost/content-api';
 
 // Create API instance with site credentials

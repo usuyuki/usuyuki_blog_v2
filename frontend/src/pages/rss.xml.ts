@@ -20,6 +20,7 @@ export async function get() {
 			description: SITE_DESCRIPTION,
 			site: SITE_URL,
 			customData: '<language>ja</language>',
+			// @ts-ignore
 			items: posts.map((post) => ({
 				title: post.title,
 				pubDate: post.published_at,

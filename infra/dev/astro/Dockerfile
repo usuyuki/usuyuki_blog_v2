@@ -1,4 +1,5 @@
-FROM node:18-alpine
+FROM node:20-slim
+RUN npm install -g pnpm
+# corepackだとpnpmのインストールが初回コマンド実行時になるのでnpmでインストール
 WORKDIR /frontend
-RUN corepack enable
 EXPOSE 1000 

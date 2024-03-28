@@ -4,9 +4,27 @@ import SocialIcon from '~/components/atom/SocialIcon.astro';
 
 <footer>
 	<p class="text-center mt-2 mb-2 mx-2 text-sm">copyright usuyuki</p>
-	<a href="aboutThisBlog" class="mx-2 my-2 flex items-center">
-		<p class="text-center text-sm">このブログについて</p>
-	</a>
+	<div class="flex flex-wrap">
+		<a href="rss.xml" class="mx-2 my-2 flex items-center">
+			<p class="text-center text-sm">RSS</p>
+		</a>
+		<div class="pr-4">
+			<a
+				href="https://feedly.com/i/subscription/feed%2Fhttps%3A%2F%2Fblog.usuyuki.net%2Frss.xml"
+				target="blank"
+				><img
+					id="feedlyFollow"
+					src="https://s1.feedly.com/legacy/feedly-follow-circle-flat-black_2x.png"
+					alt="follow us in feedly"
+					width="28"
+					height="28"
+				/></a
+			>
+		</div>
+		<a href="aboutThisBlog" class="mx-2 my-2 flex items-center">
+			<p class="text-center text-sm">このブログについて</p>
+		</a>
+	</div>
 	<SocialIcon />
 </footer>
 <style>
