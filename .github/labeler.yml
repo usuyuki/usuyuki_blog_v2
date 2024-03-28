@@ -1,54 +1,78 @@
 🗃components:
-  - frontend/src/components/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/src/components/*
 🖼layouts:
-  - frontend/src/layouts/*
-  - frontend/src/styles/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/src/layouts/*
+          - frontend/src/styles/*
 🧩types:
-  - frontend/src/types/*
-  - frontend/src/env.d.ts
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/src/types/*
+          - frontend/src/env.d.ts
 ⚒libs:
-  - frontend/src/libs/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/src/libs/*
 📄pages:
-  - frontend/src/pages/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/src/pages/*
 🕵test:
-  - frontend/tests/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/tests/*
 🗺config:
-  - .env.example
-  - frontend/astro.config.mjs
-  - frontend/src/consts.ts
-  - frontend/.env.example
-  - frontend/.eslintignore
-  - frontend/.eslintrc.cjs
-  - frontend/.gitattributes
-  - frontend/.gitignore
-  - frontend/.npmrc
-  - frontend/.prettierignore
-  - frontend/.prettierrc
-  - frontend/.playwright-ct.config.ts
-  - frontend/.playwright.config.ts
-  - frontend/.postcss.config.cjs
-  - frontend/.tailwind.config.cjs
-  - frontend/stylelint.config.cjs
-  - frontend/.tsconfig.json
-  - frontend/.vite.config.ts
-  - frontend/.vscode/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - .env.example
+          - frontend/astro.config.mjs
+          - frontend/src/consts.ts
+          - frontend/.env.example
+          - frontend/.eslintignore
+          - frontend/.eslintrc.cjs
+          - frontend/.gitattributes
+          - frontend/.gitignore
+          - frontend/.npmrc
+          - frontend/.prettierignore
+          - frontend/.prettierrc
+          - frontend/.playwright-ct.config.ts
+          - frontend/.playwright.config.ts
+          - frontend/.postcss.config.cjs
+          - frontend/.tailwind.config.cjs
+          - frontend/stylelint.config.cjs
+          - frontend/.tsconfig.json
+          - frontend/.vite.config.ts
+          - frontend/.vscode/*
 🎁package:
-  - frontend/package.json
-  - frontend/pnpm-lock.yaml
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/package.json
+          - frontend/pnpm-lock.yaml
 👗static:
-  - frontend/public/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - frontend/public/*
 📄docs:
-  - README.md
-  - frontend/README.md
-  - backend/README.md
-  - LICENSE
+  - changed-files:
+      - any-glob-to-any-file:
+          - README.md
+          - frontend/README.md
+          - backend/README.md
+          - LICENSE
 
 🐟infra:
-  - compose.yml
-  - compose-prod.yml
-  - infra/*
-  - .dockerignore
+  - changed-files:
+      - any-glob-to-any-file:
+          - compose.yml
+          - compose-prod.yml
+          - infra/*
+          - .dockerignore
 
 ✈ci:
-  - .github/workflows/*
-  - .github/labeler.yml
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/workflows/*
+          - .github/labeler.yml
