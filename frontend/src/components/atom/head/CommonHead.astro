@@ -1,6 +1,6 @@
 ---
 import { GoogleFontsOptimizer } from 'astro-google-fonts-optimizer';
-import { ViewTransitions } from 'astro:transitions';
+// import { ViewTransitions } from 'astro:transitions';
 import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
 import type { HeadMetaType } from '~/types/HeadMetaType';
 interface Props extends HeadMetaType {}
@@ -57,4 +57,4 @@ const pageTitle = title + ' | ' + SITE_TITLE;
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:image" content={ogImage} />
 
-<ViewTransitions />
+<!-- <ViewTransitions /> -->
