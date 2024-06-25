@@ -41,7 +41,7 @@ services:
       - ghost
 
   db:
-    image: mariadb:lts
+    image: mysql:8.0-debian
     restart: always
     volumes:
       - db-store:/var/lib/mysql
