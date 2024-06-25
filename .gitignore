@@ -1,3 +1,4 @@
 backend/*
 !backend/README.md
 .env
+.env.prod
