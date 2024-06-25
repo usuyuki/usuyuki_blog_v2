@@ -47,10 +47,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: example
 
+  tunnel:
+    restart: always
+    image: cloudflare/cloudflared
+    command: tunnel run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}
+
 volumes:
   db-store:
-
-networks:
-  default:
-    name: nginx-proxy
-    external: true
