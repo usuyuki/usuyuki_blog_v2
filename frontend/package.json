@@ -16,19 +16,19 @@
 		"format": "prettier --write **/*.{css,scss,ts,tsx,astro}"
 	},
 	"dependencies": {
-		"@astrojs/node": "^8.3.4",
+		"@astrojs/node": "^9.0.0",
 		"@astrojs/rss": "^4.0.10",
 		"@astrojs/tailwind": "^5.1.4",
 		"@tryghost/content-api": "^1.11.21",
 		"@tryghost/helpers": "^1.1.90",
-		"astro": "^4.16.18",
+		"astro": "^5.1.1",
 		"astro-google-fonts-optimizer": "^0.2.2",
 		"image-size": "^1.2.0",
 		"sharp": "^0.31.3",
 		"tailwindcss": "^3.4.17"
 	},
 	"devDependencies": {
-		"@astrojs/check": "^0.5.10",
+		"@astrojs/check": "^0.9.4",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"eslint": "^8.57.1",
