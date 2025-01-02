@@ -29,7 +29,7 @@ const pageTitle = title + ' | ' + SITE_TITLE;
 	window.dataLayer = window.dataLayer || [];
 	function gtag() {
 		//  'dataLayer' is not defined  no-undefのエラーが出るが、どうしようもできないのでコメントで無効化してる
-		dataLayer.push(arguments); // eslint-disable-line
+		dataLayer.push(arguments);
 	}
 	gtag('js', new Date());
 
