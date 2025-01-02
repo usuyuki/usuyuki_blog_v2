@@ -1,4 +1,4 @@
-FROM node:20-slim AS prod
+FROM node:22-slim AS prod
 RUN npm install -g pnpm
 WORKDIR /frontend
 COPY package.json ./
