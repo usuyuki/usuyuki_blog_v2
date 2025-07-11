@@ -1,11 +1,12 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 import node from '@astrojs/node';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://blog.usuyuki.net',
 	vite: {
+		plugins: [tailwindcss()],
 		resolve: {
 			alias: {
 				// tsconfig.jsonにも定義
@@ -13,7 +14,7 @@ export default defineConfig({
 			}
 		}
 	},
-	integrations: [tailwind()],
+	integrations: [],
 	server: {
 		port: 1000,
 		host: '0.0.0.0'

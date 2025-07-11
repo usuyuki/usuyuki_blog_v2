@@ -18,14 +18,14 @@
 	"dependencies": {
 		"@astrojs/node": "^9.3.0",
 		"@astrojs/rss": "^4.0.12",
-		"@astrojs/tailwind": "^6.0.2",
+		"@tailwindcss/vite": "^4.1.11",
 		"@tryghost/content-api": "^1.11.28",
 		"@tryghost/helpers": "^1.1.97",
 		"astro": "^5.11.0",
 		"astro-google-fonts-optimizer": "^0.2.2",
 		"image-size": "^2.0.2",
 		"sharp": "^0.34.3",
-		"tailwindcss": "^3.4.17"
+		"tailwindcss": "^4.1.11"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.4",
