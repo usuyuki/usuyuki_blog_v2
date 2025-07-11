@@ -8,21 +8,17 @@ import TOC from '~/components/atom/TOC.astro';
 import YMDMolecule from '~/components/atom/date/YMDMolecule.astro';
 import TagList from '~/components/atom/tag/TagList.astro';
 import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
-import { ghostClient } from '~/libs/ghostClient';
+import { ghostApiWithRetry } from '~/libs/ghostClient';
 import { generateTOC } from '~/libs/helper/generateTOC';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
 import { judgeWpArticle } from '~/libs/helper/judgeWpArticle';
 import type { TOCType } from '~/types/TOCType';
-const post = await ghostClient.posts
-	.read({
-		slug: Astro.params.slug,
-		include: 'tags'
-	})
-	.catch((err: any) => {
-		console.error(err);
-	});
+const post = await ghostApiWithRetry.posts.read({
+	slug: Astro.params.slug,
+	include: 'tags'
+});
 
-if (post === undefined) {
+if (!post) {
 	return Astro.redirect('/404');
 }
 post.published_at = iso8601TimeToDate(post.published_at);
