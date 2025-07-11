@@ -1,5 +1,5 @@
 ---
-import { ghostClient } from '~/libs/ghostClient';
+import { ghostApiWithRetry } from '~/libs/ghostClient';
 
 interface Props {
 	ulClass?: string;
@@ -7,15 +7,11 @@ interface Props {
 }
 const { ulClass = '', liClass = '' } = Astro.props;
 
-const tags = await ghostClient.tags
-	.browse({
-		limit: 'all',
-		order: 'slug ASC',
-		filter: 'visibility:public'
-	})
-	.catch((err: any) => {
-		console.error(err);
-	});
+const tags = await ghostApiWithRetry.tags.browse({
+	limit: 'all',
+	order: 'slug ASC',
+	filter: 'visibility:public'
+});
 ---
 
 {

@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+@theme {
+	--color-white: #fcf7f4;
+	--color-black: #540610;
+	--color-brown: #d4a680;
+	--color-pink: #ff98b2;
+	--color-orange: #ff785b;
+	--color-blue: #00b5c0;
+	--color-dark-blue: #003355;
+	--color-green: #5ebe98;
+	--color-red: #ff300e;
+	--breakpoint-sm: 640px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 1024px;
+	--breakpoint-xl: 1280px;
+	--font-family-numbers:
+		Helvetica, Mongolian Baiti, ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
+	--font-family-serif:
+		Varela Round, Kosugi Maru, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+		Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+		Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji, ui-serif, Georgia, Cambria,
+		Times New Roman, Times, serif;
+	--font-family-sans:
+		Noto Sans JP, sans-serif, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+		Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+		Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}

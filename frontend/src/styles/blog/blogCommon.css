@@ -1,5 +1,5 @@
 /* なぜか本番のビルドだとこれらのファイルの後にTailwindが読み込まれて、優先度的に反映されないためクラス指定で行う */
-@tailwind components;
+@import '../tailwind.css';
 @layer components {
 	code {
 		max-width: var(--article-max-width);

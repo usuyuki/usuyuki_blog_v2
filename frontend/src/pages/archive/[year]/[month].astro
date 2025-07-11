@@ -2,7 +2,7 @@
 import ArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
-import { ghostClient } from '~/libs/ghostClient';
+import { ghostApiWithRetry } from '~/libs/ghostClient';
 import { isMonth } from '~/libs/validation/isMonth';
 import { isYear } from '~/libs/validation/isYear';
 import type { HeadMetaType } from '~/types/HeadMetaType';
@@ -22,26 +22,22 @@ let date = new Date(yearSlug, monthSlug + -1, 1);
 date.setMonth(date.getMonth() + 1);
 date.setDate(date.getDate() - 1);
 const lastDay = date.getDate();
-const posts = await ghostClient.posts
-	.browse({
-		filter: `published_at:>='${yearSlug}-${monthSlug
-			.toString()
-			.padStart(2, '0')}-01 00:00:00'+published_at:<='${yearSlug}-${monthSlug
-			.toString()
-			.padStart(2, '0')}-${lastDay} 23:59:59'`,
-		limit: 'all',
-		order: 'published_at ASC'
-	})
-	.catch((err: any) => {
-		console.error(err);
-	});
+const posts = await ghostApiWithRetry.posts.browse({
+	filter: `published_at:>='${yearSlug}-${monthSlug
+		.toString()
+		.padStart(2, '0')}-01 00:00:00'+published_at:<='${yearSlug}-${monthSlug
+		.toString()
+		.padStart(2, '0')}-${lastDay} 23:59:59'`,
+	limit: 'all',
+	order: 'published_at ASC'
+});
 
 //先月と来月の算出
 const prevMonth = new Date(yearSlug, monthSlug - 2, 1);
 const nextMonth = new Date(yearSlug, monthSlug, 1);
 
 const postsData = {
-	posts: posts
+	posts: posts || []
 };
 
 const headMeta: HeadMetaType = {

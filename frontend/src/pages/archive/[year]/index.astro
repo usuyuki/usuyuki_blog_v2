@@ -2,7 +2,7 @@
 import ArticleArchive from '~/components/molecule/articleArchive/MDArticleArchive.astro';
 import { SITE_URL } from '~/consts';
 import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
-import { ghostClient } from '~/libs/ghostClient';
+import { ghostApiWithRetry } from '~/libs/ghostClient';
 import { isYear } from '~/libs/validation/isYear';
 import type { HeadMetaType } from '~/types/HeadMetaType';
 //バリデーション
@@ -12,18 +12,14 @@ if (!isYear(yearSlug)) {
 	return Astro.redirect('/404');
 }
 
-const posts = await ghostClient.posts
-	.browse({
-		filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
-		limit: 'all',
-		order: 'published_at ASC'
-	})
-	.catch((err: any) => {
-		console.error(err);
-	});
+const posts = await ghostApiWithRetry.posts.browse({
+	filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
+	limit: 'all',
+	order: 'published_at ASC'
+});
 
 const postsData = {
-	posts: posts
+	posts: posts || []
 };
 
 const headMeta: HeadMetaType = {
