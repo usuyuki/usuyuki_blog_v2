@@ -13,9 +13,6 @@ const headMeta: HeadMetaType = {
 	description: '「急須で入れたようななにか」のトップページです',
 	ogImage: SITE_URL + '/images/ogp/ogp.png'
 };
-
-//今月のアーカイブURL
-const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth() + 1}`;
 ---
 
 <IndexLayout {...headMeta}>
@@ -23,7 +20,7 @@ const archiveUrl = `/archive/${new Date().getFullYear()}/${new Date().getMonth()
 	<!-- <h2 class="text-4xl">急須で入れたような</h2>
 	<h2 class="text-3xl">何か</h2> -->
 	<LatestArticle />
-	<NormalInternalLinkButton title="月間ごとのアーカイブ" url={archiveUrl} />
+	<NormalInternalLinkButton title="アーカイブ" url="/archive" />
 	<FeaturedArticle />
 	<div class="mt-4 mb-12 flex justify-center flex-col items-center">
 		<h2 class="text-2xl font-bold mb-4">Tags</h2>
