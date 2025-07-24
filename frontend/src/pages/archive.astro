@@ -1,0 +1,211 @@
+---
+import { SITE_URL } from '~/consts';
+import IndexLayout from '~/layouts/extends/IndexLayout.astro';
+import { ghostApiWithRetry } from '~/libs/ghostClient';
+import type { HeadMetaType } from '~/types/HeadMetaType';
+import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
+import SquareDay from '~/components/atom/date/SquareDay.astro';
+
+const headMeta: HeadMetaType = {
+	title: 'アーカイブ',
+	slug: '/archive',
+	description: '無限スクロールするアーカイブページだよ',
+	ogImage: SITE_URL + '/images/ogp/ogp.png'
+};
+
+// 直近6ヶ月の記事を取得
+const sixMonthsAgo = new Date();
+sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+const posts = await ghostApiWithRetry.posts.browse({
+	filter: `published_at:>='${sixMonthsAgo.toISOString()}'`,
+	limit: 'all',
+	order: 'published_at DESC'
+});
+
+// 月ごとにグループ化
+const groupedPosts: { [key: string]: any[] } = {};
+posts?.forEach((post: any) => {
+	const date = iso8601TimeToDate(post.published_at);
+	const monthKey = `${date.year}-${String(date.month).padStart(2, '0')}`;
+	if (!groupedPosts[monthKey]) {
+		groupedPosts[monthKey] = [];
+	}
+	groupedPosts[monthKey].push({
+		...post,
+		published_at: date
+	});
+});
+
+// 月キーを降順でソート
+const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare(a));
+---
+
+<IndexLayout {...headMeta}>
+	<div class="container mx-auto px-4">
+		<h1 class="text-3xl font-bold text-center mb-8">アーカイブ</h1>
+
+		<div id="archive-content">
+			{
+				sortedMonthKeys.map((monthKey) => {
+					const [year, month] = monthKey.split('-');
+					const monthName = `${year}年${parseInt(month)}月`;
+					const monthPosts = groupedPosts[monthKey];
+
+					return (
+						<section class="mb-12">
+							<h2 class="text-2xl font-bold mb-6 text-center text-green">
+								{monthName}
+							</h2>
+							<div class="flex flex-wrap items-stretch">
+								{monthPosts.map((post: any) => (
+									<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
+										<a
+											class="hover:shadow-xl p-2 block rounded-xl h-full duration-300"
+											href={`/${post.slug}`}
+										>
+											<div class="flex justify-center items-center flex-col relative">
+												<SquareDay
+													day={post.published_at.day}
+													slug={post.slug}
+												/>
+												<div>
+													{post.feature_image ? (
+														<img
+															src={post.feature_image}
+															class="object-cover w-40 h-40 rounded-md"
+															alt="記事サムネイル"
+															loading="lazy"
+														/>
+													) : (
+														<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+													)}
+												</div>
+												<h3 class="text-xl text-black pt-2 text-wrap-balance text-center">
+													{post.title}
+												</h3>
+											</div>
+										</a>
+									</div>
+								))}
+							</div>
+						</section>
+					);
+				})
+			}
+		</div>
+
+		<div id="load-more-container" class="text-center py-8">
+			<button
+				id="load-more-btn"
+				class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+			>
+				もっと読み込む
+			</button>
+		</div>
+	</div>
+
+	<script is:inline>
+		let currentOffset = 6; // 最初に6ヶ月読み込み済み
+		let isLoading = false;
+
+		const loadMoreBtn = document.getElementById('load-more-btn');
+		const archiveContent = document.getElementById('archive-content');
+
+		async function loadMorePosts() {
+			if (isLoading) return;
+			isLoading = true;
+			loadMoreBtn.textContent = '読み込み中...';
+
+			try {
+				const response = await fetch(`/api/archive?offset=${currentOffset}`);
+				const data = await response.json();
+
+				if (data.posts && data.posts.length > 0) {
+					// 月ごとにグループ化
+					const groupedPosts = {};
+					data.posts.forEach((post) => {
+						const date = new Date(post.published_at);
+						const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+						if (!groupedPosts[monthKey]) {
+							groupedPosts[monthKey] = [];
+						}
+						groupedPosts[monthKey].push(post);
+					});
+
+					// 月キーを降順でソート
+					const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
+						b.localeCompare(a)
+					);
+
+					// HTMLを生成して追加
+					sortedMonthKeys.forEach((monthKey) => {
+						const [year, month] = monthKey.split('-');
+						const monthName = `${year}年${parseInt(month)}月`;
+						const monthPosts = groupedPosts[monthKey];
+
+						const section = document.createElement('section');
+						section.className = 'mb-12';
+						section.innerHTML = `
+							<h2 class="text-2xl font-bold mb-6 text-center text-blue-600">${monthName}</h2>
+							<div class="flex flex-wrap items-stretch">
+								${monthPosts
+									.map(
+										(post) => `
+									<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
+										<a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/${post.slug}">
+											<div class="flex justify-center items-center flex-col relative">
+												<div class="relative z-10">
+													<div class="relative">
+														<div class="absolute -top-4 right-12 w-10 h-10 rounded-md text-white font-numbers bg-blue flex items-center justify-center">
+															<p class="text-xl">${new Date(post.published_at).getDate()}</p>
+														</div>
+													</div>
+												</div>
+												<div>
+													${
+														post.feature_image
+															? `<img src="${post.feature_image}" class="object-cover w-40 h-40 rounded-md" alt="記事サムネイル" loading="lazy" />`
+															: '<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md"></div>'
+													}
+												</div>
+												<h3 class="text-xl text-black pt-2 text-wrap-balance text-center">
+													${post.title}
+												</h3>
+											</div>
+										</a>
+									</div>
+								`
+									)
+									.join('')}
+							</div>
+						`;
+						archiveContent.appendChild(section);
+					});
+
+					currentOffset += 6;
+				} else {
+					loadMoreBtn.style.display = 'none';
+				}
+			} catch (error) {
+				console.error('記事の読み込みに失敗しました:', error);
+			} finally {
+				isLoading = false;
+				loadMoreBtn.textContent = 'もっと読み込む';
+			}
+		}
+
+		loadMoreBtn.addEventListener('click', loadMorePosts);
+
+		// 無限スクロール
+		let scrollTimeout;
+		window.addEventListener('scroll', () => {
+			clearTimeout(scrollTimeout);
+			scrollTimeout = setTimeout(() => {
+				if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 1000) {
+					loadMorePosts();
+				}
+			}, 100);
+		});
+	</script>
+</IndexLayout>
