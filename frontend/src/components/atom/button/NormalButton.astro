@@ -1,0 +1,17 @@
+---
+interface Props {
+	title: string;
+	id?: string;
+	className?: string;
+}
+const { title, id, className = '' } = Astro.props;
+---
+
+<div class={`flex items-center justify-center ${className}`}>
+	<button
+		id={id}
+		class="flex rounded-xl bg-green px-4 py-3 hover:bg-blue hover:text-white text-white duration-500"
+	>
+		<p>{title}</p>
+	</button>
+</div>
