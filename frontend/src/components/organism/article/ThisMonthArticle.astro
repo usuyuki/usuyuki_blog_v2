@@ -1,25 +1,26 @@
 ---
-import ArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
-import { ghostClient } from '~/libs/ghostClient';
+import ArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
+import { ghostClient } from "~/libs/ghostClient";
+
 const today = new Date();
 const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
 // ここちゃんとする
 const formatDate = (date: any) => {
-	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
 		date.getDate()
-	).padStart(2, '0')}`;
+	).padStart(2, "0")}`;
 };
 
 const posts = await ghostClient.posts
 	.browse({
 		filter: `published_at:>='${formatDate(lastDay)}'`,
-		order: 'published_at ASC'
+		order: "published_at ASC",
 	})
 	.catch((err: any) => {
 		console.error(err);
 	});
 const postsData = {
-	posts: posts
+	posts: posts,
 };
 ---
 

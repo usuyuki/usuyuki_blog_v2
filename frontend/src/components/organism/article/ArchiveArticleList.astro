@@ -1,8 +1,8 @@
 ---
-import { ghostApiWithRetry } from '~/libs/ghostClient';
-import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import DArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
-import NormalButton from '~/components/atom/button/NormalButton.astro';
+import NormalButton from "~/components/atom/button/NormalButton.astro";
+import DArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 
 // 直近6ヶ月の記事を取得
 const sixMonthsAgo = new Date();
@@ -10,21 +10,21 @@ sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
 const posts = await ghostApiWithRetry.posts.browse({
 	filter: `published_at:>='${sixMonthsAgo.toISOString()}'`,
-	limit: 'all',
-	order: 'published_at DESC'
+	limit: "all",
+	order: "published_at DESC",
 });
 
 // 月ごとにグループ化
 const groupedPosts: { [key: string]: any[] } = {};
 posts?.forEach((post: any) => {
 	const date = iso8601TimeToDate(post.published_at);
-	const monthKey = `${date.year}-${String(date.month).padStart(2, '0')}`;
+	const monthKey = `${date.year}-${String(date.month).padStart(2, "0")}`;
 	if (!groupedPosts[monthKey]) {
 		groupedPosts[monthKey] = [];
 	}
 	groupedPosts[monthKey].push({
 		...post,
-		published_at: date
+		published_at: date,
 	});
 });
 

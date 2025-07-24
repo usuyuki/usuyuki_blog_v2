@@ -1,14 +1,14 @@
 ---
-import { SITE_URL } from '~/consts';
-import IndexLayout from '~/layouts/extends/IndexLayout.astro';
-import ArchiveArticleList from '~/components/organism/article/ArchiveArticleList.astro';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import ArchiveArticleList from "~/components/organism/article/ArchiveArticleList.astro";
+import { SITE_URL } from "~/consts";
+import IndexLayout from "~/layouts/extends/IndexLayout.astro";
+import type { HeadMetaType } from "~/types/HeadMetaType";
 
 const headMeta: HeadMetaType = {
-	title: 'アーカイブ',
-	slug: '/archive',
-	description: 'うすゆきブログのアーカイブページです。月ごとに記事を整理しています。',
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	title: "アーカイブ",
+	slug: "/archive",
+	description: "うすゆきブログのアーカイブページです。月ごとに記事を整理しています。",
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

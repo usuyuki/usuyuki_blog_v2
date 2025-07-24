@@ -1,9 +1,10 @@
 ---
-import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
-import LatestArticleList from '~/components/organism/article/LatestArticleList.astro';
-import TagList from '~/components/organism/tag/TagList.astro';
-import BaseLayout from '~/layouts/BaseLayout.astro';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import ArchiveList from "~/components/molecule/widget/ArchiveList.astro";
+import LatestArticleList from "~/components/organism/article/LatestArticleList.astro";
+import TagList from "~/components/organism/tag/TagList.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 interface Props extends HeadMetaType {}
 const headMeta: Props = Astro.props;
 ---

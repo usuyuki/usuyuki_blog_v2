@@ -1,16 +1,17 @@
 ---
-import ArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
-import { SITE_URL } from '~/consts';
-import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
-import { ghostApiWithRetry } from '~/libs/ghostClient';
-import { isMonth } from '~/libs/validation/isMonth';
-import { isYear } from '~/libs/validation/isYear';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import ArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
+import { SITE_URL } from "~/consts";
+import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { isMonth } from "~/libs/validation/isMonth";
+import { isYear } from "~/libs/validation/isYear";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 //バリデーション
 const yearSlug = Number(Astro.params.year);
 const monthSlug = Number(Astro.params.month);
 if (!(isYear(yearSlug) && isMonth(monthSlug))) {
-	return Astro.redirect('/404');
+	return Astro.redirect("/404");
 }
 
 /**
@@ -18,18 +19,18 @@ if (!(isYear(yearSlug) && isMonth(monthSlug))) {
  * Dateオブジェクトで0を使うと前の月の最終日を取得できるので、1月足した上でその月の0日を取得→前の月の最終日がわかる
  * 月が12月でも動作する。
  */
-let date = new Date(yearSlug, monthSlug + -1, 1);
+const date = new Date(yearSlug, monthSlug + -1, 1);
 date.setMonth(date.getMonth() + 1);
 date.setDate(date.getDate() - 1);
 const lastDay = date.getDate();
 const posts = await ghostApiWithRetry.posts.browse({
 	filter: `published_at:>='${yearSlug}-${monthSlug
 		.toString()
-		.padStart(2, '0')}-01 00:00:00'+published_at:<='${yearSlug}-${monthSlug
+		.padStart(2, "0")}-01 00:00:00'+published_at:<='${yearSlug}-${monthSlug
 		.toString()
-		.padStart(2, '0')}-${lastDay} 23:59:59'`,
-	limit: 'all',
-	order: 'published_at ASC'
+		.padStart(2, "0")}-${lastDay} 23:59:59'`,
+	limit: "all",
+	order: "published_at ASC",
 });
 
 //先月と来月の算出
@@ -37,14 +38,14 @@ const prevMonth = new Date(yearSlug, monthSlug - 2, 1);
 const nextMonth = new Date(yearSlug, monthSlug, 1);
 
 const postsData = {
-	posts: posts || []
+	posts: posts || [],
 };
 
 const headMeta: HeadMetaType = {
 	title: `${yearSlug}年${monthSlug}月の記事`,
 	slug: `/archive/${yearSlug}/${monthSlug}`,
 	description: `うすゆきブログ${yearSlug}年の${monthSlug}アーカイブです`,
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

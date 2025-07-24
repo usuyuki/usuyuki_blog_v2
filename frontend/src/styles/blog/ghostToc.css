@@ -1,4 +1,4 @@
-@import '../tailwind.css';
+@import "../tailwind.css";
 @layer components {
 	.ghost-toc {
 		max-width: var(--article-max-width);

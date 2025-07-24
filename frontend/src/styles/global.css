@@ -1,4 +1,4 @@
-@import './tailwind.css';
+@import "./tailwind.css";
 
 :root {
 	--white: #fcf7f4;
@@ -47,10 +47,10 @@ body {
 		Helvetica Neue,
 		Arial,
 		Noto Sans,
-		'Apple Color Emoji',
-		'Segoe UI Emoji',
+		"Apple Color Emoji",
+		"Segoe UI Emoji",
 		Segoe UI Symbol,
-		'Noto Color Emoji';
+		"Noto Color Emoji";
 }
 article {
 	max-width: var(--article-max-width);
@@ -80,10 +80,10 @@ h6 {
 		Helvetica Neue,
 		Arial,
 		Noto Sans,
-		'Apple Color Emoji',
-		'Segoe UI Emoji',
+		"Apple Color Emoji",
+		"Segoe UI Emoji",
 		Segoe UI Symbol,
-		'Noto Color Emoji';
+		"Noto Color Emoji";
 }
 
 main {

@@ -1,8 +1,9 @@
 ---
-import { Image } from 'astro:assets';
-import SquareDay from '~/components/atom/date/SquareDay.astro';
-import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import type { ArticleArchiveType } from '~/types/ArticleArchiveType';
+import { Image } from "astro:assets";
+import SquareDay from "~/components/atom/date/SquareDay.astro";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
 interface Props {
 	posts: ArticleArchiveType[];
 }
@@ -10,7 +11,7 @@ const { posts } = Astro.props;
 
 //日付の変換（既に変換済みの場合はスキップ）
 posts.map((post: any) => {
-	if (typeof post.published_at === 'string') {
+	if (typeof post.published_at === "string") {
 		post.published_at = iso8601TimeToDate(post.published_at);
 	}
 });

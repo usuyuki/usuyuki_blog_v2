@@ -7,7 +7,7 @@ interface Props {
 	ulClass?: string;
 	liClass?: string;
 }
-const { ulClass = '', liClass = '' } = Astro.props;
+const { ulClass = "", liClass = "" } = Astro.props;
 
 type ListContent = {
 	year: number;
@@ -37,7 +37,7 @@ for (let year = latestYear; year >= oldestYear; year--) {
 		archiveList.push({
 			year: year,
 			month: month,
-			link: `/archive/${year}/${month}`
+			link: `/archive/${year}/${month}`,
 		});
 	}
 }
