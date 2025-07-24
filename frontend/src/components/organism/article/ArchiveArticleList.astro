@@ -1,7 +1,7 @@
 ---
 import { ghostApiWithRetry } from '~/libs/ghostClient';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import MDArticleArchive from '~/components/molecule/articleArchive/MDArticleArchive.astro';
+import DArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
 import NormalButton from '~/components/atom/button/NormalButton.astro';
 
 // 直近6ヶ月の記事を取得
@@ -45,7 +45,7 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 				return (
 					<section class="mb-12">
 						<h2 class="text-2xl font-bold mb-6 text-center text-green">{monthName}</h2>
-						<MDArticleArchive posts={monthPosts} />
+						<DArticleArchive posts={monthPosts} />
 					</section>
 				);
 			})
