@@ -113,12 +113,11 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 							<h2 class="text-2xl font-bold mb-6 text-center text-green">${monthName}</h2>
 							<div class="flex flex-wrap items-stretch">
 								${monthPosts
-									.map(
-										(post: any) => {
-											const date = new Date(post.published_at);
-											const postMonth = date.getMonth() + 1;
-											const postDay = date.getDate();
-											return `
+									.map((post: any) => {
+										const date = new Date(post.published_at);
+										const postMonth = date.getMonth() + 1;
+										const postDay = date.getDate();
+										return `
 									<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
 										<a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/${post.slug}">
 											<div class="flex justify-center items-center flex-col">
@@ -144,8 +143,7 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 										</a>
 									</div>
 								`;
-										}
-									)
+									})
 									.join('')}
 							</div>
 						`;
