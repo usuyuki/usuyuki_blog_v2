@@ -8,9 +8,11 @@ interface Props {
 }
 const { posts } = Astro.props;
 
-//日付の変換
+//日付の変換（既に変換済みの場合はスキップ）
 posts.map((post: any) => {
-	post.published_at = iso8601TimeToDate(post.published_at);
+	if (typeof post.published_at === 'string') {
+		post.published_at = iso8601TimeToDate(post.published_at);
+	}
 });
 
 // 同じサイズでflexさせるために要素深くなっているが、aタグをblockにして、その上の要素でサイズ指定して、更に上の要素でitems-stretchする必要があるためやむを得ない

@@ -1,7 +1,7 @@
 ---
 import { ghostApiWithRetry } from '~/libs/ghostClient';
 import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import MDArticleArchive from '~/components/molecule/articleArchive/MDArticleArchive.astro';
+import DArticleArchive from '~/components/molecule/articleArchive/DArticleArchive.astro';
 import NormalButton from '~/components/atom/button/NormalButton.astro';
 
 // 直近6ヶ月の記事を取得
@@ -45,7 +45,7 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 				return (
 					<section class="mb-12">
 						<h2 class="text-2xl font-bold mb-6 text-center text-green">{monthName}</h2>
-						<MDArticleArchive posts={monthPosts} />
+						<DArticleArchive posts={monthPosts} />
 					</section>
 				);
 			})
@@ -115,17 +115,15 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 								${monthPosts
 									.map((post: any) => {
 										const date = new Date(post.published_at);
-										const postMonth = date.getMonth() + 1;
 										const postDay = date.getDate();
 										return `
 									<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
 										<a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/${post.slug}">
 											<div class="flex justify-center items-center flex-col">
-												<div class="relative mb-4">
-													<div class="w-16 h-16 bg-green rounded-full flex items-center justify-center text-white font-bold">
-														<div class="text-center">
-															<div class="text-xs leading-tight">${postMonth}月</div>
-															<div class="text-lg leading-tight">${postDay}</div>
+												<div class="relative z-10">
+													<div class="relative">
+														<div class="absolute -top-4 right-12 w-10 h-10 rounded-md text-white font-numbers bg-blue flex items-center justify-center">
+															<p class="text-xl">${postDay}</p>
 														</div>
 													</div>
 												</div>
@@ -176,6 +174,6 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 		});
 	}
 
-	// DOM読み込み完了後に初期化実行
-	document.addEventListener('DOMContentLoaded', initializeInfiniteScroll);
+	// Astroの読み込み完了で初期化
+	document.addEventListener('astro:page-load', initializeInfiniteScroll);
 </script>
