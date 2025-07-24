@@ -175,8 +175,6 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare
 		});
 	}
 
-	// DOM読み込み完了後に初期化実行
-	document.addEventListener('DOMContentLoaded', initializeInfiniteScroll);
-	// Astro のページ遷移対応
+	// Astroの読み込み完了で初期化
 	document.addEventListener('astro:page-load', initializeInfiniteScroll);
 </script>
