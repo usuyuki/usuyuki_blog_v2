@@ -1,17 +1,18 @@
 ---
-import NormalInternalLinkButton from '~/components/atom/button/NormalInternalLinkButton.astro';
-import ArchiveList from '~/components/molecule/widget/ArchiveList.astro';
-import FeaturedArticle from '~/components/organism/article/FeaturedArticle.astro';
-import LatestArticle from '~/components/organism/article/LatestArticle.astro';
-import TagList from '~/components/organism/tag/TagList.astro';
-import { SITE_URL } from '~/consts';
-import IndexLayout from '~/layouts/extends/IndexLayout.astro';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import NormalInternalLinkButton from "~/components/atom/button/NormalInternalLinkButton.astro";
+import ArchiveList from "~/components/molecule/widget/ArchiveList.astro";
+import FeaturedArticle from "~/components/organism/article/FeaturedArticle.astro";
+import LatestArticle from "~/components/organism/article/LatestArticle.astro";
+import TagList from "~/components/organism/tag/TagList.astro";
+import { SITE_URL } from "~/consts";
+import IndexLayout from "~/layouts/extends/IndexLayout.astro";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 const headMeta: HeadMetaType = {
-	title: 'とっぷ',
-	slug: '',
-	description: '「急須で入れたようななにか」のトップページです',
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	title: "とっぷ",
+	slug: "",
+	description: "「急須で入れたようななにか」のトップページです",
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

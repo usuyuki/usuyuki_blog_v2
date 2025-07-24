@@ -1,5 +1,5 @@
 /* ghost/Div.astroにクラスを記述すると何故か使える */
-@import '../tailwind.css';
+@import "../tailwind.css";
 @layer components {
 	.kg-bookmark-card {
 		@apply mx-auto my-2 p-4 md:w-4/5 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;

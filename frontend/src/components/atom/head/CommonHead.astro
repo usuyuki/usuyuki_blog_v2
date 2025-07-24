@@ -1,12 +1,13 @@
 ---
-import { GoogleFontsOptimizer } from 'astro-google-fonts-optimizer';
-import { ClientRouter } from 'astro:transitions';
-import { SITE_TITLE, SITE_URL, SITE_AUTHOR, TWITTER_ID, SITE_SUB_TITLE } from '~/consts';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import { ClientRouter } from "astro:transitions";
+import { GoogleFontsOptimizer } from "astro-google-fonts-optimizer";
+import { SITE_AUTHOR, SITE_SUB_TITLE, SITE_TITLE, SITE_URL, TWITTER_ID } from "~/consts";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 interface Props extends HeadMetaType {}
 const { title, slug, description, ogImage } = Astro.props;
 const url = SITE_URL + slug;
-const pageTitle = title + ' | ' + SITE_TITLE;
+const pageTitle = `${title} | ${SITE_TITLE}`;
 ---
 
 <meta name="robots" content="index, follow" />

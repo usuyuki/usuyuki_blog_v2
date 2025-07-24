@@ -1,16 +1,16 @@
 ---
-import { ghostApiWithRetry } from '~/libs/ghostClient';
+import { ghostApiWithRetry } from "~/libs/ghostClient";
 
 interface Props {
 	ulClass?: string;
 	liClass?: string;
 }
-const { ulClass = '', liClass = '' } = Astro.props;
+const { ulClass = "", liClass = "" } = Astro.props;
 
 const tags = await ghostApiWithRetry.tags.browse({
-	limit: 'all',
-	order: 'slug ASC',
-	filter: 'visibility:public'
+	limit: "all",
+	order: "slug ASC",
+	filter: "visibility:public",
 });
 ---
 

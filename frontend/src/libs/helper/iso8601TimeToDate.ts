@@ -13,7 +13,7 @@ export const iso8601TimeToDate = (dateString: string): DateType => {
 	const data: DateType = {
 		year: dataObj.getFullYear(),
 		month: dataObj.getMonth() + 1,
-		day: dataObj.getDate()
+		day: dataObj.getDate(),
 	};
 	return data;
 };

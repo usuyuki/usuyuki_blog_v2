@@ -1,17 +1,17 @@
 ---
-import AboutThisBlogWrapper from '~/components/atom/wrapper/AboutThisBlogWrapper.astro';
-import { SITE_URL } from '~/consts';
-import PageLayout from '~/layouts/extends/PageLayout.astro';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import AboutThisBlogWrapper from "~/components/atom/wrapper/AboutThisBlogWrapper.astro";
+import { SITE_URL } from "~/consts";
+import PageLayout from "~/layouts/extends/PageLayout.astro";
+import type { HeadMetaType } from "~/types/HeadMetaType";
 
 // 静的に描画して良いところ
 export const prerender = true;
 
 const headMeta: HeadMetaType = {
-	title: 'このブログについて',
-	slug: '/aboutThisBlog',
-	description: 'このブログについての説明です。',
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	title: "このブログについて",
+	slug: "/aboutThisBlog",
+	description: "このブログについての説明です。",
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

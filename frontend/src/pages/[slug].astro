@@ -1,25 +1,26 @@
 ---
-import '~/styles/blog/ghostContent.css';
-import '~/styles/blog/wordpressContent.css';
-import '~/styles/blog/ghostToc.css';
-import '~/styles/blog/blogCommon.css';
-import { Image } from 'astro:assets';
-import TOC from '~/components/atom/TOC.astro';
-import YMDMolecule from '~/components/atom/date/YMDMolecule.astro';
-import TagList from '~/components/atom/tag/TagList.astro';
-import ArticleLayout from '~/layouts/extends/ArticleLayout.astro';
-import { ghostApiWithRetry } from '~/libs/ghostClient';
-import { generateTOC } from '~/libs/helper/generateTOC';
-import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import { judgeWpArticle } from '~/libs/helper/judgeWpArticle';
-import type { TOCType } from '~/types/TOCType';
+import "~/styles/blog/ghostContent.css";
+import "~/styles/blog/wordpressContent.css";
+import "~/styles/blog/ghostToc.css";
+import "~/styles/blog/blogCommon.css";
+import { Image } from "astro:assets";
+import YMDMolecule from "~/components/atom/date/YMDMolecule.astro";
+import TOC from "~/components/atom/TOC.astro";
+import TagList from "~/components/atom/tag/TagList.astro";
+import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { generateTOC } from "~/libs/helper/generateTOC";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
+import type { TOCType } from "~/types/TOCType";
+
 const post = await ghostApiWithRetry.posts.read({
 	slug: Astro.params.slug,
-	include: 'tags'
+	include: "tags",
 });
 
 if (!post) {
-	return Astro.redirect('/404');
+	return Astro.redirect("/404");
 }
 post.published_at = iso8601TimeToDate(post.published_at);
 
@@ -27,8 +28,8 @@ const headMeta = {
 	title: post.title,
 	slug: post.slug,
 	// excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
-	description: post.excerpt.replace(/\r?\n/g, '').slice(0, 150),
-	ogImage: post.feature_image
+	description: post.excerpt.replace(/\r?\n/g, "").slice(0, 150),
+	ogImage: post.feature_image,
 };
 
 const tocList: TOCType[] = generateTOC(post.html);
