@@ -1,16 +1,17 @@
 ---
-import { Image } from 'astro:assets';
-import SquareDay from '~/components/atom/date/SquareDay.astro';
-import { iso8601TimeToDate } from '~/libs/helper/iso8601TimeToDate';
-import type { ArticleArchiveType } from '~/types/ArticleArchiveType';
+import { Image } from "astro:assets";
+import SquareDay from "~/components/atom/date/SquareDay.astro";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
 interface Props {
 	posts: ArticleArchiveType[];
 }
 const { posts } = Astro.props;
 
 //日付の変換（既に変換済みの場合はスキップ）
-posts.map((post: any) => {
-	if (typeof post.published_at === 'string') {
+posts.map((post: ArticleArchiveType) => {
+	if (typeof post.published_at === "string") {
 		post.published_at = iso8601TimeToDate(post.published_at);
 	}
 });
@@ -20,14 +21,14 @@ posts.map((post: any) => {
 
 <div class="flex flex-wrap items-stretch">
 	{
-		posts.map((post: any) => (
+		posts.map((post: ArticleArchiveType) => (
 			<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
 				<a
 					class="hover:shadow-xl p-2 block rounded-xl h-full duration-300  "
 					href={`/${post.slug}`}
 				>
 					<div class="flex justify-center items-center flex-col">
-						<SquareDay day={post.published_at.day} slug={post.slug} />
+						<SquareDay day={typeof post.published_at === 'string' ? 0 : post.published_at.day} slug={post.slug} />
 						<div>
 							{post.feature_image ? (
 								<Image

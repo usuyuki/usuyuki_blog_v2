@@ -33,8 +33,8 @@ docker compose exec astro pnpm 1
 # Individual commands
 docker compose exec astro pnpm build
 docker compose exec astro pnpm check      # Astro type checking
-docker compose exec astro pnpm lint       # ESLint + Prettier
-docker compose exec astro pnpm format     # Prettier formatting
+docker compose exec astro pnpm lint       # Biome linting and checking
+docker compose exec astro pnpm format     # Biome formatting
 
 # Access shell in container
 make sh
@@ -87,8 +87,8 @@ docker compose exec astro pnpm 1
 ```
 
 This runs:
-1. Prettier formatting
-2. ESLint with auto-fix
+1. Biome formatting
+2. Biome linting and checking
 3. Astro type checking
 4. Build process
 

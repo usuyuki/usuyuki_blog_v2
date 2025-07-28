@@ -1,17 +1,19 @@
 ---
-import { ghostClient } from '~/libs/ghostClient';
+import { ghostClient } from "~/libs/ghostClient";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
 interface Props {
 	ulClass?: string;
 	liClass?: string;
 }
-const { ulClass = '', liClass = '' } = Astro.props;
+const { ulClass = "", liClass = "" } = Astro.props;
 
 const posts = await ghostClient.posts
 	.browse({
 		limit: 5,
-		order: 'published_at DESC'
+		order: "published_at DESC",
 	})
-	.catch((err: any) => {
+	.catch((err: Error) => {
 		console.error(err);
 	});
 ---
@@ -19,7 +21,7 @@ const posts = await ghostClient.posts
 {
 	posts && posts.length > 0 ? (
 		<ul class={ulClass}>
-			{posts.map((post: any) => (
+			{posts.map((post: ArticleArchiveType) => (
 				<li class={`text-lg my-2 ${liClass}`}>
 					<a href={`/${post.slug}`}>📰{post.title}</a>
 				</li>

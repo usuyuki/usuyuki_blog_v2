@@ -1,32 +1,33 @@
 ---
-import ArticleArchive from '~/components/molecule/articleArchive/MDArticleArchive.astro';
-import { SITE_URL } from '~/consts';
-import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
-import { ghostApiWithRetry } from '~/libs/ghostClient';
-import { isYear } from '~/libs/validation/isYear';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchive.astro";
+import { SITE_URL } from "~/consts";
+import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { isYear } from "~/libs/validation/isYear";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 //バリデーション
 const yearSlug = Number(Astro.params.year);
 //数字かつ整数かつ4桁であるか
 if (!isYear(yearSlug)) {
-	return Astro.redirect('/404');
+	return Astro.redirect("/404");
 }
 
 const posts = await ghostApiWithRetry.posts.browse({
 	filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
-	limit: 'all',
-	order: 'published_at ASC'
+	limit: "all",
+	order: "published_at ASC",
 });
 
 const postsData = {
-	posts: posts || []
+	posts: posts || [],
 };
 
 const headMeta: HeadMetaType = {
 	title: `${yearSlug}年の記事`,
 	slug: `/archive/${yearSlug}`,
 	description: `うすゆきブログ${yearSlug}年のアーカイブです`,
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

@@ -1,40 +1,41 @@
 ---
-import ArticleArchive from '~/components/molecule/articleArchive/YMDArticleArchive.astro';
-import TagList from '~/components/organism/tag/TagList.astro';
-import { SITE_URL } from '~/consts';
-import ArchiveLayout from '~/layouts/extends/ArchiveLayout.astro';
-import { ghostApiWithRetry } from '~/libs/ghostClient';
-import { isTag } from '~/libs/validation/isTag';
-import type { HeadMetaType } from '~/types/HeadMetaType';
+import ArticleArchive from "~/components/molecule/articleArchive/YMDArticleArchive.astro";
+import TagList from "~/components/organism/tag/TagList.astro";
+import { SITE_URL } from "~/consts";
+import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { isTag } from "~/libs/validation/isTag";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
 //バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
 if (!(tagSlug === undefined) && !isTag(tagSlug)) {
-	return Astro.redirect('/404');
+	return Astro.redirect("/404");
 }
 
 const posts = await ghostApiWithRetry.posts.browse({
 	filter: `tag:${tagSlug}`,
-	limit: 'all',
-	order: 'published_at DESC'
+	limit: "all",
+	order: "published_at DESC",
 });
 
 const tag = await ghostApiWithRetry.tags.read({
-	slug: tagSlug
+	slug: tagSlug,
 });
 
 if (!tag) {
-	return Astro.redirect('/404');
+	return Astro.redirect("/404");
 }
 
 const postsData = {
-	posts: posts || []
+	posts: posts || [],
 };
 
 const headMeta: HeadMetaType = {
 	title: `${tag.name}タグの記事一覧`,
 	slug: `/tag/${tagSlug}`,
 	description: tag.description ?? `うすゆきブログの${tag.name}タグの記事一覧です。`,
-	ogImage: SITE_URL + '/images/ogp/ogp.png'
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 
