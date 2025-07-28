@@ -5,7 +5,7 @@ import { ghostClient } from "~/libs/ghostClient";
 const today = new Date();
 const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
 // ここちゃんとする
-const formatDate = (date: any) => {
+const formatDate = (date: Date) => {
 	return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
 		date.getDate()
 	).padStart(2, "0")}`;
@@ -16,7 +16,7 @@ const posts = await ghostClient.posts
 		filter: `published_at:>='${formatDate(lastDay)}'`,
 		order: "published_at ASC",
 	})
-	.catch((err: any) => {
+	.catch((err: Error) => {
 		console.error(err);
 	});
 const postsData = {

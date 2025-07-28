@@ -32,7 +32,6 @@ body {
 	scroll-behavior: smooth !important;
 	background-color: var(--white);
 	color: var(--black);
-	color: var(--black);
 	tab-size: 4;
 	font-feature-settings: normal;
 	font-family:
@@ -46,10 +45,8 @@ body {
 		Roboto,
 		Helvetica Neue,
 		Arial,
-		Noto Sans,
 		"Apple Color Emoji",
 		"Segoe UI Emoji",
-		Segoe UI Symbol,
 		"Noto Color Emoji";
 }
 article {
@@ -79,10 +76,8 @@ h6 {
 		Roboto,
 		Helvetica Neue,
 		Arial,
-		Noto Sans,
 		"Apple Color Emoji",
 		"Segoe UI Emoji",
-		Segoe UI Symbol,
 		"Noto Color Emoji";
 }
 

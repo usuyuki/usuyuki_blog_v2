@@ -7,7 +7,7 @@ export async function GET() {
 		.browse({
 			limit: "all",
 		})
-		.catch((err: any) => {
+		.catch((err: Error) => {
 			console.error(err);
 		});
 

@@ -13,25 +13,32 @@
 		"indentStyle": "tab",
 		"lineWidth": 100
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"correctness": {
-				"noUnusedVariables": "off",
-				"noUnusedImports": "off"
-			},
-			"suspicious": {
-				"noExplicitAny": "off",
-				"noDuplicateFontNames": "off",
-				"noDuplicateProperties": "off"
-			},
-			"style": {
-				"noDescendingSpecificity": "off"
+	"assist": {
+		"actions": {
+			"source": {
+				"organizeImports": "on"
 			}
 		}
 	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.astro"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedImports": "off",
+						"noUnusedVariables": "off"
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double",

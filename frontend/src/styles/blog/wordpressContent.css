@@ -89,6 +89,6 @@ th {
 }
 
 /* blogCommonのaタグ青色の上書き */
-.toc_list a {
+#toc_container .toc_list a {
 	color: var(--black);
 }

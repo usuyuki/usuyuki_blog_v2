@@ -2,6 +2,27 @@
 // @ts-ignore
 import GhostContentAPI from "@tryghost/content-api";
 
+// Ghost API オプションの型定義
+interface GhostPostOptions {
+	slug?: string;
+	id?: string;
+	filter?: string;
+	limit?: number | "all";
+	order?: string;
+	include?: string;
+	fields?: string;
+}
+
+interface GhostTagOptions {
+	slug?: string;
+	id?: string;
+	filter?: string;
+	limit?: number | "all";
+	order?: string;
+	include?: string;
+	fields?: string;
+}
+
 // Create API instance with site credentials
 export const ghostClient = new GhostContentAPI({
 	url: import.meta.env.GHOST_API_URL || process.env.GHOST_API_URL,
@@ -12,7 +33,7 @@ export const ghostClient = new GhostContentAPI({
 // リトライ機能付きのGhost APIクライアント
 export const ghostApiWithRetry = {
 	posts: {
-		read: async (options: any, maxRetries = 3) => {
+		read: async (options: GhostPostOptions, maxRetries = 3) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.read(options);
@@ -26,7 +47,7 @@ export const ghostApiWithRetry = {
 				}
 			}
 		},
-		browse: async (options: any, maxRetries = 3) => {
+		browse: async (options: GhostPostOptions, maxRetries = 3) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.browse(options);
@@ -42,7 +63,7 @@ export const ghostApiWithRetry = {
 		},
 	},
 	tags: {
-		read: async (options: any, maxRetries = 3) => {
+		read: async (options: GhostTagOptions, maxRetries = 3) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.tags.read(options);
@@ -56,7 +77,7 @@ export const ghostApiWithRetry = {
 				}
 			}
 		},
-		browse: async (options: any, maxRetries = 3) => {
+		browse: async (options: GhostTagOptions, maxRetries = 3) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.tags.browse(options);
