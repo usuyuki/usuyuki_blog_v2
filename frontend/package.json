@@ -10,8 +10,8 @@
 		"preview": "astro preview",
 		"check": "astro check",
 		"astro": "astro",
-		"lint": "biome check ./src",
-		"format": "biome format --write ./src"
+		"lint": "biome lint .",
+		"format": "biome format --write ."
 	},
 	"dependencies": {
 		"@astrojs/node": "^9.3.0",

@@ -5,9 +5,7 @@
 	"trailingComma": "none",
 	"printWidth": 100,
 	"tabWidth": 4,
-	"plugins": [
-		"prettier-plugin-astro"
-	],
+	"plugins": ["prettier-plugin-astro"],
 	"overrides": [
 		{
 			"files": "*.astro",
