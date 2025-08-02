@@ -5,5 +5,7 @@
  * WordPress移行記事だと確実にid="toc_container"が入っているし、かなり最初に出てくるので一番これがまともな判定
  */
 export const judgeWpArticle = (htmlString: string): boolean => {
-	return htmlString.match(/<[^>]*id\s*=\s*(["']?)toc_container\1[^>]*>/g) !== null;
+	return (
+		htmlString.match(/<[^>]*id\s*=\s*(["']?)toc_container\1[^>]*>/g) !== null
+	);
 };
