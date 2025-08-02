@@ -15,25 +15,9 @@
 			"recommended": true
 		}
 	},
-	"assist": {
-		"actions": {
-			"source": {
-				"organizeImports": "on"
-			}
-		}
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"trailingCommas": "es5",
-			"semicolons": "always"
-		}
-	},
 	"overrides": [
 		{
-			"includes": [
-				"**/*.astro"
-			],
+			"includes": ["**/*.astro"],
 			"linter": {
 				"rules": {
 					"correctness": {

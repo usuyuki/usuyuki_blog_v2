@@ -41,7 +41,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					console.error(
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error
+						error,
 					);
 					if (i === maxRetries - 1) {
 						return null;
@@ -58,7 +58,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					console.error(
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error
+						error,
 					);
 					if (i === maxRetries - 1) {
 						return null;
@@ -77,7 +77,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					console.error(
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error
+						error,
 					);
 					if (i === maxRetries - 1) {
 						return null;
@@ -94,7 +94,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					console.error(
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error
+						error,
 					);
 					if (i === maxRetries - 1) {
 						return null;

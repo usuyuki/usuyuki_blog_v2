@@ -19,7 +19,7 @@ const posts = await ghostApiWithRetry.posts.browse({
 const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
 posts?.forEach((post: ArticleArchiveType) => {
 	const date = iso8601TimeToDate(
-		typeof post.published_at === "string" ? post.published_at : ""
+		typeof post.published_at === "string" ? post.published_at : "",
 	);
 	const monthKey = `${date.year}-${String(date.month).padStart(2, "0")}`;
 	if (!groupedPosts[monthKey]) {
@@ -33,7 +33,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 
 // 月キーを降順でソート
 const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
-	b.localeCompare(a)
+	b.localeCompare(a),
 );
 ---
 
