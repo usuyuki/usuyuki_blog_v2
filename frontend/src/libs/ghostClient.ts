@@ -39,7 +39,10 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.posts.read(options);
 					return result;
 				} catch (error) {
-					console.error(`Ghost API error (attempt ${i + 1}/${maxRetries}):`, error);
+					console.error(
+						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
+						error
+					);
 					if (i === maxRetries - 1) {
 						return null;
 					}
@@ -53,7 +56,10 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.posts.browse(options);
 					return result;
 				} catch (error) {
-					console.error(`Ghost API error (attempt ${i + 1}/${maxRetries}):`, error);
+					console.error(
+						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
+						error
+					);
 					if (i === maxRetries - 1) {
 						return null;
 					}
@@ -69,7 +75,10 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.tags.read(options);
 					return result;
 				} catch (error) {
-					console.error(`Ghost API error (attempt ${i + 1}/${maxRetries}):`, error);
+					console.error(
+						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
+						error
+					);
 					if (i === maxRetries - 1) {
 						return null;
 					}
@@ -83,7 +92,10 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.tags.browse(options);
 					return result;
 				} catch (error) {
-					console.error(`Ghost API error (attempt ${i + 1}/${maxRetries}):`, error);
+					console.error(
+						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
+						error
+					);
 					if (i === maxRetries - 1) {
 						return null;
 					}

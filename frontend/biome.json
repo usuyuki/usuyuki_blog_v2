@@ -2,16 +2,18 @@
 	"$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
 	"vcs": {
 		"enabled": true,
-		"clientKind": "git"
-	},
-	"files": {
-		"includes": ["**/src/**/*", "!**/dist/**/*", "!**/node_modules/**/*"]
+		"clientKind": "git",
+		"useIgnoreFile": true
 	},
 	"formatter": {
 		"enabled": true,
-		"formatWithErrors": false,
-		"indentStyle": "tab",
-		"lineWidth": 100
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true
+		}
 	},
 	"assist": {
 		"actions": {
@@ -20,15 +22,18 @@
 			}
 		}
 	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"trailingCommas": "es5",
+			"semicolons": "always"
 		}
 	},
 	"overrides": [
 		{
-			"includes": ["**/*.astro"],
+			"includes": [
+				"**/*.astro"
+			],
 			"linter": {
 				"rules": {
 					"correctness": {
@@ -38,12 +43,5 @@
 				}
 			}
 		}
-	],
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "double",
-			"trailingCommas": "es5",
-			"semicolons": "always"
-		}
-	}
+	]
 }
