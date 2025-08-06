@@ -79,6 +79,17 @@ The Ghost CMS connection requires:
 - `GHOST_API_URL` - Ghost CMS API endpoint
 - `GHOST_CONTENT_KEY` - Ghost CMS content API key
 
+For RSS integration from external blogs:
+- `EXTERNAL_BLOGS` - JSON array of external blog configurations
+  
+  Example:
+  ```json
+  [
+    {"name": "Example Blog", "rssUrl": "https://example.com/feed.xml"},
+    {"name": "Another Blog", "rssUrl": "https://anotherblog.com/rss"}
+  ]
+  ```
+
 ## Testing and Quality Assurance
 
 Always run the complete pipeline before committing:

@@ -36,6 +36,7 @@ services:
       NODE_ENV: production
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
       GHOST_API_URL: ${GHOST_API_URL}
+      EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
     user: "1000:1000"
     depends_on:
       - ghost
