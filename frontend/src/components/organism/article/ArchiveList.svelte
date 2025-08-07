@@ -3,8 +3,8 @@ import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import ArticleCard from "./ArticleCard.svelte";
 
 interface Props {
-  initialPosts: { [key: string]: ArticleArchiveType[] };
-  initialMonthKeys: string[];
+	initialPosts: { [key: string]: ArticleArchiveType[] };
+	initialMonthKeys: string[];
 }
 
 let { initialPosts = {}, initialMonthKeys = [] }: Props = $props();

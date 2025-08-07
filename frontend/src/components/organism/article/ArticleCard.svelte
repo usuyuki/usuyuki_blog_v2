@@ -2,7 +2,7 @@
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 interface Props {
-  post: ArticleArchiveType;
+	post: ArticleArchiveType;
 }
 
 let { post }: Props = $props();
