@@ -3,7 +3,7 @@
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
-		"1": "pnpm format && pnpm lint && pnpm check && pnpm build",
+		"1": "pnpm format && pnpm lint && pnpm check && pnpm test:run && pnpm build",
 		"dev": "astro dev",
 		"start": "astro dev",
 		"build": "astro build",
@@ -11,7 +11,10 @@
 		"check": "astro check",
 		"astro": "astro",
 		"lint": "biome lint .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"test:run": "vitest run"
 	},
 	"dependencies": {
 		"@astrojs/node": "^9.3.0",
@@ -30,7 +33,14 @@
 	"devDependencies": {
 		"@astrojs/check": "^0.9.4",
 		"@biomejs/biome": "^2.1.2",
+		"@sveltejs/vite-plugin-svelte": "^6.1.0",
+		"@testing-library/jest-dom": "^6.6.4",
+		"@testing-library/svelte": "^5.2.8",
+		"@vitest/ui": "^3.2.4",
+		"jsdom": "^26.1.0",
 		"postcss-html": "^1.8.0",
-		"typescript": "^5.9.2"
+		"typescript": "^5.9.2",
+		"vite": "^7.1.0",
+		"vitest": "^3.2.4"
 	}
 }
