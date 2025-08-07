@@ -1,7 +1,6 @@
 services:
   ghost:
     image: ghost:5-alpine
-    restart: always
     environment:
       # see https://ghost.org/docs/config/#configuration-options
       database__client: mysql
@@ -27,7 +26,6 @@ services:
       - ./frontend:/frontend
     ports:
       - "1000:1000"
-    restart: always
     stdin_open: true
     tty: true
     environment:
@@ -40,7 +38,6 @@ services:
 
   db:
     image: mysql:8.0
-    restart: always
     volumes:
       - db-store:/var/lib/mysql
     environment:
