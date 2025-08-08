@@ -28,7 +28,7 @@ async function loadMorePosts() {
 			const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
 
 			data.posts.forEach((post: ArticleArchiveType) => {
-				const date = new Date(post.published_at);
+				const date = new Date(post.published_at as string);
 				const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 				if (!groupedPosts[monthKey]) {
 					groupedPosts[monthKey] = [];
@@ -92,30 +92,31 @@ onMount(() => {
 </script>
 
 <div id="archive-content">
-  {#each monthKeys as monthKey}
-    {@const [year, month] = monthKey.split('-')}
-    {@const monthName = `${year}年${parseInt(month)}月`}
-    {@const monthPosts = posts[monthKey]}
-    
-    <section class="mb-12">
-      <h2 class="text-2xl font-bold mb-6 text-center text-green">{monthName}</h2>
-      <div class="flex flex-wrap items-stretch">
-        {#each monthPosts as post}
-          <ArticleCard {post} />
-        {/each}
-      </div>
-    </section>
-  {/each}
+	{#each monthKeys as monthKey}
+		{@const [year, month] = monthKey.split('-')}
+		{@const monthName = `${year}年${parseInt(month)}月`}
+		{@const monthPosts = posts[monthKey]}
+
+		<section class="mb-12">
+			<h2 class="text-2xl font-bold mb-6 text-center text-green">{monthName}</h2>
+			<div class="flex flex-wrap items-stretch">
+				{#each monthPosts as post}
+					<ArticleCard {post} />
+				{/each}
+			</div>
+		</section>
+	{/each}
 </div>
 
 {#if hasMorePosts}
-  <div class="py-8">
-    <button 
-      class="w-full px-8 py-4 bg-blue text-white rounded-lg hover:shadow-xl duration-300 disabled:opacity-50" 
-      onclick={loadMorePosts} 
-      disabled={isLoading}
-    >
-      {isLoading ? '読み込み中...' : 'もっと読み込む'}
-    </button>
-  </div>
+	<div class="py-8 text-center">
+		<button
+			class="px-4 py-4 bg-blue text-white rounded-lg hover:shadow-xl duration-300 disabled:opacity-50"
+			onclick={loadMorePosts}
+			disabled={isLoading}
+		>
+			{isLoading ? '読み込み中...' : 'もっと!!'}
+		</button>
+	</div>
 {/if}
+

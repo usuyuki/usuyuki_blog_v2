@@ -7,12 +7,15 @@ interface Props {
 
 let { post }: Props = $props();
 
-let date = $derived(new Date(post.published_at));
-let postDay = $derived(date.getDate());
+let postDay = $derived(
+	typeof post.published_at === "string"
+		? new Date(post.published_at).getDate()
+		: post.published_at.day,
+);
 </script>
 
 <div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
-  <a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/{post.slug}">
+  <a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/{post.slug}" data-astro-prefetch>
     <div class="flex justify-center items-center flex-col">
       <div class="relative z-10">
         <div class="relative">
@@ -29,13 +32,17 @@ let postDay = $derived(date.getDate());
             height="500" 
             class="object-cover w-40 h-40 rounded-md" 
             alt="記事サムネイル" 
-            loading="lazy" 
+            loading="lazy"
+            style="view-transition-name: image-{post.slug};"
           />
         {:else}
           <div class="aspect-square h-40 object-cover bg-gray-200 rounded-md"></div>
         {/if}
       </div>
-      <h3 class="text-xl text-black pt-2 text-wrap-balance text-center">
+      <h3 
+        class="text-xl text-black pt-2 text-wrap-balance text-center"
+        style="view-transition-name: title-{post.slug};"
+      >
         {post.title}
       </h3>
     </div>
