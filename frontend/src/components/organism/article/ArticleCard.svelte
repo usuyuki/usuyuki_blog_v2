@@ -15,7 +15,13 @@ let postDay = $derived(
 </script>
 
 <div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
-  <a class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" href="/{post.slug}" data-astro-prefetch>
+  <a 
+    class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" 
+    href={post.isExternal ? post.externalUrl : `/${post.slug}`}
+    target={post.isExternal ? "_blank" : "_self"}
+    rel={post.isExternal ? "noopener noreferrer" : undefined}
+    data-astro-prefetch={post.isExternal ? undefined : true}
+  >
     <div class="flex justify-center items-center flex-col">
       <div class="relative z-10">
         <div class="relative">
@@ -45,6 +51,11 @@ let postDay = $derived(
       >
         {post.title}
       </h3>
+      {#if post.source}
+        <div class="text-sm text-gray-500 mt-1">
+          {post.source}
+        </div>
+      {/if}
     </div>
   </a>
 </div>

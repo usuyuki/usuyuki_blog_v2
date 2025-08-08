@@ -1,33 +1,52 @@
 ---
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { ArticleAggregator } from "~/libs/articleAggregator";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import ArchiveList from "./ArchiveList.svelte";
 
-// 直近6ヶ月の記事を取得
+// 直近6ヶ月の記事を取得（Ghost記事とRSS記事を統合）
 const sixMonthsAgo = new Date();
 sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-const posts = await ghostApiWithRetry.posts.browse({
-	filter: `published_at:>='${sixMonthsAgo.toISOString()}'`,
-	limit: "all",
-	order: "published_at DESC",
+const allArticles = await ArticleAggregator.getLatestArticles({
+	limit: 100, // アーカイブページは多めに取得
+	includeExternal: true,
+});
+
+// 6ヶ月以内の記事をフィルタリング
+const recentArticles = allArticles.filter(article => {
+	const articleDate = new Date(article.published_at as string);
+	return articleDate >= sixMonthsAgo;
 });
 
 // 月ごとにグループ化
 const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
-posts?.forEach((post: ArticleArchiveType) => {
-	const date = iso8601TimeToDate(
-		typeof post.published_at === "string" ? post.published_at : "",
-	);
-	const monthKey = `${date.year}-${String(date.month).padStart(2, "0")}`;
+recentArticles.forEach((article: ArticleArchiveType) => {
+	let dateToUse: Date;
+	if (typeof article.published_at === "string") {
+		dateToUse = new Date(article.published_at);
+	} else {
+		// DateType format
+		dateToUse = new Date(
+			`${article.published_at.year}-${article.published_at.month.toString().padStart(2, '0')}-${article.published_at.day.toString().padStart(2, '0')}`
+		);
+	}
+	
+	const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, '0')}`;
 	if (!groupedPosts[monthKey]) {
 		groupedPosts[monthKey] = [];
 	}
-	groupedPosts[monthKey].push({
-		...post,
-		published_at: date,
-	});
+	
+	// Ghost記事は日付フォーマットを変換、外部記事はそのまま
+	if (article.isExternal) {
+		groupedPosts[monthKey].push(article);
+	} else {
+		const date = iso8601TimeToDate(article.published_at as string);
+		groupedPosts[monthKey].push({
+			...article,
+			published_at: date,
+		});
+	}
 });
 
 // 月キーを降順でソート

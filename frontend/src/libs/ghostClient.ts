@@ -55,8 +55,9 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 
 // エラーの型チェック関数
 function isRateLimitError(error: any): boolean {
-	return error?.type === 'TooManyRequestsError' || 
-		   error?.response?.status === 429;
+	return (
+		error?.type === "TooManyRequestsError" || error?.response?.status === 429
+	);
 }
 
 // リトライ機能付きのGhost APIクライアント
@@ -76,19 +77,21 @@ export const ghostApiWithRetry = {
 						return null;
 					}
 					// レート制限エラーの場合はさらに長めに待機
-					const waitTime = isRateLimitError(error) ? 30000 * (2 ** i) : 3000 * (2 ** i);
+					const waitTime = isRateLimitError(error)
+						? 30000 * 2 ** i
+						: 3000 * 2 ** i;
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
 		},
 		browse: async (options: GhostPostOptions, maxRetries = 1) => {
 			// キャッシュをチェック
-			const cacheKey = getCacheKey('posts.browse', options);
+			const cacheKey = getCacheKey("posts.browse", options);
 			const cached = getFromCache(cacheKey);
 			if (cached) {
 				return cached;
 			}
-			
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.browse(options);
@@ -100,18 +103,20 @@ export const ghostApiWithRetry = {
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
 						error.message,
 					);
-					
+
 					// レート制限エラーの場合は即座に諦める（フェールファスト）
 					if (isRateLimitError(error)) {
 						console.warn("Rate limit detected, skipping Ghost API calls");
 						return null;
 					}
-					
+
 					if (i === maxRetries - 1) {
 						return null;
 					}
 					// レート制限エラーの場合はさらに長めに待機
-					const waitTime = isRateLimitError(error) ? 30000 * (2 ** i) : 3000 * (2 ** i);
+					const waitTime = isRateLimitError(error)
+						? 30000 * 2 ** i
+						: 3000 * 2 ** i;
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -132,19 +137,21 @@ export const ghostApiWithRetry = {
 						return null;
 					}
 					// レート制限エラーの場合はさらに長めに待機
-					const waitTime = isRateLimitError(error) ? 30000 * (2 ** i) : 3000 * (2 ** i);
+					const waitTime = isRateLimitError(error)
+						? 30000 * 2 ** i
+						: 3000 * 2 ** i;
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
 		},
 		browse: async (options: GhostTagOptions, maxRetries = 3) => {
 			// キャッシュをチェック
-			const cacheKey = getCacheKey('tags.browse', options);
+			const cacheKey = getCacheKey("tags.browse", options);
 			const cached = getFromCache(cacheKey);
 			if (cached) {
 				return cached;
 			}
-			
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.tags.browse(options);
@@ -160,7 +167,9 @@ export const ghostApiWithRetry = {
 						return null;
 					}
 					// レート制限エラーの場合はさらに長めに待機
-					const waitTime = isRateLimitError(error) ? 30000 * (2 ** i) : 3000 * (2 ** i);
+					const waitTime = isRateLimitError(error)
+						? 30000 * 2 ** i
+						: 3000 * 2 ** i;
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}

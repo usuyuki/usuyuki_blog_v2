@@ -54,9 +54,15 @@ export class RSSClient {
 
 			// 日付の取得 (複数のフォーマットに対応)
 			const pubDate =
-				this.extractTextContent(this.getFirstElementByTagName(item, "pubDate")) ||
-				this.extractTextContent(this.getFirstElementByTagName(item, "dc:date")) ||
-				this.extractTextContent(this.getFirstElementByTagName(item, "published"));
+				this.extractTextContent(
+					this.getFirstElementByTagName(item, "pubDate"),
+				) ||
+				this.extractTextContent(
+					this.getFirstElementByTagName(item, "dc:date"),
+				) ||
+				this.extractTextContent(
+					this.getFirstElementByTagName(item, "published"),
+				);
 
 			return {
 				title,

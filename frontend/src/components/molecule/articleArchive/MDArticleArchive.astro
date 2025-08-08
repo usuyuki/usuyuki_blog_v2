@@ -8,9 +8,9 @@ interface Props {
 	posts: ArticleArchiveType[];
 }
 const { posts } = Astro.props;
-//日付の変換
+//日付の変換（外部記事は変換をスキップ）
 posts.map((post: ArticleArchiveType) => {
-	if (typeof post.published_at === "string") {
+	if (typeof post.published_at === "string" && !post.isExternal) {
 		post.published_at = iso8601TimeToDate(post.published_at);
 	}
 });
@@ -28,8 +28,12 @@ posts.map((post: ArticleArchiveType) => {
 				>
 					<div class="flex justify-center items-center flex-col">
 						<CircleMD
-							month={typeof post.published_at === 'string' ? 0 : post.published_at.month}
-							day={typeof post.published_at === 'string' ? 0 : post.published_at.day}
+							month={typeof post.published_at === 'string' 
+								? new Date(post.published_at).getMonth() + 1
+								: post.published_at.month}
+							day={typeof post.published_at === 'string' 
+								? new Date(post.published_at).getDate()
+								: post.published_at.day}
 							slug={post.slug}
 						/>
 						<div>

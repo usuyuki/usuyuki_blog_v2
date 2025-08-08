@@ -17,13 +17,16 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 				console.warn("Invalid blog config: not an object", blog);
 				return false;
 			}
-			
+
 			const blogObj = blog as Record<string, unknown>;
-			if (typeof blogObj.name !== "string" || typeof blogObj.rssUrl !== "string") {
+			if (
+				typeof blogObj.name !== "string" ||
+				typeof blogObj.rssUrl !== "string"
+			) {
 				console.warn("Invalid blog config: missing name or rssUrl", blog);
 				return false;
 			}
-			
+
 			return true;
 		});
 	} catch (error) {

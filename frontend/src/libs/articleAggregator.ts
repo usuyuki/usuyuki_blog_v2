@@ -42,7 +42,7 @@ export class ArticleAggregator {
 		try {
 			const ghostPosts = await ghostApiWithRetry.posts.browse({
 				order: "published_at DESC",
-				limit: Math.min(limit, 10), // さらに控えめに調整
+				limit: limit, // limitをそのまま使用してより多くのGhost記事を取得
 			});
 
 			if (ghostPosts) {
@@ -50,7 +50,10 @@ export class ArticleAggregator {
 				articles.push(...ghostArticles);
 			}
 		} catch (error) {
-			console.warn("Ghost posts unavailable (rate limit or error), showing RSS content only:", error.message);
+			console.warn(
+				"Ghost posts unavailable (rate limit or error), showing RSS content only:",
+				error.message,
+			);
 			// Ghost APIがレート制限の場合はRSSのみ表示
 		}
 
@@ -68,12 +71,25 @@ export class ArticleAggregator {
 		// 日付でソートして制限数まで取得
 		return articles
 			.sort((a, b) => {
-				const dateA = typeof a.published_at === 'string' 
-					? new Date(a.published_at).getTime() 
-					: new Date(`${a.published_at.year}-${a.published_at.month.toString().padStart(2, '0')}-${a.published_at.day.toString().padStart(2, '0')}`).getTime();
-				const dateB = typeof b.published_at === 'string' 
-					? new Date(b.published_at).getTime() 
-					: new Date(`${b.published_at.year}-${b.published_at.month.toString().padStart(2, '0')}-${b.published_at.day.toString().padStart(2, '0')}`).getTime();
+				let dateA: number;
+				let dateB: number;
+
+				if (typeof a.published_at === "string") {
+					dateA = new Date(a.published_at).getTime();
+				} else {
+					dateA = new Date(
+						`${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`,
+					).getTime();
+				}
+
+				if (typeof b.published_at === "string") {
+					dateB = new Date(b.published_at).getTime();
+				} else {
+					dateB = new Date(
+						`${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`,
+					).getTime();
+				}
+
 				return dateB - dateA; // 新しい順
 			})
 			.slice(0, limit);
