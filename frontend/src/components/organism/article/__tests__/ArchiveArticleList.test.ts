@@ -30,7 +30,7 @@ describe("ArchiveArticleList Integration Logic", () => {
 	};
 
 	const mockZennArticle: ArticleArchiveType = {
-		title: "Zenn Article", 
+		title: "Zenn Article",
 		slug: "https://zenn.dev/usuyuki/articles/456",
 		published_at: "2023-12-05T10:00:00.000Z",
 		source: "Zenn",
@@ -44,7 +44,9 @@ describe("ArchiveArticleList Integration Logic", () => {
 
 	it("should fetch articles including external RSS sources for archive", async () => {
 		const mockArticles = [mockGhostArticle, mockQiitaArticle, mockZennArticle];
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(mockArticles);
+		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
+			mockArticles,
+		);
 
 		// Test the logic that ArchiveArticleList should use
 		const articles = await ArticleAggregator.getLatestArticles({
@@ -58,17 +60,17 @@ describe("ArchiveArticleList Integration Logic", () => {
 		});
 
 		expect(articles).toHaveLength(3);
-		expect(articles.some(article => article.source === "Qiita")).toBe(true);
-		expect(articles.some(article => article.source === "Zenn")).toBe(true);
-		expect(articles.some(article => !article.isExternal)).toBe(true);
+		expect(articles.some((article) => article.source === "Qiita")).toBe(true);
+		expect(articles.some((article) => article.source === "Zenn")).toBe(true);
+		expect(articles.some((article) => !article.isExternal)).toBe(true);
 	});
 
 	it("should group articles by month including external articles", () => {
 		const articles = [mockGhostArticle, mockQiitaArticle, mockZennArticle];
-		
+
 		// Test the grouping logic that should be used in ArchiveArticleList
 		const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
-		
+
 		articles.forEach((article) => {
 			// For external articles, preserve the original date format
 			let dateToUse: Date;
@@ -77,39 +79,47 @@ describe("ArchiveArticleList Integration Logic", () => {
 			} else {
 				// Convert DateType to Date
 				dateToUse = new Date(
-					`${article.published_at.year}-${article.published_at.month.toString().padStart(2, '0')}-${article.published_at.day.toString().padStart(2, '0')}`
+					`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
 				);
 			}
-			
-			const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, '0')}`;
-			
+
+			const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, "0")}`;
+
 			if (!groupedPosts[monthKey]) {
 				groupedPosts[monthKey] = [];
 			}
-			
+
 			groupedPosts[monthKey].push({
 				...article,
 				// Don't modify the published_at for external articles
-				published_at: article.isExternal ? article.published_at : {
-					year: dateToUse.getFullYear(),
-					month: dateToUse.getMonth() + 1,
-					day: dateToUse.getDate(),
-				},
+				published_at: article.isExternal
+					? article.published_at
+					: {
+							year: dateToUse.getFullYear(),
+							month: dateToUse.getMonth() + 1,
+							day: dateToUse.getDate(),
+						},
 			});
 		});
 
 		expect(groupedPosts).toHaveProperty("2023-12");
 		expect(groupedPosts["2023-12"]).toHaveLength(3);
-		
+
 		// Check that external articles maintain their original format
-		const qiitaArticleInGroup = groupedPosts["2023-12"].find(a => a.source === "Qiita");
-		const zennArticleInGroup = groupedPosts["2023-12"].find(a => a.source === "Zenn");
-		const ghostArticleInGroup = groupedPosts["2023-12"].find(a => !a.isExternal);
-		
+		const qiitaArticleInGroup = groupedPosts["2023-12"].find(
+			(a) => a.source === "Qiita",
+		);
+		const zennArticleInGroup = groupedPosts["2023-12"].find(
+			(a) => a.source === "Zenn",
+		);
+		const ghostArticleInGroup = groupedPosts["2023-12"].find(
+			(a) => !a.isExternal,
+		);
+
 		expect(qiitaArticleInGroup?.isExternal).toBe(true);
 		expect(zennArticleInGroup?.isExternal).toBe(true);
 		expect(ghostArticleInGroup?.isExternal).toBe(false);
-		
+
 		// External articles should keep string dates, Ghost articles should be converted
 		expect(typeof qiitaArticleInGroup?.published_at).toBe("string");
 		expect(typeof zennArticleInGroup?.published_at).toBe("string");
@@ -123,8 +133,10 @@ describe("ArchiveArticleList Integration Logic", () => {
 			"2023-11": [mockZennArticle],
 		};
 
-		const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) => b.localeCompare(a));
-		
+		const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
+			b.localeCompare(a),
+		);
+
 		expect(sortedMonthKeys[0]).toBe("2023-12");
 		expect(sortedMonthKeys[1]).toBe("2023-11");
 		expect(sortedMonthKeys[2]).toBe("2023-10");
@@ -139,27 +151,27 @@ describe("ArchiveArticleList Integration Logic", () => {
 			{
 				...mockQiitaArticle,
 				published_at: "2023-12-10T10:00:00.000Z", // string format
-			}
+			},
 		];
 
 		const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
-		
+
 		mixedArticles.forEach((article) => {
 			let dateToUse: Date;
 			if (typeof article.published_at === "string") {
 				dateToUse = new Date(article.published_at);
 			} else {
 				dateToUse = new Date(
-					`${article.published_at.year}-${article.published_at.month.toString().padStart(2, '0')}-${article.published_at.day.toString().padStart(2, '0')}`
+					`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
 				);
 			}
-			
-			const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, '0')}`;
-			
+
+			const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, "0")}`;
+
 			if (!groupedPosts[monthKey]) {
 				groupedPosts[monthKey] = [];
 			}
-			
+
 			groupedPosts[monthKey].push(article);
 		});
 
@@ -176,16 +188,20 @@ describe("ArchiveArticleList Integration Logic", () => {
 				published_at: new Date().toISOString(), // Current date
 			},
 			{
-				...mockQiitaArticle, 
+				...mockQiitaArticle,
 				published_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
 			},
 			{
 				...mockZennArticle,
-				published_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(), // 1 week ago
-			}
+				published_at: new Date(
+					Date.now() - 1000 * 60 * 60 * 24 * 7,
+				).toISOString(), // 1 week ago
+			},
 		];
-		
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(recentMockArticles);
+
+		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
+			recentMockArticles,
+		);
 
 		// This simulates what the /api/archive endpoint should do
 		const startDate = new Date();
@@ -197,12 +213,12 @@ describe("ArchiveArticleList Integration Logic", () => {
 		});
 
 		// Filter by date range (this is what the API should do)
-		const filteredArticles = articles.filter(article => {
+		const filteredArticles = articles.filter((article) => {
 			const articleDate = new Date(article.published_at as string);
 			return articleDate >= startDate;
 		});
 
 		expect(filteredArticles.length).toBeGreaterThan(0);
-		expect(filteredArticles.some(article => article.isExternal)).toBe(true);
+		expect(filteredArticles.some((article) => article.isExternal)).toBe(true);
 	});
 });

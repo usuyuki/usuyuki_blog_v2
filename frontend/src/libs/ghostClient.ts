@@ -53,12 +53,29 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 	});
 }
 
+// 長期キャッシュ（1週間）
+function setLongTermCache<T>(key: string, data: T): void {
+	cache.set(`longterm_${key}`, {
+		data,
+		expiry: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1週間
+	});
+}
+
+function getLongTermCache<T>(key: string): T | null {
+	const cached = cache.get(`longterm_${key}`);
+	if (cached) {
+		return cached.data;
+	}
+	return null;
+}
+
 // エラーの型チェック関数
 function isRateLimitError(error: any): boolean {
 	return (
 		error?.type === "TooManyRequestsError" || error?.response?.status === 429
 	);
 }
+
 
 // リトライ機能付きのGhost APIクライアント
 export const ghostApiWithRetry = {
@@ -78,25 +95,32 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合はさらに長めに待機
 					const waitTime = isRateLimitError(error)
-						? 30000 * 2 ** i
-						: 3000 * 2 ** i;
+						? 5000 * (i + 1) // 5秒、10秒、15秒
+						: 1000 * (i + 1); // 1秒、2秒、3秒
+					console.log(`Waiting ${waitTime}ms before retry...`);
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
 		},
-		browse: async (options: GhostPostOptions, maxRetries = 1) => {
-			// キャッシュをチェック
+		browse: async (options: GhostPostOptions, maxRetries = 3) => {
+			// 通常キャッシュをチェック
 			const cacheKey = getCacheKey("posts.browse", options);
 			const cached = getFromCache(cacheKey);
 			if (cached) {
+				console.log("Returning cached Ghost data");
 				return cached;
 			}
 
+			// 長期キャッシュもチェック
+			const longTermCached = getLongTermCache(cacheKey);
+			
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.browse(options);
-					// 成功時にキャッシュに保存
-					setCache(cacheKey, result, 900000); // 15分間キャッシュ（レート制限対策）
+					// 成功時に通常と長期両方のキャッシュに保存
+					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
+					setLongTermCache(cacheKey, result); // 1週間キャッシュ
+					console.log(`Ghost API success: fetched ${result?.length || 0} posts`);
 					return result;
 				} catch (error) {
 					console.warn(
@@ -104,19 +128,35 @@ export const ghostApiWithRetry = {
 						error.message,
 					);
 
-					// レート制限エラーの場合は即座に諦める（フェールファスト）
+					// レート制限エラーの場合
 					if (isRateLimitError(error)) {
-						console.warn("Rate limit detected, skipping Ghost API calls");
-						return null;
+						console.warn("Rate limit detected");
+						if (i === maxRetries - 1) {
+							// 最後のリトライ失敗時は長期キャッシュを返す
+							if (longTermCached) {
+								console.warn("Rate limit: Returning long-term cached data");
+								return longTermCached;
+							} else {
+								console.warn("Rate limit: No cached data available");
+								return null;
+							}
+						}
 					}
 
 					if (i === maxRetries - 1) {
+						// 最後のリトライ失敗時は長期キャッシュを返す
+						if (longTermCached) {
+							console.warn("All retries exhausted: Returning long-term cached data");
+							return longTermCached;
+						}
 						return null;
 					}
-					// レート制限エラーの場合はさらに長めに待機
+					
+					// 待機時間を短くする（テスト環境では長すぎる）
 					const waitTime = isRateLimitError(error)
-						? 30000 * 2 ** i
-						: 3000 * 2 ** i;
+						? 2000 * (i + 1) // 2秒、4秒、6秒
+						: 1000 * (i + 1); // 1秒、2秒、3秒
+					console.log(`Waiting ${waitTime}ms before retry...`);
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -138,8 +178,9 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合はさらに長めに待機
 					const waitTime = isRateLimitError(error)
-						? 30000 * 2 ** i
-						: 3000 * 2 ** i;
+						? 5000 * (i + 1) // 5秒、10秒、15秒
+						: 1000 * (i + 1); // 1秒、2秒、3秒
+					console.log(`Waiting ${waitTime}ms before retry...`);
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -156,7 +197,7 @@ export const ghostApiWithRetry = {
 				try {
 					const result = await ghostClient.tags.browse(options);
 					// 成功時にキャッシュに保存
-					setCache(cacheKey, result, 900000); // 15分間キャッシュ（レート制限対策）
+					setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）
 					return result;
 				} catch (error) {
 					console.error(
@@ -168,8 +209,9 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合はさらに長めに待機
 					const waitTime = isRateLimitError(error)
-						? 30000 * 2 ** i
-						: 3000 * 2 ** i;
+						? 5000 * (i + 1) // 5秒、10秒、15秒
+						: 1000 * (i + 1); // 1秒、2秒、3秒
+					console.log(`Waiting ${waitTime}ms before retry...`);
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}

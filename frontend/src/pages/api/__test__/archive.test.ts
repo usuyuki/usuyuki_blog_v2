@@ -58,7 +58,7 @@ describe("Archive API", () => {
 				isExternal: false,
 			},
 			{
-				title: "Article 2", 
+				title: "Article 2",
 				published_at: "2025-06-01T00:00:00Z",
 				source: "Qiita",
 				isExternal: true,
@@ -71,9 +71,9 @@ describe("Archive API", () => {
 			{
 				title: "Article 4",
 				published_at: "2025-04-01T00:00:00Z",
-				source: "Zenn", 
+				source: "Zenn",
 				isExternal: true,
-			}
+			},
 		];
 
 		// Sort by date (newest first)
@@ -114,20 +114,20 @@ describe("Archive API", () => {
 				title: "Recent Qiita",
 				published_at: new Date().toISOString(), // Recent
 				isExternal: true,
-				source: "Qiita"
+				source: "Qiita",
 			},
 			{
 				title: "Old Zenn",
 				published_at: new Date(2020, 0, 1).toISOString(), // Very old
 				isExternal: true,
-				source: "Zenn"
-			}
+				source: "Zenn",
+			},
 		];
 
 		const sixMonthsAgo = new Date();
 		sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-		const recentArticles = testArticles.filter(article => {
+		const recentArticles = testArticles.filter((article) => {
 			const articleDate = new Date(article.published_at);
 			return articleDate >= sixMonthsAgo;
 		});

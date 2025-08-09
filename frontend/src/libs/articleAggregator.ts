@@ -1,11 +1,14 @@
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
-import type { RSSItem } from "~/types/RSSType";
+import type { RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { RSSClient } from "~/libs/rssClient";
 import { CONFIG } from "~/libs/config";
 
 export class ArticleAggregator {
-	private static convertRSSToArticle(rssItem: RSSItem): ArticleArchiveType {
+	private static convertRSSToArticle(
+		rssItem: RSSItem,
+		blogConfig?: ExternalBlogConfig,
+	): ArticleArchiveType {
 		return {
 			slug: rssItem.link, // RSS記事の場合はURLをslugとして使用
 			published_at: rssItem.published_at,
@@ -13,6 +16,7 @@ export class ArticleAggregator {
 			source: rssItem.source,
 			isExternal: true,
 			externalUrl: rssItem.link,
+			sourceColor: blogConfig?.color,
 		};
 	}
 
@@ -61,7 +65,12 @@ export class ArticleAggregator {
 		if (includeExternal && CONFIG.externalBlogs.length > 0) {
 			try {
 				const rssItems = await RSSClient.fetchMultipleRSS(CONFIG.externalBlogs);
-				const rssArticles = rssItems.map(this.convertRSSToArticle);
+				const rssArticles = rssItems.map((rssItem) => {
+					const blogConfig = CONFIG.externalBlogs.find(
+						(config) => config.name === rssItem.source,
+					);
+					return this.convertRSSToArticle(rssItem, blogConfig);
+				});
 				articles.push(...rssArticles);
 			} catch (error) {
 				console.error("Failed to fetch RSS posts:", error);

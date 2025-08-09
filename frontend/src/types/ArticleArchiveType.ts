@@ -12,4 +12,5 @@ export type ArticleArchiveType = {
 	source?: string; // RSS元のブログ名（Ghostの場合はundefined）
 	isExternal?: boolean; // 外部記事フラグ
 	externalUrl?: string; // 外部記事の場合のURL
+	sourceColor?: string; // 外部記事のサムネイル色
 };

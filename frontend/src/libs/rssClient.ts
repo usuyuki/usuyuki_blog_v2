@@ -101,11 +101,17 @@ export class RSSClient {
 				this.getFirstElementByTagName(entry, "title"),
 			);
 			const linkElement = this.getFirstElementByTagName(entry, "link");
-			const link = linkElement?.getAttribute("href") || "";
-			const summary = this.extractTextContent(
-				this.getFirstElementByTagName(entry, "summary") ||
-					this.getFirstElementByTagName(entry, "content"),
-			);
+			const urlElement = this.getFirstElementByTagName(entry, "url");
+			const link =
+				linkElement?.getAttribute("href") ||
+				this.extractTextContent(urlElement) ||
+				"";
+			const summaryElement = this.getFirstElementByTagName(entry, "summary");
+			const contentElement = this.getFirstElementByTagName(entry, "content");
+			const summary =
+				this.extractTextContent(summaryElement) ||
+				this.extractTextContent(contentElement) ||
+				"";
 			const authorElement = this.getFirstElementByTagName(entry, "author");
 			const author = this.extractTextContent(
 				this.getFirstElementByTagName(authorElement, "name"),

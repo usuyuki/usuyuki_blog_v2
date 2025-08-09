@@ -2,12 +2,13 @@ import type { APIRoute } from "astro";
 import { ArticleAggregator } from "~/libs/articleAggregator";
 
 export const GET: APIRoute = async ({ url }) => {
-	const offset = parseInt(url.searchParams.get("offset") || "0");
+	const beforeDate = url.searchParams.get("before");
+	const limit = parseInt(url.searchParams.get("limit") || "12");
 
 	try {
 		// ArticleAggregatorを使用してGhost記事とRSS記事を統合取得
 		const allArticles = await ArticleAggregator.getLatestArticles({
-			limit: 200, // アーカイブはより多くの記事を取得
+			limit: 500, // より多くの記事を取得
 			includeExternal: true,
 		});
 
@@ -18,26 +19,39 @@ export const GET: APIRoute = async ({ url }) => {
 			return dateB - dateA;
 		});
 
-		// ページネーションベースのアプローチ（6ヶ月単位ではなく記事数ベース）
-		const articlesPerPage = 12; // 1ページあたりの記事数
-		const startIndex = offset * articlesPerPage;
-		const endIndex = startIndex + articlesPerPage;
+		// beforeパラメータでフィルタリング
+		let filteredArticles = sortedArticles;
+		if (beforeDate) {
+			const beforeDateTime = new Date(beforeDate).getTime();
+			filteredArticles = sortedArticles.filter((article) => {
+				const articleTime = new Date(article.published_at as string).getTime();
+				return articleTime < beforeDateTime;
+			});
+		}
 
-		const paginatedPosts = sortedArticles.slice(startIndex, endIndex);
+		// 指定された件数だけ取得
+		const paginatedPosts = filteredArticles.slice(0, limit);
 
-		console.log(`Archive API: offset=${offset}, total=${sortedArticles.length}, returning ${paginatedPosts.length} articles (${startIndex}-${endIndex})`);
+		// 次のページがあるかチェック
+		const hasMore = filteredArticles.length > limit;
+		const nextBefore = hasMore && paginatedPosts.length > 0 
+			? paginatedPosts[paginatedPosts.length - 1].published_at
+			: null;
 
-		return new Response(JSON.stringify({ 
-			posts: paginatedPosts,
-			hasMore: endIndex < sortedArticles.length,
-			totalArticles: sortedArticles.length,
-			currentPage: Math.floor(offset / articlesPerPage)
-		}), {
-			status: 200,
-			headers: {
-				"Content-Type": "application/json",
+		return new Response(
+			JSON.stringify({
+				posts: paginatedPosts,
+				hasMore,
+				nextBefore,
+				totalArticles: allArticles.length,
+			}),
+			{
+				status: 200,
+				headers: {
+					"Content-Type": "application/json",
+				},
 			},
-		});
+		);
 	} catch (error) {
 		console.error("Archive API error:", error);
 		return new Response(JSON.stringify({ error: "Failed to fetch posts" }), {

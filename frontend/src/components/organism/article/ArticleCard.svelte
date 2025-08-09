@@ -41,6 +41,21 @@ let postDay = $derived(
             loading="lazy"
             style="view-transition-name: image-{post.slug};"
           />
+        {:else if post.isExternal && post.source}
+          {#if post.sourceColor && post.sourceColor.startsWith('#')}
+            <div 
+              class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg"
+              style="background-color: {post.sourceColor}"
+            >
+              <span>{post.source.slice(0, 4) || 'Blog'}</span>
+            </div>
+          {:else}
+            <div 
+              class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg {post.sourceColor || 'bg-gray-600'}"
+            >
+              <span>{post.source.slice(0, 4) || 'Blog'}</span>
+            </div>
+          {/if}
         {:else}
           <div class="aspect-square h-40 object-cover bg-gray-200 rounded-md"></div>
         {/if}

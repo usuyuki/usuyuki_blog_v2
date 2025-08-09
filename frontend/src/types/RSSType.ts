@@ -17,4 +17,5 @@ export type RSSFeed = {
 export type ExternalBlogConfig = {
 	name: string;
 	rssUrl: string;
+	color?: string; // Tailwind色クラス（例: "bg-green-500"）または16進数カラー（例: "#ffffff"）
 };
