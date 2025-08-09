@@ -1,24 +1,38 @@
 import type { APIRoute } from "astro";
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { ArticleAggregator } from "~/libs/articleAggregator";
 
 export const GET: APIRoute = async ({ url }) => {
 	const offset = parseInt(url.searchParams.get("offset") || "0");
 
-	// offset月前から6ヶ月分の記事を取得
-	const startDate = new Date();
-	startDate.setMonth(startDate.getMonth() - offset - 6);
-
-	const endDate = new Date();
-	endDate.setMonth(endDate.getMonth() - offset);
-
 	try {
-		const posts = await ghostApiWithRetry.posts.browse({
-			filter: `published_at:>='${startDate.toISOString()}'+published_at:<'${endDate.toISOString()}'`,
-			limit: "all",
-			order: "published_at DESC",
+		// ArticleAggregatorを使用してGhost記事とRSS記事を統合取得
+		const allArticles = await ArticleAggregator.getLatestArticles({
+			limit: 200, // アーカイブはより多くの記事を取得
+			includeExternal: true,
 		});
 
-		return new Response(JSON.stringify({ posts: posts || [] }), {
+		// 記事を日付順にソート（新しい順）
+		const sortedArticles = allArticles.sort((a, b) => {
+			const dateA = new Date(a.published_at as string).getTime();
+			const dateB = new Date(b.published_at as string).getTime();
+			return dateB - dateA;
+		});
+
+		// ページネーションベースのアプローチ（6ヶ月単位ではなく記事数ベース）
+		const articlesPerPage = 12; // 1ページあたりの記事数
+		const startIndex = offset * articlesPerPage;
+		const endIndex = startIndex + articlesPerPage;
+
+		const paginatedPosts = sortedArticles.slice(startIndex, endIndex);
+
+		console.log(`Archive API: offset=${offset}, total=${sortedArticles.length}, returning ${paginatedPosts.length} articles (${startIndex}-${endIndex})`);
+
+		return new Response(JSON.stringify({ 
+			posts: paginatedPosts,
+			hasMore: endIndex < sortedArticles.length,
+			totalArticles: sortedArticles.length,
+			currentPage: Math.floor(offset / articlesPerPage)
+		}), {
 			status: 200,
 			headers: {
 				"Content-Type": "application/json",

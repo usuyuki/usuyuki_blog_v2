@@ -9,4 +9,7 @@ export type ArticleArchiveType = {
 	published_at: string | DateType;
 	feature_image?: string;
 	title: string;
+	source?: string; // RSS元のブログ名（Ghostの場合はundefined）
+	isExternal?: boolean; // 外部記事フラグ
+	externalUrl?: string; // 外部記事の場合のURL
 };
