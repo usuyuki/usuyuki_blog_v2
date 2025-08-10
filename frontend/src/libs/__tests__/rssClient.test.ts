@@ -8,10 +8,27 @@ vi.mock("xmldom", () => ({
 	})),
 }));
 
+// Mock cache module
+vi.mock("~/libs/cache", () => {
+	const mockCache = {
+		get: vi.fn(),
+		set: vi.fn(),
+		clear: vi.fn(),
+		delete: vi.fn(),
+		cleanup: vi.fn(),
+	};
+
+	return {
+		cache: mockCache,
+		ONE_HOUR_MS: 60 * 60 * 1000,
+	};
+});
+
 // Mock fetch
 global.fetch = vi.fn();
 
 import { fetchRSS, fetchMultipleRSS } from "../rssClient";
+import { cache } from "../cache";
 
 describe("RSSClient", () => {
 	const mockConfig: ExternalBlogConfig = {
@@ -37,6 +54,8 @@ describe("RSSClient", () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Reset cache mock to return null by default (cache miss)
+		vi.mocked(cache.get).mockReturnValue(null);
 	});
 
 	describe("fetchRSS", () => {

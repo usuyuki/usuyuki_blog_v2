@@ -1,4 +1,5 @@
 import type { RSSFeed, RSSItem, ExternalBlogConfig } from "~/types/RSSType";
+import { cache, ONE_HOUR_MS } from "~/libs/cache";
 // @ts-ignore
 import { DOMParser } from "xmldom";
 
@@ -130,6 +131,14 @@ function parseAtomFeed(xmlDoc: Document, sourceName: string): RSSFeed {
 export async function fetchRSS(
 	config: ExternalBlogConfig,
 ): Promise<RSSFeed | null> {
+	const cacheKey = `rss:${config.rssUrl}`;
+
+	// キャッシュから取得を試行
+	const cachedFeed = cache.get<RSSFeed>(cacheKey);
+	if (cachedFeed) {
+		return cachedFeed;
+	}
+
 	try {
 		const response = await fetch(config.rssUrl, {
 			headers: {
@@ -157,20 +166,31 @@ export async function fetchRSS(
 			return null;
 		}
 
+		let feed: RSSFeed | null = null;
+
 		// RSS 2.0 または RSS 1.0 の場合
 		const rssElements = getElementsByTagName(xmlDoc, "rss");
 		const rdfElements = getElementsByTagName(xmlDoc, "rdf:RDF");
 		if (rssElements.length > 0 || rdfElements.length > 0) {
-			return parseRSSFeed(xmlDoc, config.name);
+			feed = parseRSSFeed(xmlDoc, config.name);
 		}
 		// Atom フィードの場合
-		const feedElements = getElementsByTagName(xmlDoc, "feed");
-		if (feedElements.length > 0) {
-			return parseAtomFeed(xmlDoc, config.name);
-		} else {
-			console.error(`Unknown feed format for ${config.name}`);
-			return null;
+		else {
+			const feedElements = getElementsByTagName(xmlDoc, "feed");
+			if (feedElements.length > 0) {
+				feed = parseAtomFeed(xmlDoc, config.name);
+			} else {
+				console.error(`Unknown feed format for ${config.name}`);
+				return null;
+			}
 		}
+
+		// 成功した場合はキャッシュに保存
+		if (feed) {
+			cache.set(cacheKey, feed, ONE_HOUR_MS);
+		}
+
+		return feed;
 	} catch (error) {
 		console.error(`RSS fetch error for ${config.name}:`, error);
 		return null;

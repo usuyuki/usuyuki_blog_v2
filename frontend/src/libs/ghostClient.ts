@@ -40,9 +40,15 @@ function getCacheKey(method: string, options: unknown): string {
 function getFromCache<T>(key: string): T | null {
 	const cached = cache.get(key);
 	if (cached && cached.expiry > Date.now()) {
+		console.log(`[Cache HIT] Key: ghost:${key}`);
 		return cached.data as T;
 	}
-	cache.delete(key); // 期限切れのキャッシュを削除
+	if (cached) {
+		cache.delete(key); // 期限切れのキャッシュを削除
+		console.log(`[Cache EXPIRED] Key: ghost:${key}`);
+	} else {
+		console.log(`[Cache MISS] Key: ghost:${key}`);
+	}
 	return null;
 }
 
@@ -51,21 +57,27 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 		data,
 		expiry: Date.now() + ttlMs,
 	});
+	console.log(`[Cache SET] Key: ghost:${key}, TTL: ${ttlMs}ms`);
 }
 
 // 長期キャッシュ（1週間）
 function setLongTermCache<T>(key: string, data: T): void {
-	cache.set(`longterm_${key}`, {
+	const longTermKey = `longterm_${key}`;
+	cache.set(longTermKey, {
 		data,
 		expiry: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1週間
 	});
+	console.log(`[Cache SET] Key: ghost:${longTermKey}, TTL: 604800000ms`);
 }
 
 function getLongTermCache<T>(key: string): T | null {
-	const cached = cache.get(`longterm_${key}`);
+	const longTermKey = `longterm_${key}`;
+	const cached = cache.get(longTermKey);
 	if (cached) {
+		console.log(`[Cache HIT] Key: ghost:${longTermKey} (long-term)`);
 		return cached.data as T;
 	}
+	console.log(`[Cache MISS] Key: ghost:${longTermKey} (long-term)`);
 	return null;
 }
 
@@ -105,7 +117,6 @@ export const ghostApiWithRetry = {
 			const cacheKey = getCacheKey("posts.browse", options);
 			const cached = getFromCache(cacheKey);
 			if (cached) {
-				console.log("Returning cached Ghost data");
 				return cached;
 			}
 

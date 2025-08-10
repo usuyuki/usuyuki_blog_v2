@@ -1,16 +1,27 @@
 import type { APIRoute } from "astro";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import { getLatestArticles } from "~/libs/articleAggregator";
+import { cache, ONE_HOUR_MS } from "~/libs/cache";
 
 export const GET: APIRoute = async ({ url }) => {
 	const beforeDate = url.searchParams.get("before");
 	const limit = parseInt(url.searchParams.get("limit") || "12");
 
 	try {
-		// getLatestArticles関数を使用してGhost記事とRSS記事を統合取得
-		const allArticles = await getLatestArticles({
-			limit: 500, // より多くの記事を取得
-			includeExternal: true,
-		});
+		const cacheKey = "archive:all-articles";
+
+		// キャッシュから全記事を取得を試行
+		let allArticles = cache.get<ArticleArchiveType[]>(cacheKey);
+		if (!allArticles) {
+			// getLatestArticles関数を使用してGhost記事とRSS記事を統合取得
+			allArticles = await getLatestArticles({
+				limit: 500, // より多くの記事を取得
+				includeExternal: true,
+			});
+
+			// キャッシュに保存
+			cache.set(cacheKey, allArticles, ONE_HOUR_MS);
+		}
 
 		// 記事を日付順にソート（新しい順）
 		const sortedArticles = allArticles.sort((a, b) => {

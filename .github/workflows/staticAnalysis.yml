@@ -1,4 +1,4 @@
-name: 静的解析 (astro-check)
+name: Frontend 静的解析 (astro-check)
 
 on:
   pull_request:
