@@ -11,7 +11,7 @@ vi.mock("xmldom", () => ({
 // Mock fetch
 global.fetch = vi.fn();
 
-import { RSSClient } from "../rssClient";
+import { fetchRSS, fetchMultipleRSS } from "../rssClient";
 
 describe("RSSClient", () => {
 	const mockConfig: ExternalBlogConfig = {
@@ -34,22 +34,6 @@ describe("RSSClient", () => {
 		</item>
 	</channel>
 </rss>`;
-
-	const mockAtomXML = `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-	<title>Test Atom Feed</title>
-	<link href="https://example.com" />
-	<subtitle>Test Atom Feed Description</subtitle>
-	<entry>
-		<title>Test Atom Article</title>
-		<link href="https://example.com/atom-article" />
-		<summary>Test atom article summary</summary>
-		<author>
-			<name>Test Atom Author</name>
-		</author>
-		<published>2023-12-15T10:00:00Z</published>
-	</entry>
-</feed>`;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -109,7 +93,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchRSS(mockConfig);
+			const result = await fetchRSS(mockConfig);
 
 			expect(global.fetch).toHaveBeenCalledWith(
 				mockConfig.rssUrl,
@@ -134,7 +118,7 @@ describe("RSSClient", () => {
 				statusText: "Not Found",
 			} as Response);
 
-			const result = await RSSClient.fetchRSS(mockConfig);
+			const result = await fetchRSS(mockConfig);
 
 			expect(result).toBeNull();
 		});
@@ -142,7 +126,7 @@ describe("RSSClient", () => {
 		it("should handle network errors gracefully", async () => {
 			vi.mocked(global.fetch).mockRejectedValue(new Error("Network error"));
 
-			const result = await RSSClient.fetchRSS(mockConfig);
+			const result = await fetchRSS(mockConfig);
 
 			expect(result).toBeNull();
 		});
@@ -168,7 +152,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchRSS(mockConfig);
+			const result = await fetchRSS(mockConfig);
 
 			expect(result).toBeNull();
 		});
@@ -196,7 +180,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchRSS(mockConfig);
+			const result = await fetchRSS(mockConfig);
 
 			expect(result).toBeNull();
 		});
@@ -266,7 +250,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchMultipleRSS(configs);
+			const result = await fetchMultipleRSS(configs);
 
 			expect(result).toHaveLength(2);
 			expect(result[0].source).toBe("Blog 1");
@@ -336,7 +320,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchMultipleRSS(configs);
+			const result = await fetchMultipleRSS(configs);
 
 			// Should still return successful feed
 			expect(result).toHaveLength(1);
@@ -414,7 +398,7 @@ describe("RSSClient", () => {
 			const { DOMParser } = await import("xmldom");
 			vi.mocked(DOMParser).mockImplementation(() => mockParser);
 
-			const result = await RSSClient.fetchMultipleRSS(configs);
+			const result = await fetchMultipleRSS(configs);
 
 			expect(result).toHaveLength(2);
 			expect(result[0].title).toBe("Newer Article"); // Should be first (newer date)
@@ -422,7 +406,7 @@ describe("RSSClient", () => {
 		});
 
 		it("should handle empty configs array", async () => {
-			const result = await RSSClient.fetchMultipleRSS([]);
+			const result = await fetchMultipleRSS([]);
 
 			expect(result).toHaveLength(0);
 		});

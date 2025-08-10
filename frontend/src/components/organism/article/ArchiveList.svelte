@@ -8,7 +8,11 @@ interface Props {
 	initialNextBefore?: string | null;
 }
 
-let { initialPosts = {}, initialMonthKeys = [], initialNextBefore = null }: Props = $props();
+let {
+	initialPosts = {},
+	initialMonthKeys = [],
+	initialNextBefore = null,
+}: Props = $props();
 
 let posts = $state(initialPosts);
 let monthKeys = $state([...initialMonthKeys]);
@@ -26,9 +30,9 @@ async function loadMorePosts() {
 
 	try {
 		// beforeパラメータで日付ベースのページネーション
-		const url = nextBefore 
+		const url = nextBefore
 			? `/api/archive?before=${encodeURIComponent(nextBefore)}&limit=12`
-			: '/api/archive?limit=12';
+			: "/api/archive?limit=12";
 		const response = await fetch(url);
 		const data = await response.json();
 

@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-// Mock ArticleAggregator since the API should use it for RSS integration
+// Mock articleAggregator since the API should use it for RSS integration
 vi.mock("~/libs/articleAggregator", () => ({
-	ArticleAggregator: {
-		getLatestArticles: vi.fn(),
-	},
+	getLatestArticles: vi.fn(),
 }));
 
 describe("Archive API", () => {

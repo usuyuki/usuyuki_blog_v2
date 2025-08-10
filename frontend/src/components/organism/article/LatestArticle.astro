@@ -1,8 +1,8 @@
 ---
 import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchive.astro";
-import { ArticleAggregator } from "~/libs/articleAggregator";
+import { getLatestArticles } from "~/libs/articleAggregator";
 
-const articles = await ArticleAggregator.getLatestArticles({
+const articles = await getLatestArticles({
 	limit: 10,
 	includeExternal: true,
 });

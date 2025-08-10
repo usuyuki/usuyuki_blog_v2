@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import type { RSSItem } from "~/types/RSSType";
 
 // Mock the dependencies
@@ -12,9 +11,7 @@ vi.mock("~/libs/ghostClient", () => ({
 }));
 
 vi.mock("~/libs/rssClient", () => ({
-	RSSClient: {
-		fetchMultipleRSS: vi.fn(),
-	},
+	fetchMultipleRSS: vi.fn(),
 }));
 
 vi.mock("~/libs/config", () => ({
@@ -25,9 +22,9 @@ vi.mock("~/libs/config", () => ({
 	},
 }));
 
-import { ArticleAggregator } from "../articleAggregator";
+import { getLatestArticles, getFeaturedArticles } from "../articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
-import { RSSClient } from "~/libs/rssClient";
+import { fetchMultipleRSS } from "~/libs/rssClient";
 
 describe("ArticleAggregator", () => {
 	const mockGhostPost = {
@@ -56,9 +53,9 @@ describe("ArticleAggregator", () => {
 			]);
 
 			// Mock RSS Client response
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -82,9 +79,9 @@ describe("ArticleAggregator", () => {
 			);
 
 			// Mock RSS Client response
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -99,14 +96,14 @@ describe("ArticleAggregator", () => {
 				mockGhostPost,
 			]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: false,
 			});
 
 			expect(articles).toHaveLength(1);
 			expect(articles[0].isExternal).toBe(false);
-			expect(vi.mocked(RSSClient.fetchMultipleRSS)).not.toHaveBeenCalled();
+			expect(vi.mocked(fetchMultipleRSS)).not.toHaveBeenCalled();
 		});
 
 		it("should sort articles by published date (newest first)", async () => {
@@ -125,9 +122,9 @@ describe("ArticleAggregator", () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
 				olderGhostPost,
 			]);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([newerRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([newerRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -144,9 +141,9 @@ describe("ArticleAggregator", () => {
 			}));
 
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue(ghostPosts);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 3,
 				includeExternal: true,
 			});
@@ -156,9 +153,9 @@ describe("ArticleAggregator", () => {
 
 		it("should convert RSS items to articles correctly", async () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -176,9 +173,9 @@ describe("ArticleAggregator", () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
 				mockGhostPost,
 			]);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: false,
 			});
@@ -208,9 +205,9 @@ describe("ArticleAggregator", () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
 				oldGhostPost,
 			]);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([newRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([newRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -241,9 +238,9 @@ describe("ArticleAggregator", () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
 				invalidDateGhostPost,
 			]);
-			vi.mocked(RSSClient.fetchMultipleRSS).mockResolvedValue([validRSSItem]);
+			vi.mocked(fetchMultipleRSS).mockResolvedValue([validRSSItem]);
 
-			const articles = await ArticleAggregator.getLatestArticles({
+			const articles = await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -268,7 +265,7 @@ describe("ArticleAggregator", () => {
 				featuredPost,
 			]);
 
-			const articles = await ArticleAggregator.getFeaturedArticles({
+			const articles = await getFeaturedArticles({
 				limit: 5,
 			});
 
@@ -288,7 +285,7 @@ describe("ArticleAggregator", () => {
 				new Error("API Error"),
 			);
 
-			const articles = await ArticleAggregator.getFeaturedArticles({
+			const articles = await getFeaturedArticles({
 				limit: 5,
 			});
 
@@ -298,7 +295,7 @@ describe("ArticleAggregator", () => {
 		it("should return empty array when no featured posts", async () => {
 			vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
 
-			const articles = await ArticleAggregator.getFeaturedArticles({
+			const articles = await getFeaturedArticles({
 				limit: 5,
 			});
 

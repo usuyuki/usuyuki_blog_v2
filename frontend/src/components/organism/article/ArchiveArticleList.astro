@@ -1,11 +1,11 @@
 ---
-import { ArticleAggregator } from "~/libs/articleAggregator";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import ArchiveList from "./ArchiveList.svelte";
 
 // 全ての記事を取得（Ghost記事とRSS記事を統合）
-const allArticles = await ArticleAggregator.getLatestArticles({
+const allArticles = await getLatestArticles({
 	limit: 200, // より多くの記事を取得
 	includeExternal: true,
 });
@@ -56,9 +56,10 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
 );
 
 // 次のページのための基準日付を計算
-const nextBefore = firstPageArticles.length > 0 
-	? firstPageArticles[firstPageArticles.length - 1].published_at 
-	: null;
+const nextBefore =
+	firstPageArticles.length > 0
+		? firstPageArticles[firstPageArticles.length - 1].published_at
+		: null;
 ---
 
 <div class="container mx-auto px-4">

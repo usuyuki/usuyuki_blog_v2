@@ -31,16 +31,16 @@ export const ghostClient = new GhostContentAPI({
 });
 
 // キャッシュ用のシンプルなメモリストア
-const cache = new Map<string, { data: any; expiry: number }>();
+const cache = new Map<string, { data: unknown; expiry: number }>();
 
-function getCacheKey(method: string, options: any): string {
+function getCacheKey(method: string, options: unknown): string {
 	return `${method}-${JSON.stringify(options)}`;
 }
 
 function getFromCache<T>(key: string): T | null {
 	const cached = cache.get(key);
 	if (cached && cached.expiry > Date.now()) {
-		return cached.data;
+		return cached.data as T;
 	}
 	cache.delete(key); // 期限切れのキャッシュを削除
 	return null;
@@ -64,18 +64,16 @@ function setLongTermCache<T>(key: string, data: T): void {
 function getLongTermCache<T>(key: string): T | null {
 	const cached = cache.get(`longterm_${key}`);
 	if (cached) {
-		return cached.data;
+		return cached.data as T;
 	}
 	return null;
 }
 
 // エラーの型チェック関数
-function isRateLimitError(error: any): boolean {
-	return (
-		error?.type === "TooManyRequestsError" || error?.response?.status === 429
-	);
+function isRateLimitError(error: unknown): boolean {
+	const err = error as { type?: string; response?: { status?: number } };
+	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
-
 
 // リトライ機能付きのGhost APIクライアント
 export const ghostApiWithRetry = {
@@ -113,19 +111,21 @@ export const ghostApiWithRetry = {
 
 			// 長期キャッシュもチェック
 			const longTermCached = getLongTermCache(cacheKey);
-			
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.browse(options);
 					// 成功時に通常と長期両方のキャッシュに保存
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
 					setLongTermCache(cacheKey, result); // 1週間キャッシュ
-					console.log(`Ghost API success: fetched ${result?.length || 0} posts`);
+					console.log(
+						`Ghost API success: fetched ${result?.length || 0} posts`,
+					);
 					return result;
 				} catch (error) {
 					console.warn(
 						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error.message,
+						(error as Error).message,
 					);
 
 					// レート制限エラーの場合
@@ -146,12 +146,14 @@ export const ghostApiWithRetry = {
 					if (i === maxRetries - 1) {
 						// 最後のリトライ失敗時は長期キャッシュを返す
 						if (longTermCached) {
-							console.warn("All retries exhausted: Returning long-term cached data");
+							console.warn(
+								"All retries exhausted: Returning long-term cached data",
+							);
 							return longTermCached;
 						}
 						return null;
 					}
-					
+
 					// 待機時間を短くする（テスト環境では長すぎる）
 					const waitTime = isRateLimitError(error)
 						? 2000 * (i + 1) // 2秒、4秒、6秒

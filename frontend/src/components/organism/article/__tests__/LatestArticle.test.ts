@@ -3,12 +3,10 @@ import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 // Mock the ArticleAggregator
 vi.mock("~/libs/articleAggregator", () => ({
-	ArticleAggregator: {
-		getLatestArticles: vi.fn(),
-	},
+	getLatestArticles: vi.fn(),
 }));
 
-import { ArticleAggregator } from "~/libs/articleAggregator";
+import { getLatestArticles } from "~/libs/articleAggregator";
 
 describe("LatestArticle Component Logic", () => {
 	const mockArticles: ArticleArchiveType[] = [
@@ -33,18 +31,16 @@ describe("LatestArticle Component Logic", () => {
 		vi.clearAllMocks();
 	});
 
-	it("should call ArticleAggregator.getLatestArticles with correct parameters", async () => {
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
-			mockArticles,
-		);
+	it("should call getLatestArticles with correct parameters", async () => {
+		vi.mocked(getLatestArticles).mockResolvedValue(mockArticles);
 
 		// Simulate the component's data fetching logic
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 10,
 			includeExternal: true,
 		});
 
-		expect(ArticleAggregator.getLatestArticles).toHaveBeenCalledWith({
+		expect(getLatestArticles).toHaveBeenCalledWith({
 			limit: 10,
 			includeExternal: true,
 		});
@@ -52,11 +48,9 @@ describe("LatestArticle Component Logic", () => {
 	});
 
 	it("should handle the posts data structure correctly", async () => {
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
-			mockArticles,
-		);
+		vi.mocked(getLatestArticles).mockResolvedValue(mockArticles);
 
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 10,
 			includeExternal: true,
 		});
@@ -74,9 +68,9 @@ describe("LatestArticle Component Logic", () => {
 	});
 
 	it("should handle empty articles array", async () => {
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue([]);
+		vi.mocked(getLatestArticles).mockResolvedValue([]);
 
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 10,
 			includeExternal: true,
 		});
@@ -89,13 +83,13 @@ describe("LatestArticle Component Logic", () => {
 	});
 
 	it("should handle ArticleAggregator errors gracefully", async () => {
-		vi.mocked(ArticleAggregator.getLatestArticles).mockRejectedValue(
+		vi.mocked(getLatestArticles).mockRejectedValue(
 			new Error("Failed to fetch articles"),
 		);
 
 		let error: Error | null = null;
 		try {
-			await ArticleAggregator.getLatestArticles({
+			await getLatestArticles({
 				limit: 10,
 				includeExternal: true,
 			});
@@ -136,11 +130,9 @@ describe("LatestArticle Component Logic", () => {
 			return dateB - dateA; // newest first
 		});
 
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
-			sortedArticles,
-		);
+		vi.mocked(getLatestArticles).mockResolvedValue(sortedArticles);
 
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 10,
 			includeExternal: true,
 		});

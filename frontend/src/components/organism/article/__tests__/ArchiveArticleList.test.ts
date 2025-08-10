@@ -2,13 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 // Mock the ArticleAggregator to test the expected integration
 vi.mock("~/libs/articleAggregator", () => ({
-	ArticleAggregator: {
-		getLatestArticles: vi.fn(),
-	},
+	getLatestArticles: vi.fn(),
 }));
 
 // We can't actually test the Astro component directly, so we test the logic that should be used
-import { ArticleAggregator } from "~/libs/articleAggregator";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 describe("ArchiveArticleList Integration Logic", () => {
@@ -44,17 +42,15 @@ describe("ArchiveArticleList Integration Logic", () => {
 
 	it("should fetch articles including external RSS sources for archive", async () => {
 		const mockArticles = [mockGhostArticle, mockQiitaArticle, mockZennArticle];
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
-			mockArticles,
-		);
+		vi.mocked(getLatestArticles).mockResolvedValue(mockArticles);
 
 		// Test the logic that ArchiveArticleList should use
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 100, // Archive should show more articles than top page
 			includeExternal: true,
 		});
 
-		expect(ArticleAggregator.getLatestArticles).toHaveBeenCalledWith({
+		expect(getLatestArticles).toHaveBeenCalledWith({
 			limit: 100,
 			includeExternal: true,
 		});
@@ -199,15 +195,13 @@ describe("ArchiveArticleList Integration Logic", () => {
 			},
 		];
 
-		vi.mocked(ArticleAggregator.getLatestArticles).mockResolvedValue(
-			recentMockArticles,
-		);
+		vi.mocked(getLatestArticles).mockResolvedValue(recentMockArticles);
 
 		// This simulates what the /api/archive endpoint should do
 		const startDate = new Date();
 		startDate.setMonth(startDate.getMonth() - 6);
 
-		const articles = await ArticleAggregator.getLatestArticles({
+		const articles = await getLatestArticles({
 			limit: 200, // Archive API should return more articles
 			includeExternal: true,
 		});

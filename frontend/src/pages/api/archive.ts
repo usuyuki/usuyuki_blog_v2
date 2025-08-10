@@ -1,13 +1,13 @@
 import type { APIRoute } from "astro";
-import { ArticleAggregator } from "~/libs/articleAggregator";
+import { getLatestArticles } from "~/libs/articleAggregator";
 
 export const GET: APIRoute = async ({ url }) => {
 	const beforeDate = url.searchParams.get("before");
 	const limit = parseInt(url.searchParams.get("limit") || "12");
 
 	try {
-		// ArticleAggregatorを使用してGhost記事とRSS記事を統合取得
-		const allArticles = await ArticleAggregator.getLatestArticles({
+		// getLatestArticles関数を使用してGhost記事とRSS記事を統合取得
+		const allArticles = await getLatestArticles({
 			limit: 500, // より多くの記事を取得
 			includeExternal: true,
 		});
@@ -34,9 +34,10 @@ export const GET: APIRoute = async ({ url }) => {
 
 		// 次のページがあるかチェック
 		const hasMore = filteredArticles.length > limit;
-		const nextBefore = hasMore && paginatedPosts.length > 0 
-			? paginatedPosts[paginatedPosts.length - 1].published_at
-			: null;
+		const nextBefore =
+			hasMore && paginatedPosts.length > 0
+				? paginatedPosts[paginatedPosts.length - 1].published_at
+				: null;
 
 		return new Response(
 			JSON.stringify({
