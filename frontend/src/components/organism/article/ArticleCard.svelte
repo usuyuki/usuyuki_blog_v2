@@ -47,13 +47,13 @@ let postDay = $derived(
               class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg"
               style="background-color: {post.sourceColor}"
             >
-              <span>{post.source.slice(0, 4) || 'Blog'}</span>
+              <span>{post.source.slice(0, 5) || 'Blog'}</span>
             </div>
           {:else}
             <div 
               class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg {post.sourceColor || 'bg-gray-600'}"
             >
-              <span>{post.source.slice(0, 4) || 'Blog'}</span>
+              <span>{post.source.slice(0, 5) || 'Blog'}</span>
             </div>
           {/if}
         {:else}

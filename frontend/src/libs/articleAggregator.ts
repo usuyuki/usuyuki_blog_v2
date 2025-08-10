@@ -13,7 +13,7 @@ export class ArticleAggregator {
 			slug: rssItem.link, // RSS記事の場合はURLをslugとして使用
 			published_at: rssItem.published_at,
 			title: rssItem.title,
-			source: rssItem.source,
+			source: blogConfig?.name || rssItem.source, // 環境変数のnameを優先使用
 			isExternal: true,
 			externalUrl: rssItem.link,
 			sourceColor: blogConfig?.color,
