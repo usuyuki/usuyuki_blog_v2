@@ -13,20 +13,24 @@ class MemoryCache {
 			timestamp: Date.now(),
 			ttl: ttlMs,
 		});
+		console.log(`[Cache SET] Key: ${key}, TTL: ${ttlMs}ms`);
 	}
 
 	get<T>(key: string): T | null {
 		const item = this.cache.get(key);
 		if (!item) {
+			console.log(`[Cache MISS] Key: ${key}`);
 			return null;
 		}
 
 		const now = Date.now();
 		if (now - item.timestamp > item.ttl) {
 			this.cache.delete(key);
+			console.log(`[Cache EXPIRED] Key: ${key}`);
 			return null;
 		}
 
+		console.log(`[Cache HIT] Key: ${key}`);
 		return item.data as T;
 	}
 
