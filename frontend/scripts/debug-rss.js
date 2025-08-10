@@ -1,6 +1,6 @@
 // Debug script to test RSS fetching
-import { fetchRSS, fetchMultipleRSS } from "./src/libs/rssClient.js";
-import { CONFIG } from "./src/libs/config.js";
+import { fetchRSS, fetchMultipleRSS } from "../src/libs/rssClient.js";
+import { CONFIG } from "../src/libs/config.js";
 
 console.log("=== RSS Fetching Debug ===");
 console.log("CONFIG.externalBlogs:", CONFIG.externalBlogs);
