@@ -1,39 +1,65 @@
 ---
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import ArchiveList from "./ArchiveList.svelte";
 
-// 直近6ヶ月の記事を取得
-const sixMonthsAgo = new Date();
-sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-
-const posts = await ghostApiWithRetry.posts.browse({
-	filter: `published_at:>='${sixMonthsAgo.toISOString()}'`,
-	limit: "all",
-	order: "published_at DESC",
+// 全ての記事を取得（Ghost記事とRSS記事を統合）
+const allArticles = await getLatestArticles({
+	limit: 200, // より多くの記事を取得
+	includeExternal: true,
 });
 
-// 月ごとにグループ化
+// 日付でソート（新しい順）
+const sortedArticles = allArticles.sort((a, b) => {
+	const dateA = new Date(a.published_at as string).getTime();
+	const dateB = new Date(b.published_at as string).getTime();
+	return dateB - dateA;
+});
+
+// 最初のページのデータのみを渡す（12記事まで）
+const firstPageArticles = sortedArticles.slice(0, 12);
+
+// 月ごとにグループ化（最初のページのみ）
 const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
-posts?.forEach((post: ArticleArchiveType) => {
-	const date = iso8601TimeToDate(
-		typeof post.published_at === "string" ? post.published_at : "",
-	);
-	const monthKey = `${date.year}-${String(date.month).padStart(2, "0")}`;
+firstPageArticles.forEach((article: ArticleArchiveType) => {
+	let dateToUse: Date;
+	if (typeof article.published_at === "string") {
+		dateToUse = new Date(article.published_at);
+	} else {
+		// DateType format
+		dateToUse = new Date(
+			`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
+		);
+	}
+
+	const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, "0")}`;
 	if (!groupedPosts[monthKey]) {
 		groupedPosts[monthKey] = [];
 	}
-	groupedPosts[monthKey].push({
-		...post,
-		published_at: date,
-	});
+
+	// Ghost記事は日付フォーマットを変換、外部記事はそのまま
+	if (article.isExternal) {
+		groupedPosts[monthKey].push(article);
+	} else {
+		const date = iso8601TimeToDate(article.published_at as string);
+		groupedPosts[monthKey].push({
+			...article,
+			published_at: date,
+		});
+	}
 });
 
 // 月キーを降順でソート
 const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
 	b.localeCompare(a),
 );
+
+// 次のページのための基準日付を計算
+const nextBefore =
+	firstPageArticles.length > 0
+		? firstPageArticles[firstPageArticles.length - 1].published_at
+		: null;
 ---
 
 <div class="container mx-auto px-4">
@@ -42,6 +68,7 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
 	<ArchiveList 
 		initialPosts={groupedPosts} 
 		initialMonthKeys={sortedMonthKeys}
+		initialNextBefore={nextBefore}
 		client:load 
 	/>
 </div>

@@ -28,7 +28,8 @@
 		"image-size": "^2.0.2",
 		"sharp": "^0.34.3",
 		"svelte": "^5.38.0",
-		"tailwindcss": "^4.1.11"
+		"tailwindcss": "^4.1.11",
+		"xmldom": "^0.6.0"
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.4",

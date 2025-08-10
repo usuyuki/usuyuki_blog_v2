@@ -1,13 +1,13 @@
 ---
 import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchive.astro";
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { getLatestArticles } from "~/libs/articleAggregator";
 
-const posts = await ghostApiWithRetry.posts.browse({
-	order: "published_at DESC",
+const articles = await getLatestArticles({
 	limit: 10,
+	includeExternal: true,
 });
 const postsData = {
-	posts: posts || [],
+	posts: articles,
 };
 ---
 

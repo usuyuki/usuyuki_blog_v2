@@ -5,31 +5,52 @@ import ArticleCard from "./ArticleCard.svelte";
 interface Props {
 	initialPosts: { [key: string]: ArticleArchiveType[] };
 	initialMonthKeys: string[];
+	initialNextBefore?: string | null;
 }
 
-let { initialPosts = {}, initialMonthKeys = [] }: Props = $props();
+let {
+	initialPosts = {},
+	initialMonthKeys = [],
+	initialNextBefore = null,
+}: Props = $props();
 
 let posts = $state(initialPosts);
 let monthKeys = $state([...initialMonthKeys]);
-let currentOffset = $state(6);
+
+let nextBefore = $state<string | null>(initialNextBefore); // 次のページの基準日付
 let isLoading = $state(false);
 let hasMorePosts = $state(true);
 
 async function loadMorePosts() {
-	if (isLoading || !hasMorePosts) return;
+	if (isLoading || !hasMorePosts) {
+		return;
+	}
 
 	isLoading = true;
 
 	try {
-		const response = await fetch(`/api/archive?offset=${currentOffset}`);
+		// beforeパラメータで日付ベースのページネーション
+		const url = nextBefore
+			? `/api/archive?before=${encodeURIComponent(nextBefore)}&limit=12`
+			: "/api/archive?limit=12";
+		const response = await fetch(url);
 		const data = await response.json();
 
 		if (data.posts && data.posts.length > 0) {
 			const groupedPosts: { [key: string]: ArticleArchiveType[] } = {};
 
 			data.posts.forEach((post: ArticleArchiveType) => {
-				const date = new Date(post.published_at as string);
-				const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+				// 外部記事と内部記事の日付処理を統一
+				let dateToUse: Date;
+				if (typeof post.published_at === "string") {
+					dateToUse = new Date(post.published_at);
+				} else {
+					dateToUse = new Date(
+						`${post.published_at.year}-${post.published_at.month.toString().padStart(2, "0")}-${post.published_at.day.toString().padStart(2, "0")}`,
+					);
+				}
+
+				const monthKey = `${dateToUse.getFullYear()}-${String(dateToUse.getMonth() + 1).padStart(2, "0")}`;
 				if (!groupedPosts[monthKey]) {
 					groupedPosts[monthKey] = [];
 				}
@@ -40,10 +61,24 @@ async function loadMorePosts() {
 				b.localeCompare(a),
 			);
 
-			// 既存データにマージ
+			// 既存データにマージ（重複チェック付き）
 			newMonthKeys.forEach((monthKey) => {
 				if (posts[monthKey]) {
-					posts[monthKey] = [...posts[monthKey], ...groupedPosts[monthKey]];
+					// 既存記事との重複をチェック
+					const newPosts = groupedPosts[monthKey].filter((newPost) => {
+						const isDuplicate = posts[monthKey].some(
+							(existingPost) =>
+								existingPost.slug === newPost.slug ||
+								(existingPost.isExternal &&
+									newPost.isExternal &&
+									existingPost.externalUrl === newPost.externalUrl),
+						);
+						return !isDuplicate;
+					});
+
+					if (newPosts.length > 0) {
+						posts[monthKey] = [...posts[monthKey], ...newPosts];
+					}
 				} else {
 					posts[monthKey] = groupedPosts[monthKey];
 					monthKeys.push(monthKey);
@@ -51,9 +86,13 @@ async function loadMorePosts() {
 			});
 
 			// 月キーを再ソート
-			monthKeys.sort((a, b) => b.localeCompare(a));
+			monthKeys = [...new Set(monthKeys)].sort((a, b) => b.localeCompare(a));
 
-			currentOffset += 6;
+			// 次のページの基準日付を更新
+			nextBefore = data.nextBefore;
+
+			// APIからhasMoreの情報を使用
+			hasMorePosts = data.hasMore !== false;
 		} else {
 			hasMorePosts = false;
 		}
