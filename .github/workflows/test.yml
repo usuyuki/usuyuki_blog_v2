@@ -1,17 +1,18 @@
-name: Frontend Lint
+name: Frontend Test & Build
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  frontend_lint:
-    name: frontend lint
+  frontend_test:
+    name: frontend test
     runs-on: ubuntu-latest
     env:
       NODE_ENV: development
-      ghost_content_key: "${{ secrets.GHOST_CONTENT_KEY }}"
-      ghost_api_url: "${{ secrets.GHOST_API_URL }}"
+      GHOST_CONTENT_KEY: "${{ secrets.GHOST_CONTENT_KEY }}"
+      GHOST_API_URL: "${{ secrets.GHOST_API_URL }}"
+      EXTERNAL_BLOGS: "[]"
 
     steps:
       - name: Checkout
@@ -46,5 +47,8 @@ jobs:
       - name: Install dependencies
         run: cd frontend && pnpm install
 
-      - name: lint
-        run: cd frontend && pnpm lint
+      - name: Run tests
+        run: cd frontend && pnpm test:run
+
+      - name: Run Build
+        run: cd frontend && pnpm build
