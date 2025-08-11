@@ -1,5 +1,8 @@
 import type { RSSFeed, RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
+import { JSDOM } from "jsdom";
+
+const { DOMParser } = new JSDOM().window;
 
 function parseXML(xmlText: string): Document {
 	const parser = new DOMParser();
