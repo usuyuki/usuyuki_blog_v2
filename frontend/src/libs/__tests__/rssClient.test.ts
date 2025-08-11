@@ -339,70 +339,34 @@ describe("RSSClient", () => {
 				{ name: "Blog 1", rssUrl: "https://blog1.com/feed.xml" },
 			];
 
+			const mockRSSXMLWithTwoItems = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Test Blog</title>
+        <link>https://example.com</link>
+        <description>Test RSS Feed</description>
+        <item>
+            <title>Older Article</title>
+            <link>https://example.com/older</link>
+            <description>Older article</description>
+            <author>Test Author</author>
+            <pubDate>Wed, 10 Dec 2023 10:00:00 +0000</pubDate>
+        </item>
+        <item>
+            <title>Newer Article</title>
+            <link>https://example.com/newer</link>
+            <description>Newer article</description>
+            <author>Test Author</author>
+            <pubDate>Wed, 20 Dec 2023 10:00:00 +0000</pubDate>
+        </item>
+    </channel>
+</rss>`;
+
 			// Mock fetch response
 			vi.mocked(global.fetch).mockResolvedValue({
 				ok: true,
-				text: async () => mockRSSXML,
+				text: async () => mockRSSXMLWithTwoItems,
 			} as Response);
-
-			// Mock XML parsing with multiple items of different dates
-			const mockXmlDoc = {
-				getElementsByTagName: vi.fn((tagName: string) => {
-					if (tagName === "parsererror") return [];
-					if (tagName === "rss") return [{}];
-					if (tagName === "channel")
-						return [
-							{
-								getElementsByTagName: (tag: string) => {
-									if (tag === "title") return [{ textContent: "Test Blog" }];
-									if (tag === "link")
-										return [{ textContent: "https://example.com" }];
-									if (tag === "description")
-										return [{ textContent: "Test RSS Feed" }];
-									return [];
-								},
-							},
-						];
-					if (tagName === "item")
-						return [
-							{
-								getElementsByTagName: (tag: string) => {
-									if (tag === "title")
-										return [{ textContent: "Older Article" }];
-									if (tag === "link")
-										return [{ textContent: "https://example.com/older" }];
-									if (tag === "description")
-										return [{ textContent: "Older article" }];
-									if (tag === "author") return [{ textContent: "Test Author" }];
-									if (tag === "pubDate")
-										return [{ textContent: "Wed, 10 Dec 2023 10:00:00 +0000" }];
-									return [];
-								},
-							},
-							{
-								getElementsByTagName: (tag: string) => {
-									if (tag === "title")
-										return [{ textContent: "Newer Article" }];
-									if (tag === "link")
-										return [{ textContent: "https://example.com/newer" }];
-									if (tag === "description")
-										return [{ textContent: "Newer article" }];
-									if (tag === "author") return [{ textContent: "Test Author" }];
-									if (tag === "pubDate")
-										return [{ textContent: "Wed, 20 Dec 2023 10:00:00 +0000" }];
-									return [];
-								},
-							},
-						];
-					return [];
-				}),
-			};
-
-			const mockParser = {
-				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
-			};
-
-			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchMultipleRSS(configs);
 
