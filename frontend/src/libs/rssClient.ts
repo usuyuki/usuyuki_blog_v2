@@ -1,7 +1,5 @@
 import type { RSSFeed, RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
-// @ts-ignore
-import { DOMParser } from "xmldom";
 
 function parseXML(xmlText: string): Document {
 	const parser = new DOMParser();

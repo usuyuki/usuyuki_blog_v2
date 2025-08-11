@@ -1,13 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { ExternalBlogConfig } from "~/types/RSSType";
 
-// Mock xmldom
-vi.mock("xmldom", () => ({
-	DOMParser: vi.fn().mockImplementation(() => ({
-		parseFromString: vi.fn(),
-	})),
-}));
-
 // Mock cache module
 vi.mock("~/libs/cache", () => {
 	const mockCache = {
@@ -108,9 +101,8 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			// Mock the DOMParser constructor
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			// Mock the global DOMParser
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchRSS(mockConfig);
 
@@ -168,8 +160,7 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchRSS(mockConfig);
 
@@ -196,8 +187,7 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchRSS(mockConfig);
 
@@ -266,8 +256,7 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchMultipleRSS(configs);
 
@@ -336,8 +325,7 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchMultipleRSS(configs);
 
@@ -414,8 +402,7 @@ describe("RSSClient", () => {
 				parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
 			};
 
-			const { DOMParser } = await import("xmldom");
-			vi.mocked(DOMParser).mockImplementation(() => mockParser);
+			global.DOMParser = vi.fn().mockImplementation(() => mockParser);
 
 			const result = await fetchMultipleRSS(configs);
 
