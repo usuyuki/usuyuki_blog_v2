@@ -87,6 +87,23 @@ function isRateLimitError(error: unknown): boolean {
 	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
 
+// エラーログを簡潔に出力する関数
+function logGhostError(error: unknown, attempt: number, maxRetries: number): void {
+	const err = error as {
+		type?: string;
+		context?: string;
+		id?: string;
+		response?: { status?: number };
+	};
+	
+	console.error(`Ghost API error (attempt ${attempt}/${maxRetries}):`, {
+		status: err?.response?.status,
+		id: err?.id,
+		context: err?.context,
+		type: err?.type,
+	});
+}
+
 // リトライ機能付きのGhost APIクライアント
 export const ghostApiWithRetry = {
 	posts: {
@@ -96,10 +113,7 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.posts.read(options);
 					return result;
 				} catch (error) {
-					console.error(
-						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error,
-					);
+					logGhostError(error, i + 1, maxRetries);
 					if (i === maxRetries - 1) {
 						return null;
 					}
@@ -134,10 +148,7 @@ export const ghostApiWithRetry = {
 					);
 					return result;
 				} catch (error) {
-					console.warn(
-						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						(error as Error).message,
-					);
+					logGhostError(error, i + 1, maxRetries);
 
 					// レート制限エラーの場合
 					if (isRateLimitError(error)) {
@@ -182,10 +193,7 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.tags.read(options);
 					return result;
 				} catch (error) {
-					console.error(
-						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error,
-					);
+					logGhostError(error, i + 1, maxRetries);
 					if (i === maxRetries - 1) {
 						return null;
 					}
@@ -213,10 +221,7 @@ export const ghostApiWithRetry = {
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）
 					return result;
 				} catch (error) {
-					console.error(
-						`Ghost API error (attempt ${i + 1}/${maxRetries}):`,
-						error,
-					);
+					logGhostError(error, i + 1, maxRetries);
 					if (i === maxRetries - 1) {
 						return null;
 					}
