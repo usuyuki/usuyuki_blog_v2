@@ -38,9 +38,11 @@ services:
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
       GHOST_API_URL: ${GHOST_API_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
+      LOKI_URL: http://loki:3100
     user: "1000:1000"
     depends_on:
       - ghost
+      - loki
 
   db:
     image: mysql:8.0-debian
@@ -57,5 +59,28 @@ services:
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN}
 
+  loki:
+    image: grafana/loki:3.5
+    restart: always
+    volumes:
+      - ./infra/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./infra/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - loki
+
 volumes:
   db-store:
+  loki-data:
+  grafana-storage:
