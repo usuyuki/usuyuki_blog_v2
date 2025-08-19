@@ -18,6 +18,7 @@ services:
       url: ${BACKEND_API_URL}
     volumes:
       - ./backend:/var/lib/ghost/content
+      - ./backend/config.production.json:/var/lib/ghost/config.production.json
     user: "1000:1000"
     depends_on:
       - db
