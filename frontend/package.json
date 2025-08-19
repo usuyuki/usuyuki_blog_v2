@@ -17,7 +17,7 @@
 		"test:run": "vitest run"
 	},
 	"dependencies": {
-		"@astrojs/node": "^9.4.0",
+		"@astrojs/node": "^9.4.1",
 		"@astrojs/rss": "^4.0.12",
 		"@astrojs/svelte": "^7.1.0",
 		"@tailwindcss/vite": "^4.1.11",
