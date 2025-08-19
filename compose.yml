@@ -12,6 +12,7 @@ services:
       url: ${BACKEND_API_URL}
     volumes:
       - ./backend:/var/lib/ghost/content
+      - ./backend/config.development.json:/var/lib/ghost/config.development.json
     user: "1000:1000"
     ports:
       - "1001:2368"

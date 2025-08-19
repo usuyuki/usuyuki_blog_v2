@@ -1,4 +1,5 @@
 backend/*
 !backend/README.md
+!backend/config.*.json
 .env
 .env.prod
