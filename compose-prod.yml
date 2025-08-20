@@ -33,6 +33,9 @@ services:
     restart: always
     stdin_open: true
     tty: true
+    # lokiに流しているので不要(量もメチャ多いため)
+    logging:
+      driver: "none"
     environment:
       NODE_ENV: production
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
@@ -70,8 +73,6 @@ services:
   grafana:
     image: grafana/grafana:12.1.0
     restart: always
-    ports:
-      - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
