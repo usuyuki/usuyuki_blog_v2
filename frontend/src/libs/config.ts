@@ -10,13 +10,18 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 	try {
 		const parsed = JSON.parse(envVar);
 		if (!Array.isArray(parsed)) {
-			astroLogger.warn("EXTERNAL_BLOGS must be an array", { type: 'config_validation' });
+			astroLogger.warn("EXTERNAL_BLOGS must be an array", {
+				type: "config_validation",
+			});
 			return [];
 		}
 
 		return parsed.filter((blog: unknown): blog is ExternalBlogConfig => {
 			if (typeof blog !== "object" || blog === null) {
-				astroLogger.warn("Invalid blog config: not an object", { blog, type: 'config_validation' });
+				astroLogger.warn("Invalid blog config: not an object", {
+					blog,
+					type: "config_validation",
+				});
 				return false;
 			}
 
@@ -25,7 +30,10 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 				typeof blogObj.name !== "string" ||
 				typeof blogObj.rssUrl !== "string"
 			) {
-				astroLogger.warn("Invalid blog config: missing name or rssUrl", { blog, type: 'config_validation' });
+				astroLogger.warn("Invalid blog config: missing name or rssUrl", {
+					blog,
+					type: "config_validation",
+				});
 				return false;
 			}
 
@@ -33,8 +41,8 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 		});
 	} catch (error) {
 		errorHandler.handleError(error as Error, {
-			type: 'config_parse_error',
-			envVar: 'EXTERNAL_BLOGS'
+			type: "config_parse_error",
+			envVar: "EXTERNAL_BLOGS",
 		});
 		return [];
 	}

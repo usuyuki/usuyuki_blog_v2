@@ -43,14 +43,14 @@ function getCacheKey(method: string, options: unknown): string {
 function getFromCache<T>(key: string): T | null {
 	const cached = cache.get(key);
 	if (cached && cached.expiry > Date.now()) {
-		astroLogger.cacheLog('HIT', key, true, { source: 'ghost' });
+		astroLogger.cacheLog("HIT", key, true, { source: "ghost" });
 		return cached.data as T;
 	}
 	if (cached) {
 		cache.delete(key); // 期限切れのキャッシュを削除
-		astroLogger.cacheLog('EXPIRED', key, false, { source: 'ghost' });
+		astroLogger.cacheLog("EXPIRED", key, false, { source: "ghost" });
 	} else {
-		astroLogger.cacheLog('MISS', key, false, { source: 'ghost' });
+		astroLogger.cacheLog("MISS", key, false, { source: "ghost" });
 	}
 	return null;
 }
@@ -60,7 +60,7 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 		data,
 		expiry: Date.now() + ttlMs,
 	});
-	astroLogger.cacheLog('SET', key, false, { source: 'ghost', ttl: ttlMs });
+	astroLogger.cacheLog("SET", key, false, { source: "ghost", ttl: ttlMs });
 }
 
 // 長期キャッシュ（1週間）
@@ -70,17 +70,24 @@ function setLongTermCache<T>(key: string, data: T): void {
 		data,
 		expiry: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1週間
 	});
-	astroLogger.cacheLog('SET_LONGTERM', longTermKey, false, { source: 'ghost', ttl: 604800000 });
+	astroLogger.cacheLog("SET_LONGTERM", longTermKey, false, {
+		source: "ghost",
+		ttl: 604800000,
+	});
 }
 
 function getLongTermCache<T>(key: string): T | null {
 	const longTermKey = `longterm_${key}`;
 	const cached = cache.get(longTermKey);
 	if (cached) {
-		astroLogger.cacheLog('HIT_LONGTERM', longTermKey, true, { source: 'ghost' });
+		astroLogger.cacheLog("HIT_LONGTERM", longTermKey, true, {
+			source: "ghost",
+		});
 		return cached.data as T;
 	}
-	astroLogger.cacheLog('MISS_LONGTERM', longTermKey, false, { source: 'ghost' });
+	astroLogger.cacheLog("MISS_LONGTERM", longTermKey, false, {
+		source: "ghost",
+	});
 	return null;
 }
 
@@ -90,20 +97,20 @@ function isRateLimitError(error: unknown): boolean {
 	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
 
-function is404Error(error: unknown): boolean {
-	const err = error as { type?: string; response?: { status?: number } };
-	return err?.response?.status === 404;
-}
 
 // エラーログを簡潔に出力する関数
-function logGhostError(error: unknown, attempt: number, maxRetries: number): void {
+function logGhostError(
+	error: unknown,
+	attempt: number,
+	maxRetries: number,
+): void {
 	const err = error as {
 		type?: string;
 		context?: string;
 		id?: string;
 		response?: { status?: number };
 	};
-	
+
 	// 404エラーは警告として扱う
 	if (err?.response?.status === 404) {
 		astroLogger.warn(`Ghost API 404: Resource not found`, {
@@ -113,8 +120,8 @@ function logGhostError(error: unknown, attempt: number, maxRetries: number): voi
 			id: err?.id,
 			context: err?.context,
 			type: err?.type,
-			service: 'ghost-api',
-			logType: LOG_TYPES.API
+			service: "ghost-api",
+			logType: LOG_TYPES.API,
 		});
 	} else {
 		errorHandler.handleError(error as Error, {
@@ -124,7 +131,7 @@ function logGhostError(error: unknown, attempt: number, maxRetries: number): voi
 			id: err?.id,
 			context: err?.context,
 			type: err?.type,
-			service: 'ghost-api'
+			service: "ghost-api",
 		});
 	}
 }
@@ -139,18 +146,23 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
-					
+
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
-					
+
 					if (i === maxRetries - 1) {
 						return null;
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: LOG_TYPES.API, waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
+						logType: LOG_TYPES.API,
+						waitTime,
+						attempt: i + 1,
+						service: "ghost-api",
+					});
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -172,26 +184,38 @@ export const ghostApiWithRetry = {
 					// 成功時に通常と長期両方のキャッシュに保存
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
 					setLongTermCache(cacheKey, result); // 1週間キャッシュ
-					astroLogger.info(`Ghost API success: fetched ${result?.length || 0} posts`, { 
-						logType: LOG_TYPES.API,
-						count: result?.length || 0, 
-						service: 'ghost-api',
-						method: 'posts.browse'
-					});
+					astroLogger.info(
+						`Ghost API success: fetched ${result?.length || 0} posts`,
+						{
+							logType: LOG_TYPES.API,
+							count: result?.length || 0,
+							service: "ghost-api",
+							method: "posts.browse",
+						},
+					);
 					return result;
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
 
 					// レート制限エラーの場合のみリトライ
 					if (isRateLimitError(error)) {
-						astroLogger.warn("Rate limit detected", { logType: LOG_TYPES.API, service: 'ghost-api' });
+						astroLogger.warn("Rate limit detected", {
+							logType: LOG_TYPES.API,
+							service: "ghost-api",
+						});
 						if (i === maxRetries - 1) {
 							// 最後のリトライ失敗時は長期キャッシュを返す
 							if (longTermCached) {
-								astroLogger.warn("Rate limit: Returning long-term cached data", { logType: LOG_TYPES.API, service: 'ghost-api' });
+								astroLogger.warn(
+									"Rate limit: Returning long-term cached data",
+									{ logType: LOG_TYPES.API, service: "ghost-api" },
+								);
 								return longTermCached;
 							} else {
-								astroLogger.warn("Rate limit: No cached data available", { logType: LOG_TYPES.API, service: 'ghost-api' });
+								astroLogger.warn("Rate limit: No cached data available", {
+									logType: LOG_TYPES.API,
+									service: "ghost-api",
+								});
 								return null;
 							}
 						}
@@ -202,7 +226,9 @@ export const ghostApiWithRetry = {
 					} else {
 						// レート制限エラー以外はリトライせずに長期キャッシュを返す
 						if (longTermCached) {
-							console.warn("Non-rate-limit error: Returning long-term cached data");
+							console.warn(
+								"Non-rate-limit error: Returning long-term cached data",
+							);
 							return longTermCached;
 						}
 						return null;
@@ -212,7 +238,12 @@ export const ghostApiWithRetry = {
 					const waitTime = isRateLimitError(error)
 						? 2000 * (i + 1) // 2秒、4秒、6秒
 						: 1000 * (i + 1); // 1秒、2秒、3秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: LOG_TYPES.API, waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
+						logType: LOG_TYPES.API,
+						waitTime,
+						attempt: i + 1,
+						service: "ghost-api",
+					});
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -226,18 +257,23 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
-					
+
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
-					
+
 					if (i === maxRetries - 1) {
 						return null;
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: LOG_TYPES.API, waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
+						logType: LOG_TYPES.API,
+						waitTime,
+						attempt: i + 1,
+						service: "ghost-api",
+					});
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -258,18 +294,23 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
-					
+
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
-					
+
 					if (i === maxRetries - 1) {
 						return null;
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: LOG_TYPES.API, waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
+						logType: LOG_TYPES.API,
+						waitTime,
+						attempt: i + 1,
+						service: "ghost-api",
+					});
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}

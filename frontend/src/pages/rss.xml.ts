@@ -15,7 +15,9 @@ export async function GET() {
 
 	//catchでとれないことがあるので
 	if (posts === undefined) {
-		astroLogger.error("postsが正しく取得できません", undefined, { route: "/rss.xml" });
+		astroLogger.error("postsが正しく取得できません", undefined, {
+			route: "/rss.xml",
+		});
 	} else {
 		return rss({
 			title: SITE_TITLE,

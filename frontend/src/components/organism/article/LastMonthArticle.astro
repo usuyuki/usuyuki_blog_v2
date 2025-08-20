@@ -19,7 +19,7 @@ const posts = await ghostClient.posts
 		order: "published_at ASC",
 	})
 	.catch((err: Error) => {
-		errorHandler.handleComponentError('LastMonthArticle', err);
+		errorHandler.handleComponentError("LastMonthArticle", err);
 	});
 const postsData = {
 	posts: posts,

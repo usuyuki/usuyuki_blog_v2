@@ -55,10 +55,13 @@ export async function getLatestArticles(
 			articles.push(...ghostArticles);
 		}
 	} catch (error) {
-		astroLogger.warn("Ghost posts unavailable (rate limit or error), showing RSS content only", {
-			error: (error as Error).message,
-			service: 'ghost-api'
-		});
+		astroLogger.warn(
+			"Ghost posts unavailable (rate limit or error), showing RSS content only",
+			{
+				error: (error as Error).message,
+				service: "ghost-api",
+			},
+		);
 		// Ghost APIがレート制限の場合はRSSのみ表示
 	}
 
@@ -75,8 +78,8 @@ export async function getLatestArticles(
 			articles.push(...rssArticles);
 		} catch (error) {
 			errorHandler.handleError(error as Error, {
-				service: 'rss-aggregator',
-				type: 'rss_fetch_error'
+				service: "rss-aggregator",
+				type: "rss_fetch_error",
 			});
 		}
 	}
@@ -126,9 +129,9 @@ export async function getFeaturedArticles(
 		}
 	} catch (error) {
 		errorHandler.handleError(error as Error, {
-			service: 'ghost-api',
-			method: 'getFeaturedGhostPosts',
-			type: 'featured_posts_error'
+			service: "ghost-api",
+			method: "getFeaturedGhostPosts",
+			type: "featured_posts_error",
 		});
 	}
 
