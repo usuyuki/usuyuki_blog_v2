@@ -1,6 +1,8 @@
 import type { RSSFeed, RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
 import { JSDOM } from "jsdom";
+import astroLogger from "./astroLogger";
+import errorHandler from "./errorHandler";
 
 const { DOMParser } = new JSDOM().window;
 
@@ -148,9 +150,11 @@ export async function fetchRSS(
 		});
 
 		if (!response.ok) {
-			console.error(
-				`RSS fetch failed for ${config.name}: ${response.status} ${response.statusText}`,
-			);
+			errorHandler.handleNetworkError(config.rssUrl, new Error(`RSS fetch failed: ${response.status} ${response.statusText}`), {
+				blogName: config.name,
+				status: response.status,
+				statusText: response.statusText
+			});
 			return null;
 		}
 
@@ -160,10 +164,10 @@ export async function fetchRSS(
 		// XMLパースエラーチェック
 		const parseErrors = getElementsByTagName(xmlDoc, "parsererror");
 		if (parseErrors.length > 0) {
-			console.error(
-				`RSS parse error for ${config.name}:`,
-				extractTextContent(parseErrors[0]),
-			);
+			errorHandler.handleError(new Error(`RSS parse error: ${extractTextContent(parseErrors[0])}`), {
+				blogName: config.name,
+				type: 'xml_parse_error'
+			});
 			return null;
 		}
 
@@ -181,7 +185,10 @@ export async function fetchRSS(
 			if (feedElements.length > 0) {
 				feed = parseAtomFeed(xmlDoc, config.name);
 			} else {
-				console.error(`Unknown feed format for ${config.name}`);
+				errorHandler.handleError(new Error(`Unknown feed format for ${config.name}`), {
+					blogName: config.name,
+					type: 'unknown_feed_format'
+				});
 				return null;
 			}
 		}
@@ -193,7 +200,11 @@ export async function fetchRSS(
 
 		return feed;
 	} catch (error) {
-		console.error(`RSS fetch error for ${config.name}:`, error);
+		errorHandler.handleError(error as Error, {
+			blogName: config.name,
+			rssUrl: config.rssUrl,
+			type: 'rss_fetch_error'
+		});
 		return null;
 	}
 }
@@ -210,7 +221,10 @@ export async function fetchMultipleRSS(
 		if (result.status === "fulfilled" && result.value) {
 			allItems.push(...result.value.items);
 		} else {
-			console.warn(`Failed to fetch RSS for ${configs[index].name}`);
+			astroLogger.warn(`Failed to fetch RSS for ${configs[index].name}`, {
+				blogName: configs[index].name,
+				rssUrl: configs[index].rssUrl
+			});
 		}
 	});
 

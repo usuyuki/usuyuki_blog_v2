@@ -1,4 +1,6 @@
 import type { ExternalBlogConfig } from "~/types/RSSType";
+import astroLogger from "./astroLogger";
+import errorHandler from "./errorHandler";
 
 function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 	if (!envVar) {
@@ -8,13 +10,13 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 	try {
 		const parsed = JSON.parse(envVar);
 		if (!Array.isArray(parsed)) {
-			console.warn("EXTERNAL_BLOGS must be an array");
+			astroLogger.warn("EXTERNAL_BLOGS must be an array", { type: 'config_validation' });
 			return [];
 		}
 
 		return parsed.filter((blog: unknown): blog is ExternalBlogConfig => {
 			if (typeof blog !== "object" || blog === null) {
-				console.warn("Invalid blog config: not an object", blog);
+				astroLogger.warn("Invalid blog config: not an object", { blog, type: 'config_validation' });
 				return false;
 			}
 
@@ -23,14 +25,17 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 				typeof blogObj.name !== "string" ||
 				typeof blogObj.rssUrl !== "string"
 			) {
-				console.warn("Invalid blog config: missing name or rssUrl", blog);
+				astroLogger.warn("Invalid blog config: missing name or rssUrl", { blog, type: 'config_validation' });
 				return false;
 			}
 
 			return true;
 		});
 	} catch (error) {
-		console.error("Failed to parse EXTERNAL_BLOGS:", error);
+		errorHandler.handleError(error as Error, {
+			type: 'config_parse_error',
+			envVar: 'EXTERNAL_BLOGS'
+		});
 		return [];
 	}
 }
