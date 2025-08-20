@@ -17,7 +17,7 @@ import type { TOCType } from "~/types/TOCType";
 // ドットが含まれるスラッグを除外
 const slug = Astro.params.slug;
 if (!slug || slug.includes('.') || slug.length > 100) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 const post = await ghostApiWithRetry.posts.read({
@@ -26,7 +26,7 @@ const post = await ghostApiWithRetry.posts.read({
 });
 
 if (!post) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 post.published_at = iso8601TimeToDate(post.published_at);
 

@@ -11,7 +11,7 @@ import type { HeadMetaType } from "~/types/HeadMetaType";
 const yearSlug = Number(Astro.params.year);
 const monthSlug = Number(Astro.params.month);
 if (!(isYear(yearSlug) && isMonth(monthSlug))) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 /**

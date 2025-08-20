@@ -10,7 +10,7 @@ import type { HeadMetaType } from "~/types/HeadMetaType";
 //バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
 if (!(tagSlug === undefined) && !isTag(tagSlug)) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 const posts = await ghostApiWithRetry.posts.browse({
@@ -24,7 +24,7 @@ const tag = await ghostApiWithRetry.tags.read({
 });
 
 if (!tag) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 const postsData = {

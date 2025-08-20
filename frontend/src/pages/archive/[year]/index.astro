@@ -10,7 +10,7 @@ import type { HeadMetaType } from "~/types/HeadMetaType";
 const yearSlug = Number(Astro.params.year);
 //数字かつ整数かつ4桁であるか
 if (!isYear(yearSlug)) {
-	return Astro.redirect("/404");
+	return new Response(null, { status: 404 });
 }
 
 const posts = await ghostApiWithRetry.posts.browse({
