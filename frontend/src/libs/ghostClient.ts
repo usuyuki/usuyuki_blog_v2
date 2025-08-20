@@ -34,9 +34,9 @@ export const ghostClient = new GhostContentAPI({
 });
 
 // キャッシュ用のシンプルなメモリストア
-const cache = new Map<string, { data: unknown; expiry: number }>();
+const cache = new Map<string, { data: object; expiry: number }>();
 
-function getCacheKey(method: string, options: unknown): string {
+function getCacheKey(method: string, options: object): string {
 	return `${method}-${JSON.stringify(options)}`;
 }
 
@@ -55,7 +55,7 @@ function getFromCache<T>(key: string): T | null {
 	return null;
 }
 
-function setCache<T>(key: string, data: T, ttlMs = 60000): void {
+function setCache(key: string, data: object, ttlMs = 60000): void {
 	cache.set(key, {
 		data,
 		expiry: Date.now() + ttlMs,
@@ -64,7 +64,7 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 }
 
 // 長期キャッシュ（1週間）
-function setLongTermCache<T>(key: string, data: T): void {
+function setLongTermCache(key: string, data: object): void {
 	const longTermKey = `longterm_${key}`;
 	cache.set(longTermKey, {
 		data,
@@ -92,15 +92,14 @@ function getLongTermCache<T>(key: string): T | null {
 }
 
 // エラーの型チェック関数
-function isRateLimitError(error: unknown): boolean {
+function isRateLimitError(error: Error): boolean {
 	const err = error as { type?: string; response?: { status?: number } };
 	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
 
-
 // エラーログを簡潔に出力する関数
 function logGhostError(
-	error: unknown,
+	error: Error,
 	attempt: number,
 	maxRetries: number,
 ): void {
@@ -145,10 +144,11 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.posts.read(options);
 					return result;
 				} catch (error) {
-					logGhostError(error, i + 1, maxRetries);
+					const err = error as Error;
+					logGhostError(err, i + 1, maxRetries);
 
 					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(error)) {
+					if (!isRateLimitError(err)) {
 						return null;
 					}
 
@@ -195,10 +195,11 @@ export const ghostApiWithRetry = {
 					);
 					return result;
 				} catch (error) {
-					logGhostError(error, i + 1, maxRetries);
+					const err = error as Error;
+					logGhostError(err, i + 1, maxRetries);
 
 					// レート制限エラーの場合のみリトライ
-					if (isRateLimitError(error)) {
+					if (isRateLimitError(err)) {
 						astroLogger.warn("Rate limit detected", {
 							logType: LOG_TYPES.API,
 							service: "ghost-api",
@@ -235,7 +236,7 @@ export const ghostApiWithRetry = {
 					}
 
 					// 待機時間を短くする（テスト環境では長すぎる）
-					const waitTime = isRateLimitError(error)
+					const waitTime = isRateLimitError(err)
 						? 2000 * (i + 1) // 2秒、4秒、6秒
 						: 1000 * (i + 1); // 1秒、2秒、3秒
 					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
@@ -256,10 +257,11 @@ export const ghostApiWithRetry = {
 					const result = await ghostClient.tags.read(options);
 					return result;
 				} catch (error) {
-					logGhostError(error, i + 1, maxRetries);
+					const err = error as Error;
+					logGhostError(err, i + 1, maxRetries);
 
 					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(error)) {
+					if (!isRateLimitError(err)) {
 						return null;
 					}
 
@@ -293,10 +295,11 @@ export const ghostApiWithRetry = {
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）
 					return result;
 				} catch (error) {
-					logGhostError(error, i + 1, maxRetries);
+					const err = error as Error;
+					logGhostError(err, i + 1, maxRetries);
 
 					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(error)) {
+					if (!isRateLimitError(err)) {
 						return null;
 					}
 

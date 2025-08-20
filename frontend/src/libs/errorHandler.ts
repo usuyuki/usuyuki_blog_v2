@@ -22,19 +22,11 @@ class ErrorHandler {
 		});
 	}
 
-	handleApiError(
-		endpoint: string,
-		error: Error,
-		context?: ErrorContext,
-	): void {
-		this.logger.apiError(
-			endpoint,
-			error,
-			{
-				...context,
-				timestamp: new Date().toISOString(),
-			},
-		);
+	handleApiError(endpoint: string, error: Error, context?: ErrorContext): void {
+		this.logger.apiError(endpoint, error, {
+			...context,
+			timestamp: new Date().toISOString(),
+		});
 	}
 
 	handleComponentError(
@@ -42,14 +34,10 @@ class ErrorHandler {
 		error: Error,
 		context?: ErrorContext,
 	): void {
-		this.logger.componentError(
-			componentName,
-			error,
-			{
-				...context,
-				timestamp: new Date().toISOString(),
-			},
-		);
+		this.logger.componentError(componentName, error, {
+			...context,
+			timestamp: new Date().toISOString(),
+		});
 	}
 
 	handleValidationError(
@@ -64,11 +52,7 @@ class ErrorHandler {
 		});
 	}
 
-	handleNetworkError(
-		url: string,
-		error: Error,
-		context?: ErrorContext,
-	): void {
+	handleNetworkError(url: string, error: Error, context?: ErrorContext): void {
 		this.handleError(error, {
 			...context,
 			url,
@@ -77,21 +61,23 @@ class ErrorHandler {
 		});
 	}
 
-	wrapAsync<T>(
+	async wrapAsync<T>(
 		fn: () => Promise<T>,
 		errorContext?: ErrorContext,
 	): Promise<T | null> {
-		return fn().catch((error) => {
-			this.handleError(error, errorContext);
+		try {
+			return await fn();
+		} catch (error) {
+			this.handleError(error as Error, errorContext);
 			return null;
-		});
+		}
 	}
 
 	wrapSync<T>(fn: () => T, errorContext?: ErrorContext): T | null {
 		try {
 			return fn();
 		} catch (error) {
-			this.handleError(error, errorContext);
+			this.handleError(error as Error, errorContext);
 			return null;
 		}
 	}

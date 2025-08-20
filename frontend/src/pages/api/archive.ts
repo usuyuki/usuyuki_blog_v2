@@ -66,7 +66,7 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		);
 	} catch (error) {
-		errorHandler.handleApiError("/api/archive", error, {
+		errorHandler.handleApiError("/api/archive", error as Error, {
 			beforeDate: beforeDate || undefined,
 			limit,
 		});

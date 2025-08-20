@@ -7,9 +7,9 @@ interface CacheItem<T> {
 }
 
 class MemoryCache {
-	private cache = new Map<string, CacheItem<unknown>>();
+	private cache = new Map<string, CacheItem<object>>();
 
-	set<T>(key: string, data: T, ttlMs: number): void {
+	set(key: string, data: object, ttlMs: number): void {
 		this.cache.set(key, {
 			data,
 			timestamp: Date.now(),
@@ -18,7 +18,7 @@ class MemoryCache {
 		astroLogger.debug(`Cache SET: ${key}`, { key, ttl: ttlMs });
 	}
 
-	get<T>(key: string): T | null {
+	get<T extends object>(key: string): T | null {
 		const item = this.cache.get(key);
 		if (!item) {
 			astroLogger.debug(`Cache MISS: ${key}`, { key });

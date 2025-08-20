@@ -123,7 +123,7 @@ class LoggerService {
 			originalConsole.warn(message, ...args);
 		};
 
-		console.error = (message: string, ...args: string[]) => {
+		console.error = (message: string, ...args: (string | Error)[]) => {
 			const formattedMessage = this.formatConsoleMessage(message, args);
 			if (args.length > 0 && args[0] instanceof Error) {
 				this.error(formattedMessage.message, args[0], formattedMessage.context);
@@ -152,12 +152,14 @@ class LoggerService {
 		console.debug = originalConsole.debug;
 	}
 
-	private formatConsoleMessage(message: string, args: string[]) {
+	private formatConsoleMessage(message: string, args: (string | Error)[]) {
 		const messageStr = message;
 		const context: LogContext = {};
 
 		if (args.length > 0) {
-			context.additionalArgs = args;
+			context.additionalArgs = args.map((arg) =>
+				arg instanceof Error ? arg.message : arg,
+			);
 		}
 
 		return { message: messageStr, context };

@@ -16,7 +16,7 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 			return [];
 		}
 
-		return parsed.filter((blog: unknown): blog is ExternalBlogConfig => {
+		return parsed.filter((blog: object): blog is ExternalBlogConfig => {
 			if (typeof blog !== "object" || blog === null) {
 				astroLogger.warn("Invalid blog config: not an object", {
 					blog,
@@ -25,7 +25,7 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 				return false;
 			}
 
-			const blogObj = blog as Record<string, unknown>;
+			const blogObj = blog as Record<string, string>;
 			if (
 				typeof blogObj.name !== "string" ||
 				typeof blogObj.rssUrl !== "string"
