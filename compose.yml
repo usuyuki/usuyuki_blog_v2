@@ -52,7 +52,7 @@ services:
     ports:
       - "3100:3100"
     volumes:
-      - ./infra/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
       - loki-data:/loki
     command: -config.file=/etc/loki/local-config.yaml
 
@@ -60,10 +60,13 @@ services:
     image: grafana/grafana:12.1.0
     ports:
       - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
     volumes:
-      - ./infra/grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./infra/grafana/provisioning:/etc/grafana/provisioning
-      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
       - grafana-storage:/var/lib/grafana
     depends_on:
       - loki
