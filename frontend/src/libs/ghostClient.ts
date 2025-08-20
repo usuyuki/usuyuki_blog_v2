@@ -89,6 +89,11 @@ function isRateLimitError(error: unknown): boolean {
 	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
 
+function is404Error(error: unknown): boolean {
+	const err = error as { type?: string; response?: { status?: number } };
+	return err?.response?.status === 404;
+}
+
 // エラーログを簡潔に出力する関数
 function logGhostError(error: unknown, attempt: number, maxRetries: number): void {
 	const err = error as {
@@ -98,15 +103,29 @@ function logGhostError(error: unknown, attempt: number, maxRetries: number): voi
 		response?: { status?: number };
 	};
 	
-	errorHandler.handleError(error as Error, {
-		attempt,
-		maxRetries,
-		status: err?.response?.status,
-		id: err?.id,
-		context: err?.context,
-		type: err?.type,
-		service: 'ghost-api'
-	});
+	// 404エラーは警告として扱う
+	if (err?.response?.status === 404) {
+		astroLogger.warn(`Ghost API 404: Resource not found`, {
+			attempt,
+			maxRetries,
+			status: err?.response?.status,
+			id: err?.id,
+			context: err?.context,
+			type: err?.type,
+			service: 'ghost-api',
+			logType: 'api'
+		});
+	} else {
+		errorHandler.handleError(error as Error, {
+			attempt,
+			maxRetries,
+			status: err?.response?.status,
+			id: err?.id,
+			context: err?.context,
+			type: err?.type,
+			service: 'ghost-api'
+		});
+	}
 }
 
 // リトライ機能付きのGhost APIクライアント
@@ -120,7 +139,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
 					
-					// レート制限エラー以外はリトライしない
+					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
@@ -207,7 +226,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
 					
-					// レート制限エラー以外はリトライしない
+					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
@@ -239,7 +258,7 @@ export const ghostApiWithRetry = {
 				} catch (error) {
 					logGhostError(error, i + 1, maxRetries);
 					
-					// レート制限エラー以外はリトライしない
+					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(error)) {
 						return null;
 					}
