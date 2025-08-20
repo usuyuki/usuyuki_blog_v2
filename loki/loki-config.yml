@@ -18,6 +18,8 @@ common:
 
 limits_config:
   allow_structured_metadata: false
+  reject_old_samples: false
+  reject_old_samples_max_age: 168h
 
 schema_config:
   configs:
