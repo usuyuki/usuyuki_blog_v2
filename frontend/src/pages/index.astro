@@ -16,10 +16,7 @@ const headMeta: HeadMetaType = {
 	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 
-astroLogger.info("Index page accessed", { 
-	route: "/",
-	userAgent: Astro.request.headers.get("user-agent") || "unknown"
-});
+astroLogger.requestLog(Astro.request, { status: 200 });
 ---
 
 <IndexLayout {...headMeta}>

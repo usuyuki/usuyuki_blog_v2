@@ -42,14 +42,14 @@ function getCacheKey(method: string, options: unknown): string {
 function getFromCache<T>(key: string): T | null {
 	const cached = cache.get(key);
 	if (cached && cached.expiry > Date.now()) {
-		astroLogger.debug(`Cache HIT: ghost:${key}`, { cacheKey: key });
+		astroLogger.cacheLog('HIT', key, true, { source: 'ghost' });
 		return cached.data as T;
 	}
 	if (cached) {
 		cache.delete(key); // 期限切れのキャッシュを削除
-		astroLogger.debug(`Cache EXPIRED: ghost:${key}`, { cacheKey: key });
+		astroLogger.cacheLog('EXPIRED', key, false, { source: 'ghost' });
 	} else {
-		astroLogger.debug(`Cache MISS: ghost:${key}`, { cacheKey: key });
+		astroLogger.cacheLog('MISS', key, false, { source: 'ghost' });
 	}
 	return null;
 }
@@ -59,7 +59,7 @@ function setCache<T>(key: string, data: T, ttlMs = 60000): void {
 		data,
 		expiry: Date.now() + ttlMs,
 	});
-	astroLogger.debug(`Cache SET: ghost:${key}`, { cacheKey: key, ttl: ttlMs });
+	astroLogger.cacheLog('SET', key, false, { source: 'ghost', ttl: ttlMs });
 }
 
 // 長期キャッシュ（1週間）
@@ -69,17 +69,17 @@ function setLongTermCache<T>(key: string, data: T): void {
 		data,
 		expiry: Date.now() + 7 * 24 * 60 * 60 * 1000, // 1週間
 	});
-	astroLogger.debug(`Cache SET long-term: ghost:${longTermKey}`, { cacheKey: longTermKey, ttl: 604800000 });
+	astroLogger.cacheLog('SET_LONGTERM', longTermKey, false, { source: 'ghost', ttl: 604800000 });
 }
 
 function getLongTermCache<T>(key: string): T | null {
 	const longTermKey = `longterm_${key}`;
 	const cached = cache.get(longTermKey);
 	if (cached) {
-		astroLogger.debug(`Cache HIT long-term: ghost:${longTermKey}`, { cacheKey: longTermKey });
+		astroLogger.cacheLog('HIT_LONGTERM', longTermKey, true, { source: 'ghost' });
 		return cached.data as T;
 	}
-	astroLogger.debug(`Cache MISS long-term: ghost:${longTermKey}`, { cacheKey: longTermKey });
+	astroLogger.cacheLog('MISS_LONGTERM', longTermKey, false, { source: 'ghost' });
 	return null;
 }
 
@@ -130,7 +130,7 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: 'api', waitTime, attempt: i + 1, service: 'ghost-api' });
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -153,6 +153,7 @@ export const ghostApiWithRetry = {
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
 					setLongTermCache(cacheKey, result); // 1週間キャッシュ
 					astroLogger.info(`Ghost API success: fetched ${result?.length || 0} posts`, { 
+						logType: 'api',
 						count: result?.length || 0, 
 						service: 'ghost-api',
 						method: 'posts.browse'
@@ -163,14 +164,14 @@ export const ghostApiWithRetry = {
 
 					// レート制限エラーの場合のみリトライ
 					if (isRateLimitError(error)) {
-						astroLogger.warn("Rate limit detected", { service: 'ghost-api' });
+						astroLogger.warn("Rate limit detected", { logType: 'api', service: 'ghost-api' });
 						if (i === maxRetries - 1) {
 							// 最後のリトライ失敗時は長期キャッシュを返す
 							if (longTermCached) {
-								astroLogger.warn("Rate limit: Returning long-term cached data", { service: 'ghost-api' });
+								astroLogger.warn("Rate limit: Returning long-term cached data", { logType: 'api', service: 'ghost-api' });
 								return longTermCached;
 							} else {
-								astroLogger.warn("Rate limit: No cached data available", { service: 'ghost-api' });
+								astroLogger.warn("Rate limit: No cached data available", { logType: 'api', service: 'ghost-api' });
 								return null;
 							}
 						}
@@ -191,7 +192,7 @@ export const ghostApiWithRetry = {
 					const waitTime = isRateLimitError(error)
 						? 2000 * (i + 1) // 2秒、4秒、6秒
 						: 1000 * (i + 1); // 1秒、2秒、3秒
-					console.log(`Waiting ${waitTime}ms before retry...`);
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: 'api', waitTime, attempt: i + 1, service: 'ghost-api' });
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -216,7 +217,7 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: 'api', waitTime, attempt: i + 1, service: 'ghost-api' });
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
@@ -248,7 +249,7 @@ export const ghostApiWithRetry = {
 					}
 					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { waitTime, attempt: i + 1, service: 'ghost-api' });
+					astroLogger.info(`Waiting ${waitTime}ms before retry...`, { logType: 'api', waitTime, attempt: i + 1, service: 'ghost-api' });
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}

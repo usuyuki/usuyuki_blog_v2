@@ -27,17 +27,12 @@ const post = await ghostApiWithRetry.posts.read({
 });
 
 if (!post) {
-	astroLogger.warn("Post not found", { slug, route: `/${slug}` });
+	astroLogger.warn("Post not found", { logType: 'access', slug, route: `/${slug}` });
 	return new Response(null, { status: 404 });
 }
 post.published_at = iso8601TimeToDate(post.published_at);
 
-astroLogger.info("Article accessed", { 
-	slug: post.slug,
-	title: post.title,
-	route: `/${slug}`,
-	userAgent: Astro.request.headers.get("user-agent") || "unknown"
-});
+astroLogger.requestLog(Astro.request, { status: 200 });
 
 const headMeta = {
 	title: post.title,

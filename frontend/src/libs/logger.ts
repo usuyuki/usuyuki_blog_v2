@@ -28,7 +28,19 @@ const logger = winston.createLogger({
       host: lokiUrl,
       labels: { service: "frontend" },
       json: true,
-      format: winston.format.json(),
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.printf((info) => {
+          return JSON.stringify({
+            ...info,
+            labels: {
+              service: "frontend",
+              log_type: info.logType || "general",
+              level: info.level
+            }
+          });
+        })
+      ),
       replaceTimestamp: true,
       onConnectionError: (err: any) => {
         originalConsole.warn("Loki connection error:", err?.message || err);
@@ -38,9 +50,11 @@ const logger = winston.createLogger({
 });
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogType = 'access' | 'error' | 'cache' | 'api' | 'component' | 'system' | 'general';
 
 interface LogContext {
   [key: string]: any;
+  logType?: LogType;
 }
 
 class LoggerService {
@@ -51,15 +65,15 @@ class LoggerService {
   }
 
   debug(message: string, context?: LogContext) {
-    this.winston.debug(message, context);
+    this.winston.debug(message, this.enrichContext(context));
   }
 
   info(message: string, context?: LogContext) {
-    this.winston.info(message, context);
+    this.winston.info(message, this.enrichContext(context));
   }
 
   warn(message: string, context?: LogContext) {
-    this.winston.warn(message, context);
+    this.winston.warn(message, this.enrichContext(context));
   }
 
   error(message: string, error?: Error | any, context?: LogContext) {
@@ -67,14 +81,23 @@ class LoggerService {
       ? { name: error.name, message: error.message, stack: error.stack }
       : error;
     
-    this.winston.error(message, { 
+    this.winston.error(message, this.enrichContext({ 
       error: errorInfo,
+      logType: 'error',
       ...context 
-    });
+    }));
   }
 
   log(message: string, level: LogLevel = 'info', context?: LogContext) {
-    this.winston.log(level, message, context);
+    this.winston.log(level, message, this.enrichContext(context));
+  }
+
+  private enrichContext(context?: LogContext): LogContext {
+    return {
+      logType: 'general',
+      timestamp: new Date().toISOString(),
+      ...context
+    };
   }
 
   wrapConsole() {
@@ -143,4 +166,4 @@ if (typeof window !== 'undefined') {
 
 export default loggerService;
 export { originalConsole };
-export type { LogLevel, LogContext };
+export type { LogLevel, LogContext, LogType };

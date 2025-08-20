@@ -1,4 +1,4 @@
-import loggerService, { type LogContext } from './logger.js';
+import loggerService, { type LogContext, type LogType } from './logger.js';
 
 interface AstroLogContext extends LogContext {
   component?: string;
@@ -42,6 +42,7 @@ class AstroLogger {
   requestLog(request: Request, response: { status?: number } = {}, duration?: number) {
     const url = new URL(request.url);
     this.info('Request processed', {
+      logType: 'access',
       method: request.method,
       path: url.pathname,
       status: response.status || 200,
@@ -53,6 +54,7 @@ class AstroLogger {
 
   componentError(componentName: string, error: Error, context?: AstroLogContext) {
     this.error(`Component error: ${componentName}`, error, {
+      logType: 'component',
       component: componentName,
       ...context
     });
@@ -60,7 +62,25 @@ class AstroLogger {
 
   apiError(endpoint: string, error: Error, context?: AstroLogContext) {
     this.error(`API error: ${endpoint}`, error, {
+      logType: 'api',
       route: endpoint,
+      ...context
+    });
+  }
+
+  cacheLog(action: string, key: string, hit: boolean, context?: AstroLogContext) {
+    this.info(`Cache ${action}: ${key}`, {
+      logType: 'cache',
+      cacheAction: action,
+      cacheKey: key,
+      cacheHit: hit,
+      ...context
+    });
+  }
+
+  systemLog(message: string, context?: AstroLogContext) {
+    this.info(message, {
+      logType: 'system',
       ...context
     });
   }
