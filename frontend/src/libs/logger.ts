@@ -1,5 +1,6 @@
 import winston from "winston";
 import LokiTransport from "winston-loki";
+import { LOG_TYPES, type LogType } from "./logTypes";
 
 const lokiUrl = import.meta.env.LOKI_URL || process.env.LOKI_URL || "http://localhost:3100";
 
@@ -35,7 +36,7 @@ const logger = winston.createLogger({
             ...info,
             labels: {
               service: "frontend",
-              log_type: info.logType || "general",
+              log_type: info.logType || LOG_TYPES.GENERAL,
               level: info.level
             }
           });
@@ -50,7 +51,6 @@ const logger = winston.createLogger({
 });
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
-type LogType = 'access' | 'error' | 'cache' | 'api' | 'component' | 'system' | 'general';
 
 interface LogContext {
   [key: string]: any;
@@ -83,7 +83,7 @@ class LoggerService {
     
     this.winston.error(message, this.enrichContext({ 
       error: errorInfo,
-      logType: 'error',
+      logType: LOG_TYPES.ERROR,
       ...context 
     }));
   }
@@ -94,7 +94,7 @@ class LoggerService {
 
   private enrichContext(context?: LogContext): LogContext {
     return {
-      logType: 'general',
+      logType: LOG_TYPES.GENERAL,
       timestamp: new Date().toISOString(),
       ...context
     };
@@ -166,4 +166,4 @@ if (typeof window !== 'undefined') {
 
 export default loggerService;
 export { originalConsole };
-export type { LogLevel, LogContext, LogType };
+export type { LogLevel, LogContext };
