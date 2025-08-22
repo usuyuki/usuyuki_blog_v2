@@ -1,11 +1,9 @@
-apiVersion: 1
-
 groups:
-  - name: astro-alerts
-    folder: General
-    interval: 30s
+  - name: application-errors
+    folder: alerts
+    interval: 1m
     rules:
-      - uid: astro-app-error
+      - uid: astro-error-alert
         title: Astro Application Error
         condition: C
         data:
@@ -14,59 +12,44 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasource:
-              type: loki
-              uid: P8E80F9AEF21F6940
+            datasourceUid: loki-datasource
             model:
-              expr: rate({app="astro", level="error"} [5m])
+              expr: 'count_over_time({app="astro", level="error"}[5m])'
+              intervalMs: 1000
+              maxDataPoints: 43200
               refId: A
           - refId: C
             queryType: ""
             relativeTimeRange:
-              from: 0
+              from: 300
               to: 0
-            datasource:
-              type: __expr__
-              uid: __expr__
             model:
               conditions:
                 - evaluator:
                     params:
-                      - 0
+                      - 1
                     type: gt
                   operator:
                     type: and
                   query:
-                    type: query_result
                     params:
                       - A
                   reducer:
-                    type: last
                     params: []
+                    type: last
                   type: query
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              intervalMs: 1000
-              maxDataPoints: 43200
               refId: C
-              type: threshold
         noDataState: NoData
         execErrState: Alerting
-        for: 0m
+        for: 0s
         annotations:
-          summary: Astro application error detected
-          description: "Error detected in Astro application logs"
+          summary: "Astro application has error logs"
+          description: "Error level logs detected in Astro application"
         labels:
-          severity: critical
           service: astro
+          severity: warning
 
-  - name: ghost-alerts
-    folder: General
-    interval: 30s
-    rules:
-      - uid: ghost-app-error
+      - uid: ghost-error-alert
         title: Ghost Application Error
         condition: C
         data:
@@ -75,50 +58,39 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
-            datasource:
-              type: loki
-              uid: P8E80F9AEF21F6940
             model:
-              expr: rate({app="ghost", level="ERROR"} [5m])
+              expr: 'count_over_time({app="ghost", level="ERROR"}[5m])'
+              intervalMs: 1000
+              maxDataPoints: 43200
               refId: A
+            datasourceUid: loki-datasource
           - refId: C
             queryType: ""
             relativeTimeRange:
-              from: 0
+              from: 300
               to: 0
-            datasource:
-              type: __expr__
-              uid: __expr__
             model:
               conditions:
                 - evaluator:
                     params:
-                      - 0
+                      - 1
                     type: gt
                   operator:
                     type: and
                   query:
-                    type: query_result
                     params:
                       - A
                   reducer:
-                    type: last
                     params: []
+                    type: last
                   type: query
-              datasource:
-                type: __expr__
-                uid: __expr__
-              expression: A
-              intervalMs: 1000
-              maxDataPoints: 43200
               refId: C
-              type: threshold
         noDataState: NoData
         execErrState: Alerting
-        for: 0m
+        for: 0s
         annotations:
-          summary: Ghost CMS error detected
-          description: "Error detected in Ghost CMS logs"
+          summary: "Ghost application has error logs"
+          description: "Error level logs detected in Ghost application"
         labels:
-          severity: critical
           service: ghost
+          severity: warning
