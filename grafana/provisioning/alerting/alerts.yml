@@ -59,7 +59,7 @@ groups:
               from: 300
               to: 0
             model:
-              expr: 'count_over_time({app="ghost", level="ERROR"}[5m])'
+              expr: 'count_over_time({app="ghost"} |~ "] ERROR "[5m])'
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A

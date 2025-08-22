@@ -34,15 +34,15 @@ scrape_configs:
           selector: '{app="astro"}'
           stages:
             - regex:
-                expression: '\[32m(?P<level>info)\[39m'
+                expression: '^(?P<level>error):'
             - labels:
                 level:
             - regex:
-                expression: '\[33m(?P<level>warn)\[39m'
+                expression: '^(?P<level>info):'
             - labels:
                 level:
             - regex:
-                expression: '\[31m(?P<level>error)\[39m'
+                expression: '^(?P<level>warn):'
             - labels:
                 level:
             - regex:
@@ -53,6 +53,6 @@ scrape_configs:
           selector: '{app="ghost"}'
           stages:
             - regex:
-                expression: '\x1b\[(?:36m|31m|33m)(?P<level>INFO|ERROR|WARN)\x1b\[39m'
+                expression: '\] (?P<level>ERROR|INFO|WARN) '
             - labels:
                 level:
