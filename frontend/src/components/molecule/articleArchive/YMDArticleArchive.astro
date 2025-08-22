@@ -9,7 +9,7 @@ interface Props {
 }
 const { posts } = Astro.props;
 //日付の変換
-posts?.map((post: ArticleArchiveType) => {
+posts?.forEach((post: ArticleArchiveType) => {
 	if (typeof post.published_at === "string") {
 		post.published_at = iso8601TimeToDate(post.published_at);
 	}

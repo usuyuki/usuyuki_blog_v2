@@ -2,10 +2,11 @@ import type { APIRoute } from "astro";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import { getLatestArticles } from "~/libs/articleAggregator";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
+import errorHandler from "~/libs/errorHandler";
 
 export const GET: APIRoute = async ({ url }) => {
 	const beforeDate = url.searchParams.get("before");
-	const limit = parseInt(url.searchParams.get("limit") || "12");
+	const limit = parseInt(url.searchParams.get("limit") || "12", 10);
 
 	try {
 		const cacheKey = "archive:all-articles";
@@ -65,7 +66,10 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		);
 	} catch (error) {
-		console.error("Archive API error:", error);
+		errorHandler.handleApiError("/api/archive", error as Error, {
+			beforeDate: beforeDate || undefined,
+			limit,
+		});
 		return new Response(JSON.stringify({ error: "Failed to fetch posts" }), {
 			status: 500,
 			headers: {

@@ -21,8 +21,8 @@ describe("Archive API", () => {
 		const testUrl1 = new URL("http://localhost/api/archive");
 		const testUrl2 = new URL("http://localhost/api/archive?offset=6");
 
-		const offset1 = parseInt(testUrl1.searchParams.get("offset") || "0");
-		const offset2 = parseInt(testUrl2.searchParams.get("offset") || "0");
+		const offset1 = parseInt(testUrl1.searchParams.get("offset") || "0", 10);
+		const offset2 = parseInt(testUrl2.searchParams.get("offset") || "0", 10);
 
 		expect(offset1).toBe(0);
 		expect(offset2).toBe(6);
@@ -30,7 +30,7 @@ describe("Archive API", () => {
 
 	it("handles invalid offset parameter", () => {
 		const testUrl = new URL("http://localhost/api/archive?offset=invalid");
-		const offset = parseInt(testUrl.searchParams.get("offset") || "0");
+		const offset = parseInt(testUrl.searchParams.get("offset") || "0", 10);
 
 		// parseInt of invalid string returns NaN, should default to 0
 		expect(Number.isNaN(offset)).toBe(true);

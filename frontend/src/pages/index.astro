@@ -7,6 +7,7 @@ import TagList from "~/components/organism/tag/TagList.astro";
 import { SITE_URL } from "~/consts";
 import IndexLayout from "~/layouts/extends/IndexLayout.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
+import astroLogger from "~/libs/astroLogger";
 
 const headMeta: HeadMetaType = {
 	title: "とっぷ",
@@ -14,6 +15,8 @@ const headMeta: HeadMetaType = {
 	description: "「急須で入れたようななにか」のトップページです",
 	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
+
+astroLogger.requestLog(Astro.request, { status: 200 });
 ---
 
 <IndexLayout {...headMeta}>

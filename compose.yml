@@ -18,6 +18,8 @@ services:
       - "1001:2368"
     depends_on:
       - db
+    labels:
+      - "logging=promtail"
 
   astro:
     build:
@@ -34,7 +36,12 @@ services:
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
       GHOST_API_URL: ${GHOST_API_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
+      LOKI_URL: http://loki:3100
     user: "1000:1000"
+    depends_on:
+      - loki
+    labels:
+      - "logging=promtail"
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
 
   db:
@@ -44,5 +51,43 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: example
 
+  loki:
+    image: grafana/loki:3.5
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    ports:
+      - "1002:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      GRAFANA_BASE_URL: ${GRAFANA_BASE_URL:-http://localhost:1002}
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - loki
+
+  promtail:
+    image: grafana/promtail:3.5
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
 volumes:
   db-store:
+  loki-data:
+  grafana-storage:

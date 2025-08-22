@@ -12,11 +12,13 @@ import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
+import astroLogger from "~/libs/astroLogger";
+import { LOG_TYPES } from "~/libs/logTypes";
 import type { TOCType } from "~/types/TOCType";
 
 // ドットが含まれるスラッグを除外
 const slug = Astro.params.slug;
-if (!slug || slug.includes('.') || slug.length > 100) {
+if (!slug || slug.includes(".") || slug.length > 100) {
 	return new Response(null, { status: 404 });
 }
 
@@ -26,9 +28,16 @@ const post = await ghostApiWithRetry.posts.read({
 });
 
 if (!post) {
+	astroLogger.warn("Post not found", {
+		logType: LOG_TYPES.ACCESS,
+		slug,
+		route: `/${slug}`,
+	});
 	return new Response(null, { status: 404 });
 }
 post.published_at = iso8601TimeToDate(post.published_at);
+
+astroLogger.requestLog(Astro.request, { status: 200 });
 
 const headMeta = {
 	title: post.title,

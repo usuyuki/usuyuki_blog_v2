@@ -1,0 +1,96 @@
+groups:
+  - name: application-errors
+    folder: alerts
+    interval: 1m
+    rules:
+      - uid: astro-error-alert
+        title: Astro Application Error
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki-datasource
+            model:
+              expr: 'count_over_time({app="astro", level="error"}[5m])'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 0s
+        annotations:
+          summary: "Astro application has error logs"
+          description: "Error level logs detected in Astro application"
+        labels:
+          service: astro
+          severity: warning
+
+      - uid: ghost-error-alert
+        title: Ghost Application Error
+        condition: C
+        data:
+          - refId: A
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              expr: 'count_over_time({app="ghost"} |~ "] ERROR "[5m])'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+            datasourceUid: loki-datasource
+          - refId: C
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - A
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              refId: C
+        noDataState: NoData
+        execErrState: Alerting
+        for: 0s
+        annotations:
+          summary: "Ghost application has error logs"
+          description: "Error level logs detected in Ghost application"
+        labels:
+          service: ghost
+          severity: warning

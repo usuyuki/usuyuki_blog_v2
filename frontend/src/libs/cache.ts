@@ -1,3 +1,5 @@
+import astroLogger from "./astroLogger";
+
 interface CacheItem<T> {
 	data: T;
 	timestamp: number;
@@ -5,32 +7,32 @@ interface CacheItem<T> {
 }
 
 class MemoryCache {
-	private cache = new Map<string, CacheItem<unknown>>();
+	private cache = new Map<string, CacheItem<object>>();
 
-	set<T>(key: string, data: T, ttlMs: number): void {
+	set(key: string, data: object, ttlMs: number): void {
 		this.cache.set(key, {
 			data,
 			timestamp: Date.now(),
 			ttl: ttlMs,
 		});
-		console.log(`[Cache SET] Key: ${key}, TTL: ${ttlMs}ms`);
+		astroLogger.debug(`Cache SET: ${key}`, { key, ttl: ttlMs });
 	}
 
-	get<T>(key: string): T | null {
+	get<T extends object>(key: string): T | null {
 		const item = this.cache.get(key);
 		if (!item) {
-			console.log(`[Cache MISS] Key: ${key}`);
+			astroLogger.debug(`Cache MISS: ${key}`, { key });
 			return null;
 		}
 
 		const now = Date.now();
 		if (now - item.timestamp > item.ttl) {
 			this.cache.delete(key);
-			console.log(`[Cache EXPIRED] Key: ${key}`);
+			astroLogger.debug(`Cache EXPIRED: ${key}`, { key });
 			return null;
 		}
 
-		console.log(`[Cache HIT] Key: ${key}`);
+		astroLogger.debug(`Cache HIT: ${key}`, { key });
 		return item.data as T;
 	}
 

@@ -1,6 +1,7 @@
 ---
 import ArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
 import { ghostClient } from "~/libs/ghostClient";
+import errorHandler from "~/libs/errorHandler";
 
 const today = new Date();
 const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -18,7 +19,7 @@ const posts = await ghostClient.posts
 		order: "published_at ASC",
 	})
 	.catch((err: Error) => {
-		console.error(err);
+		errorHandler.handleComponentError("LastMonthArticle", err);
 	});
 const postsData = {
 	posts: posts,

@@ -1,6 +1,7 @@
 ---
 import { ghostClient } from "~/libs/ghostClient";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+import errorHandler from "~/libs/errorHandler";
 
 interface Props {
 	ulClass?: string;
@@ -14,7 +15,7 @@ const posts = await ghostClient.posts
 		order: "published_at DESC",
 	})
 	.catch((err: Error) => {
-		console.error(err);
+		errorHandler.handleComponentError("LatestArticleList", err);
 	});
 ---
 

@@ -3,6 +3,8 @@ import type { RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { fetchMultipleRSS } from "~/libs/rssClient";
 import { CONFIG } from "~/libs/config";
+import astroLogger from "./astroLogger";
+import errorHandler from "./errorHandler";
 
 function convertRSSToArticle(
 	rssItem: RSSItem,
@@ -53,9 +55,12 @@ export async function getLatestArticles(
 			articles.push(...ghostArticles);
 		}
 	} catch (error) {
-		console.warn(
-			"Ghost posts unavailable (rate limit or error), showing RSS content only:",
-			(error as Error).message,
+		astroLogger.warn(
+			"Ghost posts unavailable (rate limit or error), showing RSS content only",
+			{
+				error: (error as Error).message,
+				service: "ghost-api",
+			},
 		);
 		// Ghost APIがレート制限の場合はRSSのみ表示
 	}
@@ -72,7 +77,10 @@ export async function getLatestArticles(
 			});
 			articles.push(...rssArticles);
 		} catch (error) {
-			console.error("Failed to fetch RSS posts:", error);
+			errorHandler.handleError(error as Error, {
+				service: "rss-aggregator",
+				type: "rss_fetch_error",
+			});
 		}
 	}
 
@@ -120,7 +128,11 @@ export async function getFeaturedArticles(
 			return ghostPosts.map(convertGhostToArticle);
 		}
 	} catch (error) {
-		console.error("Failed to fetch featured Ghost posts:", error);
+		errorHandler.handleError(error as Error, {
+			service: "ghost-api",
+			method: "getFeaturedGhostPosts",
+			type: "featured_posts_error",
+		});
 	}
 
 	return [];
