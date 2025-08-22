@@ -1,0 +1,13 @@
+policies:
+  - receiver: discord-webhook
+    group_by: ['alertname', 'service']
+    group_wait: 0s
+    group_interval: 30s
+    repeat_interval: 4h
+    matchers:
+      - severity =~ "warning|critical"
+
+routes:
+  - receiver: discord-webhook
+    matchers:
+      - service =~ "astro|ghost"

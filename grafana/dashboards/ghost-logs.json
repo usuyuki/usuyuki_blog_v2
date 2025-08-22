@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -73,7 +73,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "builder",
           "expr": "sum by (stream) (count_over_time({app=\"ghost\"}[1h]))",
@@ -87,7 +87,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -163,7 +163,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "builder",
           "expr": "rate(({app=\"ghost\"} |~ \"ERROR|WARN|INFO\")[5m])",
@@ -177,7 +177,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 12,
@@ -200,7 +200,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "builder",
           "expr": "{app=\"ghost\"}",
@@ -214,7 +214,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -332,10 +332,10 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "builder",
-          "expr": "sum by (level) (count_over_time({app=\"ghost\"} | regexp \"\\\\[(?P<level>\\\\w+)\\\\]\" [5m]))",
+          "expr": "sum by (level) (count_over_time({app=\"ghost\"}[5m]))",
           "queryType": "",
           "refId": "A"
         }

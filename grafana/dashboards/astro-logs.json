@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -41,7 +41,38 @@
           },
           "mappings": []
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warn"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -73,7 +104,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\"} |~ \"info\" [1h]))",
@@ -84,7 +115,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\"} |~ \"error\" [1h]))",
@@ -95,7 +126,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\"} |~ \"warn\" [1h]))",
@@ -106,7 +137,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\"} |~ \"debug\" [1h]))",
@@ -121,7 +152,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -169,7 +200,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"access\"} [$__interval]))",
@@ -180,7 +211,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"cache\"} [$__interval]))",
@@ -191,7 +222,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"error\"} [$__interval]))",
@@ -202,7 +233,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"api\"} [$__interval]))",
@@ -213,7 +244,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"component\"} [$__interval]))",
@@ -224,7 +255,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(count_over_time({app=\"astro\",log_type=\"system\"} [$__interval]))",
@@ -239,7 +270,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "fieldConfig": {
         "defaults": {
@@ -315,7 +346,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"access\"} [1m]))",
@@ -326,7 +357,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"cache\"} [1m]))",
@@ -337,7 +368,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"error\"} [1m]))",
@@ -348,7 +379,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"api\"} [1m]))",
@@ -359,7 +390,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"component\"} [1m]))",
@@ -370,7 +401,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "sum(rate({app=\"astro\",log_type=\"system\"} [1m]))",
@@ -385,7 +416,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -408,7 +439,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"access\"}",
@@ -422,7 +453,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -445,7 +476,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"error\"}",
@@ -459,7 +490,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -482,7 +513,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"cache\"}",
@@ -496,7 +527,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -519,7 +550,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"api\"}",
@@ -533,7 +564,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -556,7 +587,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"component\"}",
@@ -570,7 +601,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -593,7 +624,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\",log_type=\"system\"}",
@@ -607,7 +638,7 @@
     {
       "datasource": {
         "type": "loki",
-        "uid": "P8E80F9AEF21F6940"
+        "uid": "loki-datasource"
       },
       "gridPos": {
         "h": 8,
@@ -630,7 +661,7 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "P8E80F9AEF21F6940"
+            "uid": "loki-datasource"
           },
           "editorMode": "code",
           "expr": "{app=\"astro\"} |~ \"\\\\[.*\\\\]\" ",
