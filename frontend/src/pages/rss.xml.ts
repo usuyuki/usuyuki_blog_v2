@@ -24,8 +24,8 @@ export async function GET() {
 			description: SITE_DESCRIPTION,
 			site: SITE_URL,
 			customData: "<language>ja</language>",
-			// @ts-ignore
-			items: posts.map((post) => ({
+			// biome-ignore lint/suspicious/noExplicitAny: Ghost API response type is complex
+			items: posts.map((post: any) => ({
 				title: post.title,
 				pubDate: post.published_at,
 				link: `/${post.slug}`,

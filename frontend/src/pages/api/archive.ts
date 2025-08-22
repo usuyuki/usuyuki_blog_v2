@@ -6,7 +6,7 @@ import errorHandler from "~/libs/errorHandler";
 
 export const GET: APIRoute = async ({ url }) => {
 	const beforeDate = url.searchParams.get("before");
-	const limit = parseInt(url.searchParams.get("limit") || "12");
+	const limit = parseInt(url.searchParams.get("limit") || "12", 10);
 
 	try {
 		const cacheKey = "archive:all-articles";

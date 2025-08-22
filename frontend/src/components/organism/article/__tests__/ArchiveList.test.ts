@@ -75,7 +75,7 @@ describe("ArchiveList Logic", () => {
 	it("formats month display names correctly", () => {
 		const monthKey = "2023-12";
 		const [year, month] = monthKey.split("-");
-		const monthName = `${year}年${parseInt(month)}月`;
+		const monthName = `${year}年${parseInt(month, 10)}月`;
 
 		expect(monthName).toBe("2023年12月");
 	});

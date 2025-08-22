@@ -1,4 +1,5 @@
 // 本当は型定義ライブラリを追加すべきだが、追加すると自前で定義した型と競合して大改修必要なので保留
+// biome-ignore lint/suspicious/noTsIgnore: Type definitions conflict with custom types
 // @ts-ignore
 import GhostContentAPI from "@tryghost/content-api";
 import astroLogger from "./astroLogger";
