@@ -1,9 +1,5 @@
 import winston from "winston";
-import LokiTransport from "winston-loki";
 import { LOG_TYPES, type LogType } from "./logTypes";
-
-const lokiUrl =
-	import.meta.env.LOKI_URL || process.env.LOKI_URL || "http://localhost:3100";
 
 const originalConsole = {
 	log: console.log,
@@ -25,28 +21,6 @@ const logger = winston.createLogger({
 				winston.format.colorize(),
 				winston.format.simple(),
 			),
-		}),
-		new LokiTransport({
-			host: lokiUrl,
-			labels: { service: "frontend" },
-			json: true,
-			format: winston.format.combine(
-				winston.format.timestamp(),
-				winston.format.printf((info) => {
-					return JSON.stringify({
-						...info,
-						labels: {
-							service: "frontend",
-							log_type: info.logType || LOG_TYPES.GENERAL,
-							level: info.level,
-						},
-					});
-				}),
-			),
-			replaceTimestamp: true,
-			onConnectionError: (err: Error) => {
-				originalConsole.warn("Loki connection error:", err?.message || err);
-			},
 		}),
 	],
 });

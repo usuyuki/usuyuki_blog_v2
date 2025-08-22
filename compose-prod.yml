@@ -35,9 +35,6 @@ services:
     restart: always
     stdin_open: true
     tty: true
-    # lokiに流しているので不要(量もメチャ多いため)
-    logging:
-      driver: "none"
     environment:
       NODE_ENV: production
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
@@ -48,6 +45,8 @@ services:
     depends_on:
       - ghost
       - loki
+    labels:
+      - "logging=promtail"
 
   db:
     image: mysql:8.0-debian
