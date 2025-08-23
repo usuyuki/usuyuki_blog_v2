@@ -53,6 +53,6 @@ scrape_configs:
           selector: '{app="ghost"}'
           stages:
             - regex:
-                expression: '\] (?P<level>ERROR|INFO|WARN) '
+                expression: '\] \x1b\[\d+m(?P<level>ERROR|INFO|WARN)\x1b\[\d+m'
             - labels:
                 level:
