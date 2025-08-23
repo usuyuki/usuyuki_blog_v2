@@ -35,7 +35,7 @@ groups:
         for: 0s
         annotations:
           summary: "Error logs detected in Astro application"
-          description: "{{ $value }} error logs detected in Astro application over the last 5 minutes"
+          description: "{{ $values.B.Value }} error logs detected in Astro application over the last 5 minutes"
         labels:
           service: astro
           severity: warning
@@ -86,7 +86,7 @@ groups:
         for: 0s
         annotations:
           summary: "Error logs detected in Ghost application"
-          description: "{{ $value }} error logs detected in Ghost application over the last 5 minutes"
+          description: "{{ $values.B.Value }} error logs detected in Ghost application over the last 5 minutes"
         labels:
           service: ghost
           severity: warning
