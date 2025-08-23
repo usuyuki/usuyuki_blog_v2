@@ -9,16 +9,14 @@ contactPoints:
           message: |
             **{{ .GroupLabels.alertname }}**
             
-            **Service:** {{ .GroupLabels.service }}
-            **Severity:** {{ .GroupLabels.severity }}
-            **Log Type:** {{ .GroupLabels.log_type }}
-            
             {{ range .Alerts }}
+            **Service:** {{ .Labels.service }} | **Log Type:** {{ .Labels.log_type }}
+            
             📋 **Summary:** {{ .Annotations.summary }}
             📝 **Description:** {{ .Annotations.description }}
             ⏰ **Started:** {{ .StartsAt }}
             
             🔗 **View in Grafana:** ${GRAFANA_BASE_URL}/alerting/list
-            📊 **View Dashboard:** ${GRAFANA_BASE_URL}/d/{{ if eq .GroupLabels.service "astro" }}astro-logs-by-type{{ else if eq .GroupLabels.service "ghost" }}ghost-logs{{ end }}/
+            📊 **View Dashboard:** ${GRAFANA_BASE_URL}/d/{{ if eq .Labels.service "astro" }}astro-logs-by-type{{ else if eq .Labels.service "ghost" }}ghost-logs{{ end }}/
             {{ end }}
         disableResolveMessage: false
