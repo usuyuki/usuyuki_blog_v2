@@ -14,10 +14,19 @@ groups:
               to: 0
             datasourceUid: loki-datasource
             model:
-              expr: 'count_over_time({app="astro"} |~ "error"[5m])'
+              expr: 'count_over_time({app="astro",log_type="error"}[5m])'
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
+          - refId: D
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki-datasource
+            model:
+              expr: '{app="astro",log_type="error"}'
+              refId: D
           - refId: B
             queryType: ""
             relativeTimeRange:
@@ -43,7 +52,7 @@ groups:
               maxDataPoints: 43200
               refId: C
               type: math
-        noDataState: NoData
+        noDataState: OK
         execErrState: Alerting
         for: 0s
         annotations:
@@ -69,6 +78,15 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
+          - refId: D
+            queryType: ""
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: loki-datasource
+            model:
+              expr: '{app="ghost"} |~ "ERROR"'
+              refId: D
           - refId: B
             queryType: ""
             relativeTimeRange:
@@ -94,7 +112,7 @@ groups:
               maxDataPoints: 43200
               refId: C
               type: math
-        noDataState: NoData
+        noDataState: OK
         execErrState: Alerting
         for: 0s
         annotations:

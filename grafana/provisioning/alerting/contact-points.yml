@@ -18,6 +18,13 @@ contactPoints:
             📝 **Description:** {{ .Annotations.description }}
             ⏰ **Started:** {{ .StartsAt }}
             
+            {{ if .Values.D }}
+            🔍 **Recent Error Logs:**
+            ```
+            {{ .Values.D.Value }}
+            ```
+            {{ end }}
+            
             🔗 **View in Grafana:** ${GRAFANA_BASE_URL}/alerting/list
             🔍 **View Logs:** ${GRAFANA_BASE_URL}/explore?left=%5B%22now-1h%22,%22now%22,%22loki%22,%7B%22expr%22:%22%7Bapp%3D%5C%22{{ .GroupLabels.service }}%5C%22,log_type%3D%5C%22{{ .GroupLabels.log_type }}%5C%22%7D%22%7D%5D
             {{ end }}
