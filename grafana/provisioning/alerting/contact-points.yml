@@ -9,11 +9,8 @@ contactPoints:
           message: |
             **{{ .GroupLabels.alertname }}**
             
-            **Service:** {{ .GroupLabels.service }}
-            
             {{ range .Alerts }}
-            **Severity:** {{ .Labels.severity }}
-            **Log Type:** {{ .Labels.log_type }}
+            **Service:** {{ .Labels.service }} | **Log Type:** {{ .Labels.log_type }}
             
             📋 **Summary:** {{ .Annotations.summary }}
             📝 **Description:** {{ .Annotations.description }}
