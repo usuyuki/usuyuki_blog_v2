@@ -1,10 +1,10 @@
 groups:
-  - name: application-errors
+  - name: astro-error-logs
     folder: alerts
     interval: 1m
     rules:
-      - uid: astro-error-alert
-        title: Astro Application Error
+      - uid: astro-error-logs-alert
+        title: Astro Error Logs Detected
         condition: C
         data:
           - refId: A
@@ -14,43 +14,48 @@ groups:
               to: 0
             datasourceUid: loki-datasource
             model:
-              expr: 'count_over_time({app="astro", level="error"}[5m])'
+              expr: 'count_over_time({app="astro",log_type="error"}[5m])'
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: reduce
           - refId: C
             queryType: ""
             relativeTimeRange:
-              from: 300
+              from: 0
               to: 0
+            datasourceUid: __expr__
             model:
-              conditions:
-                - evaluator:
-                    params:
-                      - 1
-                    type: gt
-                  operator:
-                    type: and
-                  query:
-                    params:
-                      - A
-                  reducer:
-                    params: []
-                    type: last
-                  type: query
+              expression: $B > 0
+              intervalMs: 1000
+              maxDataPoints: 43200
               refId: C
-        noDataState: NoData
+              type: math
+        noDataState: OK
         execErrState: Alerting
         for: 0s
         annotations:
-          summary: "Astro application has error logs"
-          description: "Error level logs detected in Astro application"
+          summary: "Error logs detected in Astro application"
+          description: "{{ $values.B.Value }} error logs detected in Astro application over the last 5 minutes"
         labels:
           service: astro
           severity: warning
+          log_type: error
 
-      - uid: ghost-error-alert
-        title: Ghost Application Error
+      - uid: ghost-error-logs-alert
+        title: Ghost Error Logs Detected
         condition: C
         data:
           - refId: A
@@ -58,39 +63,44 @@ groups:
             relativeTimeRange:
               from: 300
               to: 0
+            datasourceUid: loki-datasource
             model:
-              expr: 'count_over_time({app="ghost"} |~ "] ERROR "[5m])'
+              expr: 'count_over_time({app="ghost"} |~ "ERROR"[5m])'
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
-            datasourceUid: loki-datasource
+          - refId: B
+            queryType: ""
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: A
+              reducer: last
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: B
+              type: reduce
           - refId: C
             queryType: ""
             relativeTimeRange:
-              from: 300
+              from: 0
               to: 0
+            datasourceUid: __expr__
             model:
-              conditions:
-                - evaluator:
-                    params:
-                      - 1
-                    type: gt
-                  operator:
-                    type: and
-                  query:
-                    params:
-                      - A
-                  reducer:
-                    params: []
-                    type: last
-                  type: query
+              expression: $B > 0
+              intervalMs: 1000
+              maxDataPoints: 43200
               refId: C
-        noDataState: NoData
+              type: math
+        noDataState: OK
         execErrState: Alerting
         for: 0s
         annotations:
-          summary: "Ghost application has error logs"
-          description: "Error level logs detected in Ghost application"
+          summary: "Error logs detected in Ghost application"
+          description: "{{ $values.B.Value }} error logs detected in Ghost application over the last 5 minutes"
         labels:
           service: ghost
           severity: warning
+          log_type: error
