@@ -1,8 +1,8 @@
 policies:
   - receiver: discord-webhook
-    group_by: ['alertname', 'service']
-    group_wait: 0s
-    group_interval: 30s
+    group_by: ['alertname', 'service', 'log_type']
+    group_wait: 10s
+    group_interval: 5m
     repeat_interval: 4h
     matchers:
       - severity =~ "warning|critical"
@@ -10,4 +10,9 @@ policies:
 routes:
   - receiver: discord-webhook
     matchers:
-      - service =~ "astro|ghost"
+      - service = "astro"
+      - log_type = "error"
+  - receiver: discord-webhook
+    matchers:
+      - service = "ghost"
+      - log_type = "error"
