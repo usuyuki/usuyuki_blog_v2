@@ -18,15 +18,6 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
-          - refId: D
-            queryType: ""
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: loki-datasource
-            model:
-              expr: '{app="astro",log_type="error"}'
-              refId: D
           - refId: B
             queryType: ""
             relativeTimeRange:
@@ -78,15 +69,6 @@ groups:
               intervalMs: 1000
               maxDataPoints: 43200
               refId: A
-          - refId: D
-            queryType: ""
-            relativeTimeRange:
-              from: 300
-              to: 0
-            datasourceUid: loki-datasource
-            model:
-              expr: '{app="ghost"} |~ "ERROR"'
-              refId: D
           - refId: B
             queryType: ""
             relativeTimeRange:
