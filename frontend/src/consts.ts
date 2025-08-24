@@ -7,3 +7,6 @@ export const SITE_AUTHOR = "うすゆき";
 export const TWITTER_ID = "@usuyuki26";
 export const SITE_SUB_TITLE = "急須で入れたような何か";
 export const SITE_DESCRIPTION = "うすゆきのブログです";
+
+// Google Analytics
+export const GA_MEASUREMENT_ID = "G-ZB2SYBTNQQ";

@@ -24,10 +24,9 @@ The project uses a Docker-based development and deployment setup:
 All development work happens in the `frontend/` directory. Use these commands:
 
 ```bash
-# Start development server
-make dev
-# or
-docker compose exec astro pnpm dev
+# Development server (NOTE: DO NOT run 'make dev' or 'pnpm dev' manually)
+# The development server starts automatically when containers are launched
+# and runs continuously in the background
 
 # Complete build pipeline (format, lint, check, build)
 make 1
