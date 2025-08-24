@@ -103,30 +103,44 @@ async function loadMorePosts() {
 	}
 }
 
-function handleScroll() {
-	if (
-		window.innerHeight + window.scrollY >=
-		document.body.offsetHeight - 1000
-	) {
-		loadMorePosts();
-	}
-}
-
 import { onMount } from "svelte";
 
+let sentinelElement: HTMLElement;
+let observer: IntersectionObserver;
+
 onMount(() => {
-	let scrollTimeout: ReturnType<typeof setTimeout>;
-
-	const scrollHandler = () => {
-		clearTimeout(scrollTimeout);
-		scrollTimeout = setTimeout(handleScroll, 100);
-	};
-
-	window.addEventListener("scroll", scrollHandler);
+	// Intersection Observer for infinite scroll
+	observer = new IntersectionObserver(
+		(entries) => {
+			entries.forEach((entry) => {
+				if (entry.isIntersecting && hasMorePosts && !isLoading) {
+					loadMorePosts();
+				}
+			});
+		},
+		{
+			rootMargin: "1000px", // Load more when sentinel is 1000px away from viewport
+			threshold: 0,
+		},
+	);
 
 	return () => {
-		window.removeEventListener("scroll", scrollHandler);
+		if (observer) {
+			observer.disconnect();
+		}
 	};
+});
+
+// Reactive statement to observe sentinel element when it becomes available
+$effect(() => {
+	if (observer && sentinelElement) {
+		observer.observe(sentinelElement);
+		return () => {
+			if (observer && sentinelElement) {
+				observer.unobserve(sentinelElement);
+			}
+		};
+	}
 });
 </script>
 
@@ -148,6 +162,12 @@ onMount(() => {
 </div>
 
 {#if hasMorePosts}
+	<!-- Sentinel element for Intersection Observer -->
+	<div 
+		bind:this={sentinelElement}
+		class="py-2"
+		style="height: 1px;"
+	></div>
 	<div class="py-8 text-center">
 		<button
 			class="px-4 py-4 bg-blue text-white rounded-lg hover:shadow-xl duration-300 disabled:opacity-50"
