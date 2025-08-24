@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import SquareDay from "~/components/atom/date/SquareDay.astro";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 interface Props {
@@ -32,13 +33,15 @@ posts.forEach((post: ArticleArchiveType) => {
 						<div>
 							{post.feature_image ? (
 								<Image
-									src={post.feature_image}
-									width={500}
-									height={500}
+									src={optimizeGhostImageUrl(post.feature_image, { width: 160, height: 160 })}
+									width={160}
+									height={160}
 									format="avif"
 									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
 									transition:name={'image-' + post.slug}
+									loading="lazy"
+									sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
 								/>
 							) : (
 								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
