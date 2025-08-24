@@ -30,7 +30,17 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <!-- sitemap -->
 <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-<!-- Google Fonts -->
+<!-- Preload self-hosted critical fonts -->
+<link rel="preload" href="/fonts/noto-sans-jp-500-main.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/noto-sans-jp-500-hiragana-katakana.woff2" as="font" type="font/woff2" crossorigin />
+
+<!-- DNS prefetch and preconnect for font fallback -->
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="dns-prefetch" href="//fonts.gstatic.com" />
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<!-- Google Fonts as fallback with optimized display -->
 <GoogleFontsOptimizer
 	url="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
 />
