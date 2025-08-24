@@ -141,6 +141,11 @@ astroLogger.systemLog('System startup completed');
 - `DISCORD_WEBHOOK_URL` - Discord webhook URL for error notifications
 - `GRAFANA_BASE_URL` - Grafana base URL for notification links
 
+## Code Style Guidelines
+
+- IMPORTANT: DO NOT ADD ***ANY*** COMMENTS unless asked
+- Exception: When making changes to CLAUDE.md, add comments to explain the reason if the code change alone is unclear
+
 ## Testing and Quality Assurance
 
 ### Testing Framework
