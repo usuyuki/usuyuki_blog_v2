@@ -2,7 +2,6 @@
 import { ClientRouter } from "astro:transitions";
 import { GoogleFontsOptimizer } from "astro-google-fonts-optimizer";
 import {
-	GA_MEASUREMENT_ID,
 	SITE_AUTHOR,
 	SITE_SUB_TITLE,
 	SITE_TITLE,
@@ -10,6 +9,7 @@ import {
 	TWITTER_ID,
 } from "~/consts";
 import type { HeadMetaType } from "~/types/HeadMetaType";
+import GoogleAnalytics from "~/components/atom/analytics/GoogleAnalytics.astro";
 
 interface Props extends HeadMetaType {}
 const { title, slug, description, ogImage } = Astro.props;
@@ -30,24 +30,13 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <!-- sitemap -->
 <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-<!-- Google Analytics preconnect for performance -->
-<link rel="preconnect" href="https://www.googletagmanager.com" />
-<link rel="preconnect" href="https://www.google-analytics.com" />
-
 <!-- Google Fonts -->
 <GoogleFontsOptimizer
 	url="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
 />
-<!-- Google Analytics -->
-<script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
-<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
-	window.dataLayer = window.dataLayer || [];
-	function gtag() {
-		dataLayer.push(arguments);
-	}
-	gtag('js', new Date());
-	gtag('config', GA_MEASUREMENT_ID);
-</script>
+
+<!-- Google Analytics with Partytown -->
+<GoogleAnalytics />
 <title>{pageTitle}</title>
 <meta name="author" content={SITE_AUTHOR} />
 <meta name="description" content={description} />

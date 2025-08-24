@@ -1,0 +1,18 @@
+---
+import { GA_MEASUREMENT_ID } from "~/consts";
+---
+
+<!-- Google Analytics preconnect for performance -->
+<link rel="preconnect" href="https://www.googletagmanager.com" />
+<link rel="preconnect" href="https://www.google-analytics.com" />
+
+<!-- Google Analytics with Partytown -->
+<script is:inline type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+<script is:inline type="text/partytown" define:vars={{ GA_MEASUREMENT_ID }}>
+	window.dataLayer = window.dataLayer || [];
+	function gtag() {
+		dataLayer.push(arguments);
+	}
+	gtag('js', new Date());
+	gtag('config', GA_MEASUREMENT_ID);
+</script>
