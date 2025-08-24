@@ -2,6 +2,7 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
 import svelte from "@astrojs/svelte";
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,7 +16,7 @@ export default defineConfig({
 			},
 		},
 	},
-	integrations: [svelte()],
+	integrations: [svelte(), sitemap()],
 	server: {
 		port: 1000,
 		host: "0.0.0.0",
