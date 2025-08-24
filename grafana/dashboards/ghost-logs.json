@@ -150,7 +150,53 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "INFO"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "green"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "WARN"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "yellow"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ERROR"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -178,9 +224,32 @@
             "uid": "loki-datasource"
           },
           "editorMode": "builder",
-          "expr": "rate(({app=\"ghost\"} |~ \"ERROR|WARN|INFO\")[5m])",
+          "expr": "rate(({app=\"ghost\"} |~ \"INFO\")[5m])",
           "queryType": "",
-          "refId": "A"
+          "refId": "A",
+          "legendFormat": "INFO"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-datasource"
+          },
+          "editorMode": "builder",
+          "expr": "rate(({app=\"ghost\"} |~ \"WARN\")[5m])",
+          "queryType": "",
+          "refId": "B",
+          "legendFormat": "WARN"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-datasource"
+          },
+          "editorMode": "builder",
+          "expr": "rate(({app=\"ghost\"} |~ \"ERROR\")[5m])",
+          "queryType": "",
+          "refId": "C",
+          "legendFormat": "ERROR"
         }
       ],
       "title": "Ghost Log Rate",
