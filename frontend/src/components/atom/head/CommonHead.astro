@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { GoogleFontsOptimizer } from "astro-google-fonts-optimizer";
 import {
+	GA_MEASUREMENT_ID,
 	SITE_AUTHOR,
 	SITE_SUB_TITLE,
 	SITE_TITLE,
@@ -29,21 +30,23 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <!-- sitemap -->
 <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
+<!-- Google Analytics preconnect for performance -->
+<link rel="preconnect" href="https://www.googletagmanager.com" />
+<link rel="preconnect" href="https://www.google-analytics.com" />
+
 <!-- Google Fonts -->
 <GoogleFontsOptimizer
 	url="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
 />
-<!-- ga -->
-<script is:inline src="https://www.googletagmanager.com/gtag/js?id=G-ZB2SYBTNQQ"></script>
-<script is:inline>
+<!-- Google Analytics -->
+<script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+<script is:inline define:vars={{ GA_MEASUREMENT_ID }}>
 	window.dataLayer = window.dataLayer || [];
 	function gtag() {
-		//  'dataLayer' is not defined  no-undefのエラーが出るが、どうしようもできないのでコメントで無効化してる
 		dataLayer.push(arguments);
 	}
 	gtag('js', new Date());
-
-	gtag('config', 'G-ZB2SYBTNQQ');
+	gtag('config', GA_MEASUREMENT_ID);
 </script>
 <title>{pageTitle}</title>
 <meta name="author" content={SITE_AUTHOR} />
