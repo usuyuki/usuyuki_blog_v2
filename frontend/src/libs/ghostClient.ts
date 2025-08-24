@@ -140,6 +140,19 @@ function logGhostError(
 export const ghostApiWithRetry = {
 	posts: {
 		read: async (options: GhostPostOptions, maxRetries = 3) => {
+			// slugの検証を追加
+			if (
+				options.slug &&
+				(!options.slug.trim() || options.slug === "undefined")
+			) {
+				astroLogger.warn("Invalid slug provided to Ghost API", {
+					slug: options.slug,
+					service: "ghost-api",
+					logType: LOG_TYPES.API,
+				});
+				return null;
+			}
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const result = await ghostClient.posts.read(options);
