@@ -3,7 +3,7 @@ interface ImageDimensions {
 	height: number;
 }
 
-function getBestGhostSize(targetWidth: number, targetHeight: number): string {
+function getBestGhostSize(targetWidth: number, _targetHeight: number): string {
 	// Available Ghost sizes (w300 is the minimum)
 	const availableSizes = [
 		{ key: "w300", width: 300, height: Infinity },
