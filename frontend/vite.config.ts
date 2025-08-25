@@ -11,6 +11,9 @@ export default defineConfig({
 			},
 		}),
 	],
+	server: {
+		allowedHosts: ["blog.usuyuki.net"],
+	},
 	test: {
 		globals: true,
 		environment: "jsdom",
