@@ -12,9 +12,9 @@ export default defineConfig({
 		remotePatterns: [
 			{
 				protocol: "https",
-				hostname: "blogapi.usuyuki.net"
-			}
-		]
+				hostname: "blogapi.usuyuki.net",
+			},
+		],
 	},
 	vite: {
 		plugins: [tailwindcss()],
