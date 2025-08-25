@@ -5,9 +5,44 @@ import {
 } from "./optimizeGhostImages";
 
 describe("optimizeGhostImageUrl", () => {
-	it("should return original URL as Ghost doesn't support URL parameters", () => {
+	it("should select best Ghost size for target dimensions", () => {
 		const originalUrl =
 			"https://blogapi.usuyuki.net/content/images/2023/03/IMG202-scaled.jpg";
+		const dimensions = { width: 400, height: 300 };
+
+		const result = optimizeGhostImageUrl(originalUrl, dimensions);
+
+		expect(result).toBe(
+			"https://blogapi.usuyuki.net/content/images/size/w600/2023/03/IMG202-scaled.jpg",
+		);
+	});
+
+	it("should use w300 for small images (minimum size)", () => {
+		const originalUrl =
+			"https://blogapi.usuyuki.net/content/images/2023/03/IMG202-scaled.jpg";
+		const dimensions = { width: 200, height: 200 };
+
+		const result = optimizeGhostImageUrl(originalUrl, dimensions);
+
+		expect(result).toBe(
+			"https://blogapi.usuyuki.net/content/images/size/w300/2023/03/IMG202-scaled.jpg",
+		);
+	});
+
+	it("should replace existing size parameter with best match", () => {
+		const originalUrl =
+			"https://blogapi.usuyuki.net/content/images/size/w2000/2023/03/IMG202-scaled.jpg";
+		const dimensions = { width: 160, height: 160 };
+
+		const result = optimizeGhostImageUrl(originalUrl, dimensions);
+
+		expect(result).toBe(
+			"https://blogapi.usuyuki.net/content/images/size/w300/2023/03/IMG202-scaled.jpg",
+		);
+	});
+
+	it("should handle non-Ghost URLs by returning original", () => {
+		const originalUrl = "https://example.com/image.jpg";
 		const dimensions = { width: 400, height: 300 };
 
 		const result = optimizeGhostImageUrl(originalUrl, dimensions);
@@ -18,6 +53,18 @@ describe("optimizeGhostImageUrl", () => {
 	it("should handle empty URL", () => {
 		const result = optimizeGhostImageUrl("", { width: 400, height: 300 });
 		expect(result).toBe("");
+	});
+
+	it("should use largest size for oversized requests", () => {
+		const originalUrl =
+			"https://blogapi.usuyuki.net/content/images/2023/03/IMG202-scaled.jpg";
+		const dimensions = { width: 3000, height: 2000 };
+
+		const result = optimizeGhostImageUrl(originalUrl, dimensions);
+
+		expect(result).toBe(
+			"https://blogapi.usuyuki.net/content/images/size/w2400/2023/03/IMG202-scaled.jpg",
+		);
 	});
 });
 

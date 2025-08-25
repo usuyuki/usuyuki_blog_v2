@@ -58,10 +58,11 @@ const isWpArticle = judgeWpArticle(post.html);
 			{
 				post.feature_image ? (
 					<Image
-						src={optimizeGhostImageUrl(post.feature_image, { width: 384, height: 384 })}
-						width={384}
-						height={384}
+						src={optimizeGhostImageUrl(post.feature_image, { width: 800, height: 800 })}
+						width={800}
+						height={800}
 						format="avif"
+						quality={90}
 						class="object-cover w-96 h-96 rounded-md"
 						alt="記事サムネイル"
 						transition:name={'image-' + post.slug}

@@ -7,6 +7,15 @@ import partytown from "@astrojs/partytown";
 // https://astro.build/config
 export default defineConfig({
 	site: "https://blog.usuyuki.net",
+	image: {
+		domains: ["blogapi.usuyuki.net"],
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "blogapi.usuyuki.net"
+			}
+		]
+	},
 	vite: {
 		plugins: [tailwindcss()],
 		resolve: {
