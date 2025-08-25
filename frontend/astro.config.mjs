@@ -14,24 +14,7 @@ export default defineConfig({
 				protocol: "https",
 				hostname: "blogapi.usuyuki.net"
 			}
-		],
-		service: {
-			entrypoint: "astro/assets/services/sharp",
-			config: {
-				limitInputPixels: false,
-				avif: {
-					quality: 85,
-					effort: 4
-				},
-				webp: {
-					quality: 90
-				},
-				jpeg: {
-					quality: 85,
-					progressive: true
-				}
-			}
-		}
+		]
 	},
 	vite: {
 		plugins: [tailwindcss()],
