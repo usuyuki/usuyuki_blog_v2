@@ -78,7 +78,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 0
+        "y": 8
       },
       "id": 1,
       "options": {
@@ -174,7 +174,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 0
+        "y": 8
       },
       "id": 2,
       "options": {
@@ -321,12 +321,73 @@
           },
           "unit": "short"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "warn"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "error"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "info"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "debug"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
-        "w": 8,
-        "x": 16,
+        "w": 24,
+        "x": 0,
         "y": 0
       },
       "id": 3,
@@ -349,10 +410,10 @@
             "uid": "loki-datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"access\"} [1m]))",
+          "expr": "sum(rate({app=\"astro\"} |~ \"info\" [1m]))",
           "queryType": "",
           "refId": "A",
-          "legendFormat": "access"
+          "legendFormat": "info"
         },
         {
           "datasource": {
@@ -360,10 +421,10 @@
             "uid": "loki-datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"cache\"} [1m]))",
+          "expr": "sum(rate({app=\"astro\"} |~ \"warn\" [1m]))",
           "queryType": "",
           "refId": "B",
-          "legendFormat": "cache"
+          "legendFormat": "warn"
         },
         {
           "datasource": {
@@ -371,7 +432,7 @@
             "uid": "loki-datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"error\"} [1m]))",
+          "expr": "sum(rate({app=\"astro\"} |~ \"error\" [1m]))",
           "queryType": "",
           "refId": "C",
           "legendFormat": "error"
@@ -382,35 +443,13 @@
             "uid": "loki-datasource"
           },
           "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"api\"} [1m]))",
+          "expr": "sum(rate({app=\"astro\"} |~ \"debug\" [1m]))",
           "queryType": "",
           "refId": "D",
-          "legendFormat": "api"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"component\"} [1m]))",
-          "queryType": "",
-          "refId": "E",
-          "legendFormat": "component"
-        },
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate({app=\"astro\",log_type=\"system\"} [1m]))",
-          "queryType": "",
-          "refId": "F",
-          "legendFormat": "system"
+          "legendFormat": "debug"
         }
       ],
-      "title": "Log Rate by Type",
+      "title": "Log Rate by Level",
       "type": "timeseries"
     },
     {
@@ -420,8 +459,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
+        "w": 8,
+        "x": 16,
         "y": 8
       },
       "id": 4,
@@ -457,7 +496,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 24,
         "x": 0,
         "y": 16
       },
@@ -495,8 +534,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 16
+        "x": 0,
+        "y": 24
       },
       "id": 6,
       "options": {
@@ -532,7 +571,7 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 24
       },
       "id": 7,
@@ -569,8 +608,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 12,
-        "y": 24
+        "x": 0,
+        "y": 32
       },
       "id": 8,
       "options": {
@@ -605,8 +644,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
+        "w": 12,
+        "x": 12,
         "y": 32
       },
       "id": 9,
