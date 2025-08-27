@@ -19,7 +19,18 @@ import type { TOCType } from "~/types/TOCType";
 
 // ドットが含まれるスラッグを除外
 const slug = Astro.params.slug;
-if (!slug || slug.includes(".") || slug.length > 100) {
+if (
+	!slug ||
+	typeof slug !== "string" ||
+	slug.includes(".") ||
+	slug.length > 100
+) {
+	astroLogger.warn("Invalid slug parameter", {
+		logType: LOG_TYPES.ACCESS,
+		slug: slug,
+		slugType: typeof slug,
+		route: Astro.url.pathname,
+	});
 	return new Response(null, { status: 404 });
 }
 
