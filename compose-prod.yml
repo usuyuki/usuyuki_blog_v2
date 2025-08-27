@@ -21,7 +21,8 @@ services:
       - ./backend/config.production.json:/var/lib/ghost/config.production.json
     user: "1000:1000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     labels:
       - "logging=promtail"
     networks:
@@ -59,6 +60,10 @@ services:
       - db-store:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: example
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
     networks:
       - app-network
 
