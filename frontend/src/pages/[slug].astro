@@ -17,13 +17,16 @@ import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
 import type { TOCType } from "~/types/TOCType";
 
-// ドットが含まれるスラッグを除外
+// 静的アセットや無効なスラッグを除外
 const slug = Astro.params.slug;
 if (
 	!slug ||
 	typeof slug !== "string" ||
 	slug.includes(".") ||
-	slug.length > 100
+	slug.length > 100 ||
+	slug.toLowerCase() === "assets" ||
+	slug.startsWith("_") ||
+	/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(slug)
 ) {
 	astroLogger.warn("Invalid slug parameter", {
 		logType: LOG_TYPES.ACCESS,
