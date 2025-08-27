@@ -1,5 +1,5 @@
 {
-  "url": "http://localhost:2368",
+  "url": "https://blogapi.usuyuki.net",
   "server": {
     "port": 2368,
     "host": "::"
@@ -8,10 +8,7 @@
     "transport": "Direct"
   },
   "logging": {
-    "transports": [
-      "file",
-      "stdout"
-    ]
+    "transports": ["file", "stdout"]
   },
   "process": "systemd",
   "security": {
