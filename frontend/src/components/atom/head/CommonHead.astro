@@ -1,6 +1,5 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import { GoogleFontsOptimizer } from "astro-google-fonts-optimizer";
 import {
 	SITE_AUTHOR,
 	SITE_SUB_TITLE,
@@ -30,16 +29,6 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <!-- sitemap -->
 <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-<!-- DNS prefetch and preconnect for font fallback -->
-<link rel="dns-prefetch" href="//fonts.googleapis.com" />
-<link rel="dns-prefetch" href="//fonts.gstatic.com" />
-<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-<!-- Google Fonts as fallback with optimized display -->
-<GoogleFontsOptimizer
-	url="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
-/>
 
 <!-- Google Analytics with Partytown -->
 <GoogleAnalytics />
