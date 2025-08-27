@@ -1,9 +1,4 @@
 {
-  "url": "http://localhost:1001",
-  "server": {
-    "port": 2368,
-    "host": "::"
-  },
   "mail": {
     "transport": "Direct"
   },

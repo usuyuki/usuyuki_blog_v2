@@ -1,9 +1,4 @@
 {
-  "url": "https://blogapi.usuyuki.net",
-  "server": {
-    "port": 2368,
-    "host": "::"
-  },
   "mail": {
     "transport": "Direct"
   },
