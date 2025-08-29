@@ -9,7 +9,13 @@ import type { HeadMetaType } from "~/types/HeadMetaType";
 
 //バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
-if (!(tagSlug === undefined) && !isTag(tagSlug)) {
+if (
+	!tagSlug ||
+	typeof tagSlug !== "string" ||
+	tagSlug === "undefined" ||
+	tagSlug.trim() === "" ||
+	!isTag(tagSlug)
+) {
 	return new Response(null, { status: 404 });
 }
 
