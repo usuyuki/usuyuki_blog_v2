@@ -155,7 +155,11 @@ export const ghostApiWithRetry = {
 
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const result = await ghostClient.posts.read(options);
+					const { slug, ...cleanOptions } = options;
+					const requestOptions = slug
+						? { slug, ...cleanOptions }
+						: cleanOptions;
+					const result = await ghostClient.posts.read(requestOptions);
 					return result;
 				} catch (error) {
 					const err = error as Error;

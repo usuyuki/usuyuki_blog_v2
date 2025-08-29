@@ -7,6 +7,10 @@ interface AstroLogContext extends LogContext {
 	method?: string;
 	status?: number;
 	duration?: number;
+	url?: string;
+	headers?: Record<string, string>;
+	userAgent?: string;
+	referer?: string;
 }
 
 class AstroLogger {
@@ -33,6 +37,29 @@ class AstroLogger {
 		});
 	}
 
+	requestError(
+		message: string,
+		request: Request,
+		error?: Error,
+		context?: AstroLogContext,
+	) {
+		const url = new URL(request.url);
+		const headers: Record<string, string> = {};
+		request.headers.forEach((value, key) => {
+			headers[key] = value;
+		});
+
+		this.error(message, error, {
+			method: request.method,
+			url: request.url,
+			path: url.pathname,
+			headers,
+			userAgent: request.headers.get("user-agent") ?? undefined,
+			referer: request.headers.get("referer") ?? undefined,
+			...context,
+		});
+	}
+
 	debug(message: string, context?: AstroLogContext) {
 		this.logger.debug(message, {
 			source: "astro",
@@ -52,8 +79,8 @@ class AstroLogger {
 			path: url.pathname,
 			status: response.status || 200,
 			duration,
-			userAgent: request.headers.get("user-agent"),
-			referer: request.headers.get("referer"),
+			userAgent: request.headers.get("user-agent") ?? undefined,
+			referer: request.headers.get("referer") ?? undefined,
 		});
 	}
 
@@ -73,6 +100,31 @@ class AstroLogger {
 		this.error(`API error: ${endpoint}`, error, {
 			logType: LOG_TYPES.API,
 			route: endpoint,
+			...context,
+		});
+	}
+
+	apiRequestError(
+		endpoint: string,
+		request: Request,
+		error: Error,
+		context?: AstroLogContext,
+	) {
+		const url = new URL(request.url);
+		const headers: Record<string, string> = {};
+		request.headers.forEach((value, key) => {
+			headers[key] = value;
+		});
+
+		this.error(`API error: ${endpoint}`, error, {
+			logType: LOG_TYPES.API,
+			route: endpoint,
+			method: request.method,
+			url: request.url,
+			path: url.pathname,
+			headers,
+			userAgent: request.headers.get("user-agent") ?? undefined,
+			referer: request.headers.get("referer") ?? undefined,
 			...context,
 		});
 	}

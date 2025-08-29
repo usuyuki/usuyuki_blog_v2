@@ -11,7 +11,7 @@ interface GhostPost {
 	published_at: string;
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
 	try {
 		// Ghost記事を取得
 		const posts = (await ghostApiWithRetry.posts.browse({
@@ -112,10 +112,15 @@ ${allPages
 			},
 		});
 	} catch (error) {
-		astroLogger.error("Error generating sitemap:", error as Error, {
-			logType: LOG_TYPES.ERROR,
-			service: "sitemap",
-		});
+		astroLogger.requestError(
+			"Error generating sitemap:",
+			request,
+			error as Error,
+			{
+				logType: LOG_TYPES.ERROR,
+				service: "sitemap",
+			},
+		);
 
 		// エラー時は最小限のサイトマップを返す
 		const fallbackSitemap = `<?xml version="1.0" encoding="UTF-8"?>
