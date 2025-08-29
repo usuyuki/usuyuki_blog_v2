@@ -272,7 +272,9 @@ export const ghostApiWithRetry = {
 		read: async (options: GhostTagOptions, maxRetries = 3) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const result = await ghostClient.tags.read(options);
+					const { slug, ...cleanOptions } = options;
+					const requestOptions = slug ? { slug, ...cleanOptions } : cleanOptions;
+					const result = await ghostClient.tags.read(requestOptions);
 					return result;
 				} catch (error) {
 					const err = error as Error;
