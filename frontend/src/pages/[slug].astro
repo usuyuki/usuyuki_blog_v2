@@ -37,10 +37,14 @@ if (
 	return new Response(null, { status: 404 });
 }
 
-const post = await ghostApiWithRetry.posts.read({
-	slug: slug,
-	include: "tags",
-});
+const post = await ghostApiWithRetry.posts.read(
+	{
+		slug: slug,
+		include: "tags",
+	},
+	3,
+	Astro.request,
+);
 
 if (!post) {
 	astroLogger.warn("Post not found", {

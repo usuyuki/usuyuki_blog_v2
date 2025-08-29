@@ -7,11 +7,15 @@ interface Props {
 }
 const { ulClass = "", liClass = "" } = Astro.props;
 
-const tags = await ghostApiWithRetry.tags.browse({
-	limit: "all",
-	order: "slug ASC",
-	filter: "visibility:public",
-});
+const tags = await ghostApiWithRetry.tags.browse(
+	{
+		limit: "all",
+		order: "slug ASC",
+		filter: "visibility:public",
+	},
+	3,
+	Astro.request,
+);
 ---
 
 {
