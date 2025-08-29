@@ -164,13 +164,17 @@ export const ghostApiWithRetry = {
 			maxRetries = 3,
 			request?: Request,
 		) => {
-			// slugの検証を追加
+			// slugの検証を強化
 			if (
-				options.slug &&
-				(!options.slug.trim() || options.slug === "undefined")
+				!options.slug ||
+				typeof options.slug !== "string" ||
+				options.slug.trim() === "" ||
+				options.slug === "undefined" ||
+				options.slug.includes("undefined")
 			) {
 				astroLogger.warn("Invalid slug provided to Ghost API", {
 					slug: options.slug,
+					slugType: typeof options.slug,
 					service: "ghost-api",
 					logType: LOG_TYPES.API,
 				});
@@ -180,11 +184,19 @@ export const ghostApiWithRetry = {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const { slug, ...cleanOptions } = options;
-					const requestOptions = slug
-						? { slug, ...cleanOptions }
-						: cleanOptions;
-					const result = await ghostClient.posts.read(requestOptions);
-					return result;
+					if (slug) {
+						const browseOptions = {
+							filter: `slug:'${slug}'`,
+							limit: 1,
+							...cleanOptions,
+						};
+						const browseResult = await ghostClient.posts.browse(browseOptions);
+						const result = browseResult?.[0] || null;
+						return result;
+					} else {
+						const result = await ghostClient.posts.read(cleanOptions);
+						return result;
+					}
 				} catch (error) {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
@@ -302,14 +314,39 @@ export const ghostApiWithRetry = {
 			maxRetries = 3,
 			request?: Request,
 		) => {
+			// slugの検証を強化
+			if (
+				options.slug &&
+				(typeof options.slug !== "string" ||
+					options.slug.trim() === "" ||
+					options.slug === "undefined" ||
+					options.slug.includes("undefined"))
+			) {
+				astroLogger.warn("Invalid slug provided to Ghost tags API", {
+					slug: options.slug,
+					slugType: typeof options.slug,
+					service: "ghost-api",
+					logType: LOG_TYPES.API,
+				});
+				return null;
+			}
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const { slug, ...cleanOptions } = options;
-					const requestOptions = slug
-						? { slug, ...cleanOptions }
-						: cleanOptions;
-					const result = await ghostClient.tags.read(requestOptions);
-					return result;
+					if (slug) {
+						const browseOptions = {
+							filter: `slug:'${slug}'`,
+							limit: 1,
+							...cleanOptions,
+						};
+						const browseResult = await ghostClient.tags.browse(browseOptions);
+						const result = browseResult?.[0] || null;
+						return result;
+					} else {
+						const result = await ghostClient.tags.read(cleanOptions);
+						return result;
+					}
 				} catch (error) {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);

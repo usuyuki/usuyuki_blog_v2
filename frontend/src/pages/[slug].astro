@@ -22,6 +22,8 @@ const slug = Astro.params.slug;
 if (
 	!slug ||
 	typeof slug !== "string" ||
+	slug === "undefined" ||
+	slug.trim() === "" ||
 	slug.includes(".") ||
 	slug.length > 100 ||
 	slug.toLowerCase() === "assets" ||
