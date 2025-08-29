@@ -18,26 +18,23 @@ RUN pnpm build
 
 # Production stage
 FROM node:22-slim AS prod
-RUN npm install -g pnpm
 WORKDIR /frontend
 
-# Copy package files for production dependencies
-COPY package.json pnpm-lock.yaml ./
+# Create non-root user first
+RUN addgroup --gid 1001 --system nodejs \
+    && adduser --system --uid 1001 astro
 
-# Install only production dependencies
-RUN pnpm install --frozen-lockfile --prod
+# Copy package files and install production dependencies with correct ownership
+COPY --chown=astro:nodejs package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm \
+    && pnpm install --frozen-lockfile --prod \
+    && npm cache clean --force \
+    && rm -rf /root/.npm
 
-# Copy built application from build stage
-COPY --from=build /frontend/dist ./dist
+# Copy built application from build stage with correct ownership
+COPY --chown=astro:nodejs --from=build /frontend/dist ./dist
 
-# Create non-root user
-RUN addgroup --gid 1001 --system nodejs
-RUN adduser --system --uid 1001 astro
-
-# Change ownership of application files
-RUN chown -R astro:nodejs .
 USER astro
-
 EXPOSE 1000
 
 CMD ["node", "./dist/server/entry.mjs"] 
