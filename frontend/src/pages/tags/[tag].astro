@@ -13,15 +13,23 @@ if (!(tagSlug === undefined) && !isTag(tagSlug)) {
 	return new Response(null, { status: 404 });
 }
 
-const posts = await ghostApiWithRetry.posts.browse({
-	filter: `tag:${tagSlug}`,
-	limit: "all",
-	order: "published_at DESC",
-});
+const posts = await ghostApiWithRetry.posts.browse(
+	{
+		filter: `tag:${tagSlug}`,
+		limit: "all",
+		order: "published_at DESC",
+	},
+	3,
+	Astro.request,
+);
 
-const tag = await ghostApiWithRetry.tags.read({
-	slug: tagSlug,
-});
+const tag = await ghostApiWithRetry.tags.read(
+	{
+		slug: tagSlug,
+	},
+	3,
+	Astro.request,
+);
 
 if (!tag) {
 	return new Response(null, { status: 404 });

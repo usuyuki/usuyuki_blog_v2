@@ -13,11 +13,15 @@ if (!isYear(yearSlug)) {
 	return new Response(null, { status: 404 });
 }
 
-const posts = await ghostApiWithRetry.posts.browse({
-	filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
-	limit: "all",
-	order: "published_at ASC",
-});
+const posts = await ghostApiWithRetry.posts.browse(
+	{
+		filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
+		limit: "all",
+		order: "published_at ASC",
+	},
+	3,
+	Astro.request,
+);
 
 const postsData = {
 	posts: posts || [],

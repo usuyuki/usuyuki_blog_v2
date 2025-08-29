@@ -2,10 +2,14 @@
 import ArticleArchive from "~/components/molecule/articleArchive/YMDArticleArchive.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 
-const posts = await ghostApiWithRetry.posts.browse({
-	order: "published_at DESC",
-	filter: "featured:true",
-});
+const posts = await ghostApiWithRetry.posts.browse(
+	{
+		order: "published_at DESC",
+		filter: "featured:true",
+	},
+	3,
+	Astro.request,
+);
 const postsData = {
 	posts: posts || [],
 };

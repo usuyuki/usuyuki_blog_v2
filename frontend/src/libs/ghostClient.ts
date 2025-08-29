@@ -103,6 +103,7 @@ function logGhostError(
 	error: Error,
 	attempt: number,
 	maxRetries: number,
+	request?: Request,
 ): void {
 	const err = error as {
 		type?: string;
@@ -113,16 +114,34 @@ function logGhostError(
 
 	// 404エラーは警告として扱う
 	if (err?.response?.status === 404) {
-		astroLogger.warn(`Ghost API 404: Resource not found`, {
-			attempt,
-			maxRetries,
-			status: err?.response?.status,
-			id: err?.id,
-			context: err?.context,
-			type: err?.type,
-			service: "ghost-api",
-			logType: LOG_TYPES.API,
-		});
+		if (request) {
+			astroLogger.requestError(
+				`Ghost API 404: Resource not found`,
+				request,
+				error,
+				{
+					attempt,
+					maxRetries,
+					status: err?.response?.status,
+					id: err?.id,
+					context: err?.context,
+					type: err?.type,
+					service: "ghost-api",
+					logType: LOG_TYPES.API,
+				},
+			);
+		} else {
+			astroLogger.warn(`Ghost API 404: Resource not found`, {
+				attempt,
+				maxRetries,
+				status: err?.response?.status,
+				id: err?.id,
+				context: err?.context,
+				type: err?.type,
+				service: "ghost-api",
+				logType: LOG_TYPES.API,
+			});
+		}
 	} else {
 		errorHandler.handleError(error as Error, {
 			attempt,
@@ -132,6 +151,7 @@ function logGhostError(
 			context: err?.context,
 			type: err?.type,
 			service: "ghost-api",
+			request,
 		});
 	}
 }
@@ -139,7 +159,11 @@ function logGhostError(
 // リトライ機能付きのGhost APIクライアント
 export const ghostApiWithRetry = {
 	posts: {
-		read: async (options: GhostPostOptions, maxRetries = 3) => {
+		read: async (
+			options: GhostPostOptions,
+			maxRetries = 3,
+			request?: Request,
+		) => {
 			// slugの検証を追加
 			if (
 				options.slug &&
@@ -163,7 +187,7 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					const err = error as Error;
-					logGhostError(err, i + 1, maxRetries);
+					logGhostError(err, i + 1, maxRetries, request);
 
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(err)) {
@@ -185,7 +209,11 @@ export const ghostApiWithRetry = {
 				}
 			}
 		},
-		browse: async (options: GhostPostOptions, maxRetries = 3) => {
+		browse: async (
+			options: GhostPostOptions,
+			maxRetries = 3,
+			request?: Request,
+		) => {
 			// 通常キャッシュをチェック
 			const cacheKey = getCacheKey("posts.browse", options);
 			const cached = getFromCache(cacheKey);
@@ -214,7 +242,7 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					const err = error as Error;
-					logGhostError(err, i + 1, maxRetries);
+					logGhostError(err, i + 1, maxRetries, request);
 
 					// レート制限エラーの場合のみリトライ
 					if (isRateLimitError(err)) {
@@ -269,16 +297,22 @@ export const ghostApiWithRetry = {
 		},
 	},
 	tags: {
-		read: async (options: GhostTagOptions, maxRetries = 3) => {
+		read: async (
+			options: GhostTagOptions,
+			maxRetries = 3,
+			request?: Request,
+		) => {
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const { slug, ...cleanOptions } = options;
-					const requestOptions = slug ? { slug, ...cleanOptions } : cleanOptions;
+					const requestOptions = slug
+						? { slug, ...cleanOptions }
+						: cleanOptions;
 					const result = await ghostClient.tags.read(requestOptions);
 					return result;
 				} catch (error) {
 					const err = error as Error;
-					logGhostError(err, i + 1, maxRetries);
+					logGhostError(err, i + 1, maxRetries, request);
 
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(err)) {
@@ -300,7 +334,11 @@ export const ghostApiWithRetry = {
 				}
 			}
 		},
-		browse: async (options: GhostTagOptions, maxRetries = 3) => {
+		browse: async (
+			options: GhostTagOptions,
+			maxRetries = 3,
+			request?: Request,
+		) => {
 			// キャッシュをチェック
 			const cacheKey = getCacheKey("tags.browse", options);
 			const cached = getFromCache(cacheKey);
@@ -316,7 +354,7 @@ export const ghostApiWithRetry = {
 					return result;
 				} catch (error) {
 					const err = error as Error;
-					logGhostError(err, i + 1, maxRetries);
+					logGhostError(err, i + 1, maxRetries, request);
 
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(err)) {

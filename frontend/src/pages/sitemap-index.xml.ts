@@ -14,11 +14,15 @@ interface GhostPost {
 export const GET: APIRoute = async ({ request }) => {
 	try {
 		// Ghost記事を取得
-		const posts = (await ghostApiWithRetry.posts.browse({
-			limit: "all",
-			fields: "slug,updated_at,published_at",
-			filter: "status:published",
-		})) as GhostPost[] | null;
+		const posts = (await ghostApiWithRetry.posts.browse(
+			{
+				limit: "all",
+				fields: "slug,updated_at,published_at",
+				filter: "status:published",
+			},
+			3,
+			request,
+		)) as GhostPost[] | null;
 
 		astroLogger.info(
 			`Sitemap: Found ${posts?.length || 0} posts from Ghost API`,
