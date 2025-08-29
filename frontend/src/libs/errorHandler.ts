@@ -6,6 +6,7 @@ interface ErrorContext extends AstroLogContext {
 	sessionId?: string;
 	requestId?: string;
 	stack?: string;
+	request?: Request;
 }
 
 class ErrorHandler {
@@ -15,18 +16,33 @@ class ErrorHandler {
 		const errorMessage = error.message;
 		const errorStack = error.stack;
 
-		this.logger.error(errorMessage, error, {
-			...context,
-			stack: errorStack,
-			timestamp: new Date().toISOString(),
-		});
+		if (context?.request) {
+			this.logger.requestError(errorMessage, context.request, error, {
+				...context,
+				stack: errorStack,
+				timestamp: new Date().toISOString(),
+			});
+		} else {
+			this.logger.error(errorMessage, error, {
+				...context,
+				stack: errorStack,
+				timestamp: new Date().toISOString(),
+			});
+		}
 	}
 
 	handleApiError(endpoint: string, error: Error, context?: ErrorContext): void {
-		this.logger.apiError(endpoint, error, {
-			...context,
-			timestamp: new Date().toISOString(),
-		});
+		if (context?.request) {
+			this.logger.apiRequestError(endpoint, context.request, error, {
+				...context,
+				timestamp: new Date().toISOString(),
+			});
+		} else {
+			this.logger.apiError(endpoint, error, {
+				...context,
+				timestamp: new Date().toISOString(),
+			});
+		}
 	}
 
 	handleComponentError(

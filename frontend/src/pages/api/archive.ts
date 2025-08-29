@@ -4,7 +4,7 @@ import { getLatestArticles } from "~/libs/articleAggregator";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
 import errorHandler from "~/libs/errorHandler";
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
 	const beforeDate = url.searchParams.get("before");
 	const limit = parseInt(url.searchParams.get("limit") || "12", 10);
 
@@ -69,6 +69,7 @@ export const GET: APIRoute = async ({ url }) => {
 		errorHandler.handleApiError("/api/archive", error as Error, {
 			beforeDate: beforeDate || undefined,
 			limit,
+			request,
 		});
 		return new Response(JSON.stringify({ error: "Failed to fetch posts" }), {
 			status: 500,

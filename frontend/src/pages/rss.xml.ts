@@ -4,20 +4,28 @@ import { ghostClient } from "~/libs/ghostClient";
 import astroLogger from "~/libs/astroLogger";
 import errorHandler from "~/libs/errorHandler";
 
-export async function GET() {
+export async function GET(context: { request: Request }) {
 	const posts = await ghostClient.posts
 		.browse({
 			limit: "all",
 		})
 		.catch((err: Error) => {
-			errorHandler.handleError(err, { route: "/rss.xml" });
+			errorHandler.handleError(err, {
+				route: "/rss.xml",
+				request: context.request,
+			});
 		});
 
 	//catchでとれないことがあるので
 	if (posts === undefined) {
-		astroLogger.error("postsが正しく取得できません", undefined, {
-			route: "/rss.xml",
-		});
+		astroLogger.requestError(
+			"postsが正しく取得できません",
+			context.request,
+			undefined,
+			{
+				route: "/rss.xml",
+			},
+		);
 	} else {
 		return rss({
 			title: SITE_TITLE,
