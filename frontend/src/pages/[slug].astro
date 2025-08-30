@@ -16,6 +16,7 @@ import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
 import type { TOCType } from "~/types/TOCType";
+import { createProxyImageUrl } from "~/libs/imageProxy";
 
 // 静的アセットや無効なスラッグを除外
 const slug = Astro.params.slug;
@@ -65,7 +66,7 @@ const headMeta = {
 	slug: post.slug,
 	// excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
 	description: post.excerpt.replace(/\r?\n/g, "").slice(0, 150),
-	ogImage: post.feature_image,
+	ogImage: createProxyImageUrl(post.feature_image || ""),
 };
 
 const tocList: TOCType[] = generateTOC(post.html);

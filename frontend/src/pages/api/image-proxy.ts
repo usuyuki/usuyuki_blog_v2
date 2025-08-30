@@ -18,14 +18,17 @@ export const GET: APIRoute = async ({ url }) => {
 
 	try {
 		const ghostApiUrl = import.meta.env.GHOST_API_URL || "";
-		
+
 		if (!ghostApiUrl) {
-			return new Response(JSON.stringify({ error: "Ghost API URL not configured" }), {
-				status: 500,
-				headers: {
-					"Content-Type": "application/json",
+			return new Response(
+				JSON.stringify({ error: "Ghost API URL not configured" }),
+				{
+					status: 500,
+					headers: {
+						"Content-Type": "application/json",
+					},
 				},
-			});
+			);
 		}
 
 		if (imagePath.includes("..") || imagePath.startsWith("/")) {

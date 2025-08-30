@@ -5,11 +5,7 @@ export function createProxyImageUrl(originalUrl: string): string {
 	const ghostApiUrl = import.meta.env.GHOST_API_URL || "";
 	const imageUrlPrefix = `${ghostApiUrl}/content/images/`;
 
-	if (
-		!originalUrl ||
-		!ghostApiUrl ||
-		!originalUrl.startsWith(imageUrlPrefix)
-	) {
+	if (!originalUrl || !ghostApiUrl || !originalUrl.startsWith(imageUrlPrefix)) {
 		return originalUrl;
 	}
 
