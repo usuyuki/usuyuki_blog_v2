@@ -44,6 +44,7 @@ services:
       GHOST_API_URL: ${GHOST_API_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       LOKI_URL: http://loki:3100
+      FRONTEND_URL: https://blog.usuyuki.net
     user: "1000:1000"
     depends_on:
       - ghost
