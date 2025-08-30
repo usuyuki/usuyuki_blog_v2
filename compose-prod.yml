@@ -42,6 +42,7 @@ services:
       NODE_ENV: production
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
       GHOST_API_URL: ${GHOST_API_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       LOKI_URL: http://loki:3100
     user: "1000:1000"
