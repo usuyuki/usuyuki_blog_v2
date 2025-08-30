@@ -2,8 +2,9 @@ import type { APIRoute } from "astro";
 import { getGhostFrontUrl } from "~/libs/env";
 import loggerService from "~/libs/logger";
 
-export const GET: APIRoute = async ({ url }) => {
-	const imagePath = url.searchParams.get("path");
+// ghost側だとrobots.txtでTwitteのOGPが弾かれる & クローラーに最低限の画像は見てもらいたいのでproxyする
+export const GET: APIRoute = async ({ params }) => {
+	const imagePath = params.path;
 
 	if (!imagePath) {
 		return new Response(
@@ -18,7 +19,6 @@ export const GET: APIRoute = async ({ url }) => {
 	}
 
 	try {
-		// blogapiの方でないとエラーになる
 		const ghostApiUrl = getGhostFrontUrl();
 
 		if (!ghostApiUrl) {
@@ -33,7 +33,7 @@ export const GET: APIRoute = async ({ url }) => {
 			);
 		}
 
-		if (imagePath.includes("..") || imagePath.startsWith("/")) {
+		if (imagePath.includes("..")) {
 			return new Response(JSON.stringify({ error: "Invalid image path" }), {
 				status: 400,
 				headers: {
@@ -62,18 +62,17 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
-		await loggerService.error(
+		await loggerService.warn(
 			`Image proxy error: ${(error as Error).message}`,
-			error as Error,
 			{
-				endpoint: "/api/image-proxy",
+				endpoint: "/image-proxy",
 				imagePath,
 				errorType: "image_proxy_error",
 			},
 		);
 
 		return new Response(JSON.stringify({ error: "Failed to proxy image" }), {
-			status: 500,
+			status: 404,
 			headers: {
 				"Content-Type": "application/json",
 			},
