@@ -29,8 +29,8 @@ interface GhostTagOptions {
 
 // Create API instance with site credentials
 export const ghostClient = new GhostContentAPI({
-	url: import.meta.env.GHOST_API_URL || process.env.GHOST_API_URL,
-	key: import.meta.env.GHOST_CONTENT_KEY || process.env.GHOST_CONTENT_KEY,
+	url: import.meta.env.GHOST_API_URL,
+	key: import.meta.env.GHOST_CONTENT_KEY,
 	version: "v5.0",
 });
 

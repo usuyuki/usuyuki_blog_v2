@@ -49,7 +49,5 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 }
 
 export const CONFIG = {
-	externalBlogs: parseExternalBlogs(
-		import.meta.env.EXTERNAL_BLOGS || process.env.EXTERNAL_BLOGS,
-	),
+	externalBlogs: parseExternalBlogs(import.meta.env.EXTERNAL_BLOGS),
 } as const;

@@ -31,6 +31,18 @@ export default defineConfig({
 				},
 			},
 		},
+		define: {
+			"import.meta.env.GHOST_API_URL": JSON.stringify(
+				process.env.GHOST_API_URL,
+			),
+			"import.meta.env.GHOST_CONTENT_KEY": JSON.stringify(
+				process.env.GHOST_CONTENT_KEY,
+			),
+			"import.meta.env.EXTERNAL_BLOGS": JSON.stringify(
+				process.env.EXTERNAL_BLOGS,
+			),
+			"import.meta.env.FRONTEND_URL": JSON.stringify(process.env.FRONTEND_URL),
+		},
 	},
 	integrations: [
 		svelte(),
