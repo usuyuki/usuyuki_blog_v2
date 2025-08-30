@@ -18,8 +18,10 @@ export const GET: APIRoute = async ({ url }) => {
 
 	try {
 		const decodedUrl = decodeURIComponent(imageUrl);
+		const backendApiUrl = import.meta.env.BACKEND_API_URL || "";
+		const imageUrlPrefix = `${backendApiUrl}/content/images/`;
 
-		if (!decodedUrl.startsWith("https://blogapi.usuyuki.net/content/images/")) {
+		if (!backendApiUrl || !decodedUrl.startsWith(imageUrlPrefix)) {
 			return new Response(JSON.stringify({ error: "Invalid image URL" }), {
 				status: 400,
 				headers: {

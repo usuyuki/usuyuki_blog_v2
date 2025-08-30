@@ -1,9 +1,13 @@
 import { SITE_URL } from "~/consts";
 
 export function createProxyImageUrl(originalUrl: string): string {
+	const backendApiUrl = import.meta.env.BACKEND_API_URL || "";
+	const imageUrlPrefix = `${backendApiUrl}/content/images/`;
+
 	if (
 		!originalUrl ||
-		!originalUrl.startsWith("https://blogapi.usuyuki.net/content/images/")
+		!backendApiUrl ||
+		!originalUrl.startsWith(imageUrlPrefix)
 	) {
 		return originalUrl;
 	}
