@@ -21,3 +21,8 @@ export function getExternalBlogs(): string | undefined {
 export function getFrontendUrl(): string | undefined {
 	return isServer() ? process.env.FRONTEND_URL : import.meta.env.FRONTEND_URL;
 }
+export function getGhostFrontUrl(): string | undefined {
+	return isServer()
+		? process.env.GHOST_FRONT_URL
+		: import.meta.env.GHOST_FRONT_URL;
+}

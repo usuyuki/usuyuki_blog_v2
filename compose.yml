@@ -37,6 +37,7 @@ services:
       GHOST_API_URL: ${GHOST_API_URL}
       FRONTEND_URL: ${FRONTEND_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
+      GHOST_FRONT_URL: ${BACKEND_API_URL}
       LOKI_URL: http://loki:3100
     user: "1000:1000"
     depends_on:
