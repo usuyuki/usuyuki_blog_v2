@@ -1,6 +1,7 @@
 import type { ExternalBlogConfig } from "~/types/RSSType";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
+import { getExternalBlogs } from "./env";
 
 function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 	if (!envVar) {
@@ -49,5 +50,5 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
 }
 
 export const CONFIG = {
-	externalBlogs: parseExternalBlogs(import.meta.env.EXTERNAL_BLOGS),
+	externalBlogs: parseExternalBlogs(getExternalBlogs()),
 } as const;
