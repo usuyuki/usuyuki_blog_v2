@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import errorHandler from "~/libs/errorHandler";
-import { getGhostApiUrl } from "~/libs/env";
+import { getGhostFrontUrl } from "~/libs/env";
 import loggerService from "~/libs/logger";
 
 export const GET: APIRoute = async ({ url }) => {
@@ -19,7 +18,8 @@ export const GET: APIRoute = async ({ url }) => {
 	}
 
 	try {
-		const ghostApiUrl = getGhostApiUrl();
+		// blogapiの方でないとエラーになる
+		const ghostApiUrl = getGhostFrontUrl();
 
 		if (!ghostApiUrl) {
 			return new Response(
@@ -62,15 +62,15 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
-		await loggerService.error(`Image proxy error: ${(error as Error).message}`, error as Error, {
-			endpoint: "/api/image-proxy",
-			imagePath,
-			errorType: "image_proxy_error",
-		});
-
-		errorHandler.handleApiError("/api/image-proxy", error as Error, {
-			imagePath,
-		});
+		await loggerService.error(
+			`Image proxy error: ${(error as Error).message}`,
+			error as Error,
+			{
+				endpoint: "/api/image-proxy",
+				imagePath,
+				errorType: "image_proxy_error",
+			},
+		);
 
 		return new Response(JSON.stringify({ error: "Failed to proxy image" }), {
 			status: 500,
