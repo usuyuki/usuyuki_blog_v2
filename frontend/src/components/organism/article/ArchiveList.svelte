@@ -1,6 +1,8 @@
 <script lang="ts">
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import ArticleCard from "./ArticleCard.svelte";
+import astroLogger from "~/libs/astroLogger";
+import errorHandler from "~/libs/errorHandler";
 
 interface Props {
 	initialPosts: { [key: string]: ArticleArchiveType[] };
@@ -33,7 +35,13 @@ async function loadMorePosts() {
 		const url = nextBefore
 			? `/api/archive?before=${encodeURIComponent(nextBefore)}&limit=12`
 			: "/api/archive?limit=12";
+
 		const response = await fetch(url);
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+
 		const data = await response.json();
 
 		if (data.posts && data.posts.length > 0) {
@@ -97,7 +105,19 @@ async function loadMorePosts() {
 			hasMorePosts = false;
 		}
 	} catch (error) {
-		console.error("記事の読み込みに失敗しました:", error);
+		const err = error as Error;
+		errorHandler.handleNetworkError(
+			nextBefore
+				? `/api/archive?before=${encodeURIComponent(nextBefore)}&limit=12`
+				: "/api/archive?limit=12",
+			err,
+			{
+				component: "ArchiveList",
+				operation: "loadMorePosts",
+				timestamp: new Date().toISOString(),
+			},
+		);
+		hasMorePosts = false;
 	} finally {
 		isLoading = false;
 	}
