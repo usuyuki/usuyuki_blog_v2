@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import errorHandler from "~/libs/errorHandler";
 import { getGhostApiUrl } from "~/libs/env";
+import loggerService from "~/libs/logger";
 
 export const GET: APIRoute = async ({ url }) => {
 	const imagePath = url.searchParams.get("path");
@@ -61,6 +62,12 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
+		await loggerService.error(`Image proxy error: ${(error as Error).message}`, error as Error, {
+			endpoint: "/api/image-proxy",
+			imagePath,
+			errorType: "image_proxy_error",
+		});
+
 		errorHandler.handleApiError("/api/image-proxy", error as Error, {
 			imagePath,
 		});
