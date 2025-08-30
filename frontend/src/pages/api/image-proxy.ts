@@ -62,7 +62,7 @@ export const GET: APIRoute = async ({ url }) => {
 			},
 		});
 	} catch (error) {
-		await loggerService.error(
+		await loggerService.warn(
 			`Image proxy error: ${(error as Error).message}`,
 			error as Error,
 			{
@@ -73,7 +73,7 @@ export const GET: APIRoute = async ({ url }) => {
 		);
 
 		return new Response(JSON.stringify({ error: "Failed to proxy image" }), {
-			status: 500,
+			status: 404,
 			headers: {
 				"Content-Type": "application/json",
 			},
