@@ -5,6 +5,7 @@ import GhostContentAPI from "@tryghost/content-api";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 import { LOG_TYPES } from "./logTypes";
+import { getGhostApiUrl, getGhostContentKey } from "./env";
 
 // Ghost API オプションの型定義
 interface GhostPostOptions {
@@ -29,8 +30,8 @@ interface GhostTagOptions {
 
 // Create API instance with site credentials
 export const ghostClient = new GhostContentAPI({
-	url: import.meta.env.GHOST_API_URL || process.env.GHOST_API_URL,
-	key: import.meta.env.GHOST_CONTENT_KEY || process.env.GHOST_CONTENT_KEY,
+	url: getGhostApiUrl(),
+	key: getGhostContentKey(),
 	version: "v5.0",
 });
 

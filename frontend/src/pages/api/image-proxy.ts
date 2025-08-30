@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import errorHandler from "~/libs/errorHandler";
+import { getGhostApiUrl } from "~/libs/env";
 
 export const GET: APIRoute = async ({ url }) => {
 	const imagePath = url.searchParams.get("path");
@@ -17,8 +18,7 @@ export const GET: APIRoute = async ({ url }) => {
 	}
 
 	try {
-		const ghostApiUrl =
-			import.meta.env.GHOST_API_URL || process.env.GHOST_API_URL;
+		const ghostApiUrl = getGhostApiUrl();
 
 		if (!ghostApiUrl) {
 			return new Response(
