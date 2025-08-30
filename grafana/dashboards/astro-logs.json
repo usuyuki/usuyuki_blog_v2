@@ -537,43 +537,6 @@
         "x": 0,
         "y": 28
       },
-      "id": 11,
-      "options": {
-        "dedupStrategy": "none",
-        "enableLogDetails": true,
-        "prettifyLogMessage": true,
-        "showCommonLabels": true,
-        "showLabels": true,
-        "showTime": true,
-        "sortOrder": "Descending",
-        "wrapLogMessage": true
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "{app=\"astro\"} |~ \"error\" | json | line_format \"{{.timestamp}} [{{.level | upper}}] {{.message}}\\nMethod: {{.method}}\\nURL: {{.url}}\\nUser-Agent: {{.userAgent}}\\nReferer: {{.referer}}\\nError: {{.error.message}}\\nStack: {{.stack}}\"",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Error Details with Request Info",
-      "type": "logs"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-datasource"
-      },
-      "gridPos": {
-        "h": 10,
-        "w": 12,
-        "x": 12,
-        "y": 28
-      },
       "id": 12,
       "options": {
         "dedupStrategy": "none",
@@ -638,7 +601,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 62
+        "y": 50
       },
       "id": 13,
       "options": {
@@ -704,7 +667,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 62
+        "y": 50
       },
       "id": 14,
       "options": {
@@ -779,7 +742,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 62
+        "y": 50
       },
       "id": 15,
       "options": {
@@ -903,7 +866,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 70
+        "y": 58
       },
       "id": 8,
       "options": {
@@ -940,7 +903,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 70
+        "y": 58
       },
       "id": 9,
       "options": {
@@ -977,7 +940,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 78
+        "y": 66
       },
       "id": 10,
       "options": {
