@@ -1,15 +1,23 @@
+function isServer(): boolean {
+	return typeof process !== "undefined" && !!process.env;
+}
+
 export function getGhostApiUrl(): string | undefined {
-	return import.meta.env.GHOST_API_URL;
+	return isServer() ? process.env.GHOST_API_URL : import.meta.env.GHOST_API_URL;
 }
 
 export function getGhostContentKey(): string | undefined {
-	return import.meta.env.GHOST_CONTENT_KEY;
+	return isServer()
+		? process.env.GHOST_CONTENT_KEY
+		: import.meta.env.GHOST_CONTENT_KEY;
 }
 
 export function getExternalBlogs(): string | undefined {
-	return import.meta.env.EXTERNAL_BLOGS;
+	return isServer()
+		? process.env.EXTERNAL_BLOGS
+		: import.meta.env.EXTERNAL_BLOGS;
 }
 
 export function getFrontendUrl(): string | undefined {
-	return import.meta.env.FRONTEND_URL;
+	return isServer() ? process.env.FRONTEND_URL : import.meta.env.FRONTEND_URL;
 }
