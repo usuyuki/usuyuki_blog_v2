@@ -13,7 +13,7 @@ import { createProxyImageUrl } from "~/libs/imageProxy";
 
 interface Props extends HeadMetaType {}
 const { title, slug, description, ogImage } = Astro.props;
-const url = SITE_URL + slug;
+const url = `${SITE_URL}/${slug}`;
 const pageTitle = `${title} | ${SITE_TITLE}`;
 const proxyOgImage = createProxyImageUrl(ogImage);
 ---
