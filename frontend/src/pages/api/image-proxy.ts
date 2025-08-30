@@ -17,7 +17,8 @@ export const GET: APIRoute = async ({ url }) => {
 	}
 
 	try {
-		const ghostApiUrl = import.meta.env.GHOST_API_URL || "";
+		const ghostApiUrl =
+			import.meta.env.GHOST_API_URL || process.env.GHOST_API_URL;
 
 		if (!ghostApiUrl) {
 			return new Response(
