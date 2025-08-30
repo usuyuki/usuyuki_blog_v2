@@ -9,13 +9,11 @@ import {
 } from "~/consts";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 import GoogleAnalytics from "~/components/atom/analytics/GoogleAnalytics.astro";
-import { createProxyImageUrl } from "~/libs/imageProxy";
 
 interface Props extends HeadMetaType {}
 const { title, slug, description, ogImage } = Astro.props;
 const url = `${SITE_URL}/${slug}`;
 const pageTitle = `${title} | ${SITE_TITLE}`;
-const proxyOgImage = createProxyImageUrl(ogImage);
 ---
 
 <meta name="robots" content="index, follow" />
@@ -37,7 +35,7 @@ const proxyOgImage = createProxyImageUrl(ogImage);
 <title>{pageTitle}</title>
 <meta name="author" content={SITE_AUTHOR} />
 <meta name="description" content={description} />
-<meta name="thumbnail" content={proxyOgImage} />
+<meta name="thumbnail" content={ogImage} />
 
 <meta name="robots" content="max-image-preview:large" />
 <meta property="og:locale" content="ja_JP" />
@@ -45,8 +43,8 @@ const proxyOgImage = createProxyImageUrl(ogImage);
 <meta property="og:type" content="article" />
 <meta property="og:title" content={pageTitle} />
 <meta property="og:url" content={url} />
-<meta property="og:image" content={proxyOgImage} />
-<meta property="og:image:secure_url" content={proxyOgImage} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:secure_url" content={ogImage} />
 <!-- <meta property="article:published_time" content="2023-03-02T11:44:01+00:00" />
 <meta property="article:modified_time" content="2023-03-02T13:33:25+00:00" /> -->
 
@@ -54,6 +52,6 @@ const proxyOgImage = createProxyImageUrl(ogImage);
 <meta name="twitter:site" content={TWITTER_ID} />
 <meta name="twitter:creator" content={TWITTER_ID} />
 <meta name="twitter:title" content={pageTitle} />
-<meta name="twitter:image" content={proxyOgImage} />
+<meta name="twitter:image" content={ogImage} />
 
 <ClientRouter />
