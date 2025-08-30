@@ -20,7 +20,6 @@ class LoggerService {
 
 	async debug(message: string, context?: LogContext) {
 		if (this.isClient) {
-			console.debug(`[DEBUG] ${message}`, context);
 			return;
 		}
 
@@ -29,13 +28,12 @@ class LoggerService {
 			const logger = this.createWinstonLogger(winston);
 			logger.debug(message, this.enrichContext(context));
 		} catch (_error) {
-			console.debug(`[DEBUG] ${message}`, context);
+			// Server-only logging, no fallback needed
 		}
 	}
 
 	async info(message: string, context?: LogContext) {
 		if (this.isClient) {
-			console.info(`[INFO] ${message}`, context);
 			return;
 		}
 
@@ -44,13 +42,12 @@ class LoggerService {
 			const logger = this.createWinstonLogger(winston);
 			logger.info(message, this.enrichContext(context));
 		} catch (_error) {
-			console.info(`[INFO] ${message}`, context);
+			// Server-only logging, no fallback needed
 		}
 	}
 
 	async warn(message: string, context?: LogContext) {
 		if (this.isClient) {
-			console.warn(`[WARN] ${message}`, context);
 			return;
 		}
 
@@ -59,7 +56,7 @@ class LoggerService {
 			const logger = this.createWinstonLogger(winston);
 			logger.warn(message, this.enrichContext(context));
 		} catch (_error) {
-			console.warn(`[WARN] ${message}`, context);
+			// Server-only logging, no fallback needed
 		}
 	}
 
@@ -69,7 +66,6 @@ class LoggerService {
 			: undefined;
 
 		if (this.isClient) {
-			console.error(`[ERROR] ${message}`, errorInfo, context);
 			return;
 		}
 
@@ -85,13 +81,12 @@ class LoggerService {
 				}),
 			);
 		} catch (_err) {
-			console.error(`[ERROR] ${message}`, errorInfo, context);
+			// Server-only logging, no fallback needed
 		}
 	}
 
 	async log(message: string, level: LogLevel = "info", context?: LogContext) {
 		if (this.isClient) {
-			console.log(`[${level.toUpperCase()}] ${message}`, context);
 			return;
 		}
 
@@ -100,7 +95,7 @@ class LoggerService {
 			const logger = this.createWinstonLogger(winston);
 			logger.log(level, message, this.enrichContext(context));
 		} catch (_error) {
-			console.log(`[${level.toUpperCase()}] ${message}`, context);
+			// Server-only logging, no fallback needed
 		}
 	}
 
