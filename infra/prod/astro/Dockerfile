@@ -18,11 +18,14 @@ RUN pnpm build
 
 # Production stage
 FROM node:22-slim AS prod
-WORKDIR /frontend
 
 # Create non-root user first
 RUN addgroup --gid 1001 --system nodejs \
     && adduser --system --uid 1001 astro
+
+# Set up working directory with correct ownership
+RUN mkdir -p /frontend && chown -R astro:nodejs /frontend
+WORKDIR /frontend
 
 # Copy package files and install production dependencies with correct ownership
 COPY --chown=astro:nodejs package.json pnpm-lock.yaml ./

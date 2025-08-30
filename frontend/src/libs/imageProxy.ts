@@ -1,17 +1,14 @@
 import { SITE_URL } from "~/consts";
 
 export function createProxyImageUrl(originalUrl: string): string {
-	const backendApiUrl = import.meta.env.BACKEND_API_URL || "";
-	const imageUrlPrefix = `${backendApiUrl}/content/images/`;
+	const frontendUrl = import.meta.env.FRONTEND_URL || SITE_URL;
+	const ghostApiUrl = import.meta.env.GHOST_API_URL || "";
+	const imageUrlPrefix = `${ghostApiUrl}/content/images/`;
 
-	if (
-		!originalUrl ||
-		!backendApiUrl ||
-		!originalUrl.startsWith(imageUrlPrefix)
-	) {
+	if (!originalUrl || !ghostApiUrl || !originalUrl.startsWith(imageUrlPrefix)) {
 		return originalUrl;
 	}
 
-	const encodedUrl = encodeURIComponent(originalUrl);
-	return `${SITE_URL}/api/image-proxy?url=${encodedUrl}`;
+	const imagePath = originalUrl.replace(imageUrlPrefix, "");
+	return `${frontendUrl}/api/image-proxy?path=${imagePath}`;
 }

@@ -2,11 +2,11 @@ import type { APIRoute } from "astro";
 import errorHandler from "~/libs/errorHandler";
 
 export const GET: APIRoute = async ({ url }) => {
-	const imageUrl = url.searchParams.get("url");
+	const imagePath = url.searchParams.get("path");
 
-	if (!imageUrl) {
+	if (!imagePath) {
 		return new Response(
-			JSON.stringify({ error: "URL parameter is required" }),
+			JSON.stringify({ error: "Path parameter is required" }),
 			{
 				status: 400,
 				headers: {
@@ -17,12 +17,22 @@ export const GET: APIRoute = async ({ url }) => {
 	}
 
 	try {
-		const decodedUrl = decodeURIComponent(imageUrl);
-		const backendApiUrl = import.meta.env.BACKEND_API_URL || "";
-		const imageUrlPrefix = `${backendApiUrl}/content/images/`;
+		const ghostApiUrl = import.meta.env.GHOST_API_URL || "";
 
-		if (!backendApiUrl || !decodedUrl.startsWith(imageUrlPrefix)) {
-			return new Response(JSON.stringify({ error: "Invalid image URL" }), {
+		if (!ghostApiUrl) {
+			return new Response(
+				JSON.stringify({ error: "Ghost API URL not configured" }),
+				{
+					status: 500,
+					headers: {
+						"Content-Type": "application/json",
+					},
+				},
+			);
+		}
+
+		if (imagePath.includes("..") || imagePath.startsWith("/")) {
+			return new Response(JSON.stringify({ error: "Invalid image path" }), {
 				status: 400,
 				headers: {
 					"Content-Type": "application/json",
@@ -30,7 +40,8 @@ export const GET: APIRoute = async ({ url }) => {
 			});
 		}
 
-		const response = await fetch(decodedUrl);
+		const imageUrl = `${ghostApiUrl}/content/images/${imagePath}`;
+		const response = await fetch(imageUrl);
 
 		if (!response.ok) {
 			throw new Error(`Failed to fetch image: ${response.status}`);
@@ -50,7 +61,7 @@ export const GET: APIRoute = async ({ url }) => {
 		});
 	} catch (error) {
 		errorHandler.handleApiError("/api/image-proxy", error as Error, {
-			imageUrl,
+			imagePath,
 		});
 
 		return new Response(JSON.stringify({ error: "Failed to proxy image" }), {
