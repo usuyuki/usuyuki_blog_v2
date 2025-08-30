@@ -6,6 +6,10 @@ export function createProxyImageUrl(originalUrl: string): string {
 	const ghostApiUrl = getGhostApiUrl();
 	const imageUrlPrefix = `${ghostApiUrl}/content/images/`;
 
+	console.log("==Original URL:", originalUrl);
+	console.log("==Ghost API URL:", ghostApiUrl);
+	console.log("==Image URL Prefix:", imageUrlPrefix);
+
 	if (!originalUrl || !ghostApiUrl || !originalUrl.startsWith(imageUrlPrefix)) {
 		return originalUrl;
 	}
