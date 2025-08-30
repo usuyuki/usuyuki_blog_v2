@@ -3,17 +3,17 @@ import { getFrontendUrl, getGhostFrontUrl } from "./env";
 
 export function createProxyImageUrl(originalUrl: string): string {
 	const frontendUrl = getFrontendUrl() || SITE_URL;
-	const ghostFrontUrl = getGhostFrontUrl(); // 外向きのURLがimageのパスに入っているのでこっちを採用
+	const ghostFrontUrl = getGhostFrontUrl();
 	const imageUrlPrefix = `${ghostFrontUrl}/content/images/`;
 
-	if (
-		!originalUrl ||
-		!ghostFrontUrl ||
-		!originalUrl.startsWith(imageUrlPrefix)
-	) {
+	if (!originalUrl || !ghostFrontUrl) {
 		return originalUrl;
 	}
 
-	const imagePath = originalUrl.replace(imageUrlPrefix, "");
-	return `${frontendUrl}/api/image-proxy?path=${imagePath}`;
+	if (originalUrl.startsWith(imageUrlPrefix)) {
+		const imagePath = originalUrl.replace(imageUrlPrefix, "");
+		return `${frontendUrl}/image-proxy/${imagePath}`;
+	}
+
+	return originalUrl;
 }
