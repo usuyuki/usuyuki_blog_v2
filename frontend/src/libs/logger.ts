@@ -1,4 +1,3 @@
-import winston from "winston";
 import { LOG_TYPES, type LogType } from "./logTypes";
 
 const originalConsole = {
@@ -9,22 +8,6 @@ const originalConsole = {
 	debug: console.debug,
 };
 
-const logger = winston.createLogger({
-	level: "info",
-	format: winston.format.combine(
-		winston.format.timestamp(),
-		winston.format.json(),
-	),
-	transports: [
-		new winston.transports.Console({
-			format: winston.format.combine(
-				winston.format.colorize(),
-				winston.format.simple(),
-			),
-		}),
-	],
-});
-
 type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface LogContext {
@@ -33,41 +16,110 @@ interface LogContext {
 }
 
 class LoggerService {
-	private winston: winston.Logger;
+	private isClient = typeof window !== "undefined";
 
-	constructor(winstonLogger: winston.Logger) {
-		this.winston = winstonLogger;
+	async debug(message: string, context?: LogContext) {
+		if (this.isClient) {
+			console.debug(`[DEBUG] ${message}`, context);
+			return;
+		}
+
+		try {
+			const winston = await import("winston");
+			const logger = this.createWinstonLogger(winston);
+			logger.debug(message, this.enrichContext(context));
+		} catch (_error) {
+			console.debug(`[DEBUG] ${message}`, context);
+		}
 	}
 
-	debug(message: string, context?: LogContext) {
-		this.winston.debug(message, this.enrichContext(context));
+	async info(message: string, context?: LogContext) {
+		if (this.isClient) {
+			console.info(`[INFO] ${message}`, context);
+			return;
+		}
+
+		try {
+			const winston = await import("winston");
+			const logger = this.createWinstonLogger(winston);
+			logger.info(message, this.enrichContext(context));
+		} catch (_error) {
+			console.info(`[INFO] ${message}`, context);
+		}
 	}
 
-	info(message: string, context?: LogContext) {
-		this.winston.info(message, this.enrichContext(context));
+	async warn(message: string, context?: LogContext) {
+		if (this.isClient) {
+			console.warn(`[WARN] ${message}`, context);
+			return;
+		}
+
+		try {
+			const winston = await import("winston");
+			const logger = this.createWinstonLogger(winston);
+			logger.warn(message, this.enrichContext(context));
+		} catch (_error) {
+			console.warn(`[WARN] ${message}`, context);
+		}
 	}
 
-	warn(message: string, context?: LogContext) {
-		this.winston.warn(message, this.enrichContext(context));
-	}
-
-	error(message: string, error?: Error, context?: LogContext) {
+	async error(message: string, error?: Error, context?: LogContext) {
 		const errorInfo = error
 			? { name: error.name, message: error.message, stack: error.stack }
 			: undefined;
 
-		this.winston.error(
-			message,
-			this.enrichContext({
-				error: errorInfo,
-				logType: LOG_TYPES.ERROR,
-				...context,
-			}),
-		);
+		if (this.isClient) {
+			console.error(`[ERROR] ${message}`, errorInfo, context);
+			return;
+		}
+
+		try {
+			const winston = await import("winston");
+			const logger = this.createWinstonLogger(winston);
+			logger.error(
+				message,
+				this.enrichContext({
+					error: errorInfo,
+					logType: LOG_TYPES.ERROR,
+					...context,
+				}),
+			);
+		} catch (_err) {
+			console.error(`[ERROR] ${message}`, errorInfo, context);
+		}
 	}
 
-	log(message: string, level: LogLevel = "info", context?: LogContext) {
-		this.winston.log(level, message, this.enrichContext(context));
+	async log(message: string, level: LogLevel = "info", context?: LogContext) {
+		if (this.isClient) {
+			console.log(`[${level.toUpperCase()}] ${message}`, context);
+			return;
+		}
+
+		try {
+			const winston = await import("winston");
+			const logger = this.createWinstonLogger(winston);
+			logger.log(level, message, this.enrichContext(context));
+		} catch (_error) {
+			console.log(`[${level.toUpperCase()}] ${message}`, context);
+		}
+	}
+
+	private createWinstonLogger(winston: typeof import("winston")) {
+		return winston.createLogger({
+			level: "info",
+			format: winston.format.combine(
+				winston.format.timestamp(),
+				winston.format.json(),
+			),
+			transports: [
+				new winston.transports.Console({
+					format: winston.format.combine(
+						winston.format.colorize(),
+						winston.format.simple(),
+					),
+				}),
+			],
+		});
 	}
 
 	private enrichContext(context?: LogContext): LogContext {
@@ -140,11 +192,7 @@ class LoggerService {
 	}
 }
 
-const loggerService = new LoggerService(logger);
-
-if (typeof window !== "undefined") {
-	loggerService.wrapConsole();
-}
+const loggerService = new LoggerService();
 
 export default loggerService;
 export { originalConsole };

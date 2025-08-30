@@ -16,28 +16,28 @@ interface AstroLogContext extends LogContext {
 class AstroLogger {
 	private logger = loggerService;
 
-	info(message: string, context?: AstroLogContext) {
-		this.logger.info(message, {
+	async info(message: string, context?: AstroLogContext) {
+		await this.logger.info(message, {
 			source: "astro",
 			...context,
 		});
 	}
 
-	warn(message: string, context?: AstroLogContext) {
-		this.logger.warn(message, {
+	async warn(message: string, context?: AstroLogContext) {
+		await this.logger.warn(message, {
 			source: "astro",
 			...context,
 		});
 	}
 
-	error(message: string, error?: Error, context?: AstroLogContext) {
-		this.logger.error(message, error, {
+	async error(message: string, error?: Error, context?: AstroLogContext) {
+		await this.logger.error(message, error, {
 			source: "astro",
 			...context,
 		});
 	}
 
-	requestError(
+	async requestError(
 		message: string,
 		request: Request,
 		error?: Error,
@@ -49,7 +49,7 @@ class AstroLogger {
 			headers[key] = value;
 		});
 
-		this.error(message, error, {
+		await this.error(message, error, {
 			method: request.method,
 			url: request.url,
 			path: url.pathname,
@@ -60,20 +60,20 @@ class AstroLogger {
 		});
 	}
 
-	debug(message: string, context?: AstroLogContext) {
-		this.logger.debug(message, {
+	async debug(message: string, context?: AstroLogContext) {
+		await this.logger.debug(message, {
 			source: "astro",
 			...context,
 		});
 	}
 
-	requestLog(
+	async requestLog(
 		request: Request,
 		response: { status?: number } = {},
 		duration?: number,
 	) {
 		const url = new URL(request.url);
-		this.info("Request processed", {
+		await this.info("Request processed", {
 			logType: LOG_TYPES.ACCESS,
 			method: request.method,
 			path: url.pathname,
@@ -84,27 +84,27 @@ class AstroLogger {
 		});
 	}
 
-	componentError(
+	async componentError(
 		componentName: string,
 		error: Error,
 		context?: AstroLogContext,
 	) {
-		this.error(`Component error: ${componentName}`, error, {
+		await this.error(`Component error: ${componentName}`, error, {
 			logType: LOG_TYPES.COMPONENT,
 			component: componentName,
 			...context,
 		});
 	}
 
-	apiError(endpoint: string, error: Error, context?: AstroLogContext) {
-		this.error(`API error: ${endpoint}`, error, {
+	async apiError(endpoint: string, error: Error, context?: AstroLogContext) {
+		await this.error(`API error: ${endpoint}`, error, {
 			logType: LOG_TYPES.API,
 			route: endpoint,
 			...context,
 		});
 	}
 
-	apiRequestError(
+	async apiRequestError(
 		endpoint: string,
 		request: Request,
 		error: Error,
@@ -116,7 +116,7 @@ class AstroLogger {
 			headers[key] = value;
 		});
 
-		this.error(`API error: ${endpoint}`, error, {
+		await this.error(`API error: ${endpoint}`, error, {
 			logType: LOG_TYPES.API,
 			route: endpoint,
 			method: request.method,
@@ -129,13 +129,13 @@ class AstroLogger {
 		});
 	}
 
-	cacheLog(
+	async cacheLog(
 		action: string,
 		key: string,
 		hit: boolean,
 		context?: AstroLogContext,
 	) {
-		this.info(`Cache ${action}: ${key}`, {
+		await this.info(`Cache ${action}: ${key}`, {
 			logType: LOG_TYPES.CACHE,
 			cacheAction: action,
 			cacheKey: key,
@@ -144,8 +144,8 @@ class AstroLogger {
 		});
 	}
 
-	systemLog(message: string, context?: AstroLogContext) {
-		this.info(message, {
+	async systemLog(message: string, context?: AstroLogContext) {
+		await this.info(message, {
 			logType: LOG_TYPES.SYSTEM,
 			...context,
 		});

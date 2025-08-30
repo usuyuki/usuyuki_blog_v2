@@ -24,6 +24,13 @@ export default defineConfig({
 				"~": "/src",
 			},
 		},
+		build: {
+			rollupOptions: {
+				external: (id) => {
+					return id.includes("winston");
+				},
+			},
+		},
 	},
 	integrations: [
 		svelte(),
