@@ -1,60 +1,44 @@
 import rss from "@astrojs/rss";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "~/consts";
-import { ghostClient } from "~/libs/ghostClient";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import astroLogger from "~/libs/astroLogger";
 
 export async function GET(context: { request: Request }) {
-	let allPosts: any[] = [];
-	let page = 1;
-	const limit = 100;
-
 	try {
-		while (true) {
-			const posts = await ghostClient.posts.browse({
-				limit,
-				page,
-				order: "published_at DESC",
+		// getLatestArticles関数でGhost記事のみを全件取得
+		const allArticles = await getLatestArticles({
+			includeExternal: false, // RSS記事は含めない（RSS XMLにはGhost記事のみ）
+			unlimited: true, // 全記事を取得
+		});
+
+		if (allArticles.length === 0) {
+			const error = new Error("No articles available for RSS feed");
+			astroLogger.apiRequestError("/rss.xml", context.request, error, {
+				route: "/rss.xml",
+				status: 500,
 			});
-
-			if (!posts || posts.length === 0) {
-				break;
-			}
-
-			allPosts = allPosts.concat(posts);
-
-			if (posts.length < limit) {
-				break;
-			}
-
-			page++;
+			return new Response("Internal Server Error", { status: 500 });
 		}
+
+		// Ghost記事のみをフィルター（念のため）
+		const ghostPosts = allArticles.filter(article => !article.isExternal);
+
+		return rss({
+			title: SITE_TITLE,
+			description: SITE_DESCRIPTION,
+			site: SITE_URL,
+			customData: "<language>ja</language>",
+			items: ghostPosts.map((article) => ({
+				title: article.title,
+				pubDate: article.published_at,
+				link: `/${article.slug}`,
+				content: article.title, // articleAggregatorではexcerptは含まれないため
+			})),
+		});
 	} catch (err: any) {
 		astroLogger.apiRequestError("/rss.xml", context.request, err, {
 			route: "/rss.xml",
 		});
 		return new Response("Internal Server Error", { status: 500 });
 	}
-
-	if (allPosts.length === 0) {
-		const error = new Error("Failed to fetch posts from Ghost API");
-		astroLogger.apiRequestError("/rss.xml", context.request, error, {
-			route: "/rss.xml",
-			status: 500,
-		});
-		return new Response("Internal Server Error", { status: 500 });
-	}
-
-	return rss({
-		title: SITE_TITLE,
-		description: SITE_DESCRIPTION,
-		site: SITE_URL,
-		customData: "<language>ja</language>",
-		// biome-ignore lint/suspicious/noExplicitAny: Ghost API response type is complex
-		items: allPosts.map((post: any) => ({
-			title: post.title,
-			pubDate: post.published_at,
-			link: `/${post.slug}`,
-			content: post.excerpt,
-		})),
-	});
 }

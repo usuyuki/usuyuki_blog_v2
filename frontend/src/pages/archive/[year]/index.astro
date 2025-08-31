@@ -2,7 +2,7 @@
 import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchive.astro";
 import { SITE_URL } from "~/consts";
 import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import { isYear } from "~/libs/validation/isYear";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
@@ -13,37 +13,41 @@ if (!isYear(yearSlug)) {
 	return new Response(null, { status: 404 });
 }
 
-// 年別アーカイブの全記事を取得（ページネーション対応）
-let allPosts: any[] = [];
-let page = 1;
-const limit = 100;
+// getLatestArticles関数で全記事取得後、年でフィルタリング
+const allArticles = await getLatestArticles({
+	includeExternal: true, // RSS記事も含める
+	unlimited: true, // 全記事を取得
+});
 
-while (true) {
-	const posts = await ghostApiWithRetry.posts.browse(
-		{
-			filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
-			limit,
-			page,
-			order: "published_at ASC",
-		},
-		3,
-		Astro.request,
-	);
+// 指定年の記事のみフィルタリング
+const yearStart = new Date(`${yearSlug}-01-01T00:00:00`);
+const yearEnd = new Date(`${yearSlug}-12-31T23:59:59`);
 
-	if (!posts || posts.length === 0) {
-		break;
+const posts = allArticles.filter((article) => {
+	let articleDate: Date;
+	
+	if (typeof article.published_at === "string") {
+		articleDate = new Date(article.published_at);
+	} else {
+		// DateType format
+		articleDate = new Date(
+			`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`
+		);
 	}
-
-	allPosts = allPosts.concat(posts);
-
-	if (posts.length < limit) {
-		break;
-	}
-
-	page++;
-}
-
-const posts = allPosts;
+	
+	return articleDate >= yearStart && articleDate <= yearEnd;
+}).sort((a, b) => {
+	// 日付順でソート（古い順 = ASC）
+	const dateA = typeof a.published_at === "string" 
+		? new Date(a.published_at).getTime()
+		: new Date(`${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`).getTime();
+		
+	const dateB = typeof b.published_at === "string"
+		? new Date(b.published_at).getTime()
+		: new Date(`${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`).getTime();
+		
+	return dateA - dateB; // ASC order
+});
 
 const postsData = {
 	posts: posts || [],

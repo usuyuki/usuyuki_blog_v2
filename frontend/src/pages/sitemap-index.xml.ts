@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { getLatestArticles } from "~/libs/articleAggregator";
 import { SITE_URL } from "~/consts";
 import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
@@ -13,38 +13,22 @@ interface GhostPost {
 
 export const GET: APIRoute = async ({ request }) => {
 	try {
-		// Ghost記事を取得（ページネーション対応）
-		let allPosts: GhostPost[] = [];
-		let page = 1;
-		const limit = 100;
+		// getLatestArticles関数で全記事取得（Ghost記事のみ）
+		const allArticles = await getLatestArticles({
+			includeExternal: false, // サイトマップにはGhost記事のみ
+			unlimited: true, // 全記事を取得
+		});
 
-		while (true) {
-			const posts = (await ghostApiWithRetry.posts.browse(
-				{
-					limit,
-					page,
-					fields: "slug,updated_at,published_at",
-					filter: "status:published",
-					order: "published_at DESC",
-				},
-				3,
-				request,
-			)) as GhostPost[] | null;
-
-			if (!posts || posts.length === 0) {
-				break;
-			}
-
-			allPosts = allPosts.concat(posts);
-
-			if (posts.length < limit) {
-				break;
-			}
-
-			page++;
-		}
-
-		const posts = allPosts;
+		// ArticleArchiveType から GhostPost 形式に変換
+		const posts: GhostPost[] = allArticles.map(article => ({
+			slug: article.slug,
+			published_at: typeof article.published_at === "string" 
+				? article.published_at 
+				: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`,
+			updated_at: typeof article.published_at === "string" 
+				? article.published_at 
+				: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`
+		}));
 
 		astroLogger.info(
 			`Sitemap: Found ${posts?.length || 0} posts from Ghost API`,
