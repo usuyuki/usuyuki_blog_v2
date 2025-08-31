@@ -6,8 +6,8 @@ import ArchiveList from "./ArchiveList.svelte";
 
 // 全ての記事を取得（Ghost記事とRSS記事を統合）
 const allArticles = await getLatestArticles({
-	limit: 200, // より多くの記事を取得
 	includeExternal: true,
+	unlimited: true, // 全記事を取得
 });
 
 // 日付でソート（新しい順）

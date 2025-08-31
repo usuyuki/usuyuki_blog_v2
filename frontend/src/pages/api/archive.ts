@@ -14,10 +14,10 @@ export const GET: APIRoute = async ({ url, request }) => {
 		// キャッシュから全記事を取得を試行
 		let allArticles = cache.get<ArticleArchiveType[]>(cacheKey);
 		if (!allArticles) {
-			// getLatestArticles関数を使用してGhost記事とRSS記事を統合取得
+			// getLatestArticles関数を使用してGhost記事とRSS記事を統合取得（全記事）
 			allArticles = await getLatestArticles({
-				limit: 500, // より多くの記事を取得
-				includeExternal: true,
+				includeExternal: true, // RSS記事も含める
+				unlimited: true, // 全記事を取得するフラグ
 			});
 
 			// キャッシュに保存

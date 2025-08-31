@@ -76,12 +76,13 @@ The frontend follows Atomic Design principles:
 ## Key Files and Directories
 
 - `frontend/src/consts.ts` - Site configuration constants
-- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic
+- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
 - `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost and RSS feeds
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs
 - `frontend/src/libs/config.ts` - Configuration management for external integrations
 - `frontend/src/libs/errorHandler.ts` - Centralized error handling and logging
+- `frontend/src/libs/cache.ts` - In-memory caching system for API responses
 - `frontend/src/components/` - Astro components organized by atomic design
 - `frontend/src/pages/` - Astro pages and routes
 - `frontend/src/styles/` - CSS files including Ghost content styling
@@ -208,6 +209,35 @@ This runs:
 5. Build process
 
 **IMPORTANT**: Always verify that `make 1` completes without any errors before considering any task complete. This ensures code quality and prevents broken builds.
+
+## Caching System
+
+The application uses multiple layers of caching for performance:
+
+### In-Memory Application Cache
+- **Location**: `frontend/src/libs/cache.ts`
+- **Scope**: In-memory cache that persists during container runtime
+- **Used by**: Archive API (`/api/archive`), Ghost client, RSS client
+- **Cache Duration**: 
+  - Archive articles: 1 hour (`ONE_HOUR_MS`)
+  - Ghost API responses: 1 hour (configurable per endpoint)
+  - RSS feed responses: Varies by feed freshness
+
+### Cache Management Commands
+
+```bash
+# Clear all caches by restarting containers
+docker compose restart astro
+
+# For production
+docker compose -f compose-prod.yml restart astro
+```
+
+### Important Notes
+- **Cache Keys**: When modifying data aggregation logic (like `articleAggregator.ts`), change cache keys to force cache invalidation
+- **Development**: Caches persist until container restart - always restart after significant changes
+- **Production**: Caches improve performance but may require container restart for immediate updates
+- **Ghost Client Cache**: Individual Ghost API calls are cached with TTL, check logs for cache HIT/MISS status
 
 ## Monitoring and Observability
 
