@@ -17,7 +17,8 @@ services:
       NODE_ENV: production
       url: ${BACKEND_API_URL}
     volumes:
-      - ./backend:/var/lib/ghost/content
+      - ./backend/images:/var/lib/ghost/content/images
+      - ./backend/data:/var/lib/ghost/content/data
       - ./backend/config.production.json:/var/lib/ghost/config.production.json
     user: "1000:1000"
     depends_on:

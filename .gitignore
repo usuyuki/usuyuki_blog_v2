@@ -1,5 +1,6 @@
 backend/*
-!backend/README.md
+!backend/images/
+!backend/data/
 !backend/config.*.json
 .env
 .env.prod
