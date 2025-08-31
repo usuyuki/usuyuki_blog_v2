@@ -1,25 +1,17 @@
-// 本当は型定義ライブラリを追加すべきだが、追加すると自前で定義した型と競合して大改修必要なので保留
-// biome-ignore lint/suspicious/noTsIgnore: Type definitions conflict with custom types
-// @ts-ignore
 import GhostContentAPI from "@tryghost/content-api";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 import { LOG_TYPES } from "./logTypes";
 import { getGhostApiUrl, getGhostContentKey } from "./env";
 
-// Ghost API オプションの型定義
-interface GhostPostOptions {
-	slug?: string;
-	id?: string;
-	filter?: string;
-	limit?: number;
-	page?: number;
-	order?: string;
-	include?: string;
-	fields?: string;
-}
+import type {
+	PostsOrPages,
+	Tags,
+	PostOrPage,
+	Tag,
+} from "@tryghost/content-api";
 
-interface GhostTagOptions {
+type GhostPostOptions = {
 	slug?: string;
 	id?: string;
 	filter?: string;
@@ -28,7 +20,18 @@ interface GhostTagOptions {
 	order?: string;
 	include?: string;
 	fields?: string;
-}
+};
+
+type GhostTagOptions = {
+	slug?: string;
+	id?: string;
+	filter?: string;
+	limit?: number;
+	page?: number;
+	order?: string;
+	include?: string;
+	fields?: string;
+};
 
 // Create API instance with site credentials
 export const ghostClient = new GhostContentAPI({
@@ -166,7 +169,7 @@ export const ghostApiWithRetry = {
 			options: GhostPostOptions,
 			maxRetries = 3,
 			request?: Request,
-		) => {
+		): Promise<PostOrPage | null> => {
 			// slugの検証を強化
 			if (
 				!options.slug ||
@@ -193,12 +196,20 @@ export const ghostApiWithRetry = {
 							limit: 1,
 							...cleanOptions,
 						};
-						const browseResult = await ghostClient.posts.browse(browseOptions);
+						const finalBrowseOptions: Record<string, any> = {};
+						if (browseOptions.filter) finalBrowseOptions.filter = browseOptions.filter;
+						if (browseOptions.limit) finalBrowseOptions.limit = browseOptions.limit;
+						if (browseOptions.include) finalBrowseOptions.include = browseOptions.include;
+						if (browseOptions.fields) finalBrowseOptions.fields = browseOptions.fields;
+						
+						const browseResult = await ghostClient.posts.browse(finalBrowseOptions);
 						const result = browseResult?.[0] || null;
 						return result;
-					} else {
-						const result = await ghostClient.posts.read(cleanOptions);
+					} else if (cleanOptions.id) {
+						const result = await ghostClient.posts.read({ id: cleanOptions.id });
 						return result;
+					} else {
+						return null;
 					}
 				} catch (error) {
 					const err = error as Error;
@@ -223,25 +234,34 @@ export const ghostApiWithRetry = {
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
+			return null;
 		},
 		browse: async (
 			options: GhostPostOptions,
 			maxRetries = 3,
 			request?: Request,
-		) => {
+		): Promise<PostsOrPages | null> => {
 			// 通常キャッシュをチェック
 			const cacheKey = getCacheKey("posts.browse", options);
-			const cached = getFromCache(cacheKey);
+			const cached = getFromCache<PostsOrPages>(cacheKey);
 			if (cached) {
 				return cached;
 			}
 
 			// 長期キャッシュもチェック
-			const longTermCached = getLongTermCache(cacheKey);
+			const longTermCached = getLongTermCache<PostsOrPages>(cacheKey);
 
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const result = await ghostClient.posts.browse(options);
+					const browseOptions: Record<string, any> = {};
+					if (options.filter) browseOptions.filter = options.filter;
+					if (options.limit) browseOptions.limit = options.limit;
+					if (options.page) browseOptions.page = options.page;
+					if (options.order) browseOptions.order = options.order;
+					if (options.fields) browseOptions.fields = options.fields;
+					if (options.include) browseOptions.include = options.include;
+					
+					const result = await ghostClient.posts.browse(browseOptions);
 					// 成功時に通常と長期両方のキャッシュに保存
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
 					setLongTermCache(cacheKey, result); // 1週間キャッシュ
@@ -309,6 +329,7 @@ export const ghostApiWithRetry = {
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
+			return null;
 		},
 	},
 	tags: {
@@ -316,7 +337,7 @@ export const ghostApiWithRetry = {
 			options: GhostTagOptions,
 			maxRetries = 3,
 			request?: Request,
-		) => {
+		): Promise<Tag | null> => {
 			// slugの検証を強化
 			if (
 				options.slug &&
@@ -343,12 +364,19 @@ export const ghostApiWithRetry = {
 							limit: 1,
 							...cleanOptions,
 						};
-						const browseResult = await ghostClient.tags.browse(browseOptions);
+						const finalBrowseOptions: Record<string, any> = {};
+						if (browseOptions.filter) finalBrowseOptions.filter = browseOptions.filter;
+						if (browseOptions.limit) finalBrowseOptions.limit = browseOptions.limit;
+						if (browseOptions.fields) finalBrowseOptions.fields = browseOptions.fields;
+						
+						const browseResult = await ghostClient.tags.browse(finalBrowseOptions);
 						const result = browseResult?.[0] || null;
 						return result;
-					} else {
-						const result = await ghostClient.tags.read(cleanOptions);
+					} else if (cleanOptions.id) {
+						const result = await ghostClient.tags.read({ id: cleanOptions.id });
 						return result;
+					} else {
+						return null;
 					}
 				} catch (error) {
 					const err = error as Error;
@@ -373,22 +401,30 @@ export const ghostApiWithRetry = {
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
+			return null;
 		},
 		browse: async (
 			options: GhostTagOptions,
 			maxRetries = 3,
 			request?: Request,
-		) => {
+		): Promise<Tags | null> => {
 			// キャッシュをチェック
 			const cacheKey = getCacheKey("tags.browse", options);
-			const cached = getFromCache(cacheKey);
+			const cached = getFromCache<Tags>(cacheKey);
 			if (cached) {
 				return cached;
 			}
 
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const result = await ghostClient.tags.browse(options);
+					const browseOptions: Record<string, any> = {};
+					if (options.filter) browseOptions.filter = options.filter;
+					if (options.limit) browseOptions.limit = options.limit;
+					if (options.page) browseOptions.page = options.page;
+					if (options.order) browseOptions.order = options.order;
+					if (options.fields) browseOptions.fields = options.fields;
+					
+					const result = await ghostClient.tags.browse(browseOptions);
 					// 成功時にキャッシュに保存
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）
 					return result;
@@ -415,6 +451,7 @@ export const ghostApiWithRetry = {
 					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
+			return null;
 		},
 	},
 };

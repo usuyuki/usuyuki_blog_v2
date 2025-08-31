@@ -6,12 +6,10 @@ import { CONFIG } from "~/libs/config";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 
-interface GhostPost {
-	slug: string;
-	published_at: string;
-	feature_image?: string;
-	title: string;
-}
+import type { PostOrPage } from "@tryghost/content-api";
+
+// GhostPost型をPostOrPageに統一（変換関数との互換性のため）
+type GhostPost = PostOrPage;
 
 function convertRSSToArticle(
 	rssItem: RSSItem,
@@ -28,12 +26,12 @@ function convertRSSToArticle(
 	};
 }
 
-function convertGhostToArticle(post: GhostPost): ArticleArchiveType {
+export function convertGhostToArticle(post: PostOrPage): ArticleArchiveType {
 	return {
-		slug: post.slug,
-		published_at: post.published_at,
-		feature_image: post.feature_image,
-		title: post.title,
+		slug: post.slug || '',
+		published_at: post.published_at || '',
+		feature_image: post.feature_image || undefined,
+		title: post.title || '',
 		isExternal: false,
 	};
 }
@@ -125,7 +123,7 @@ export async function getLatestArticles(
 			const finalGhostPosts = unlimited
 				? allGhostPosts
 				: allGhostPosts.slice(0, limit);
-			const ghostArticles = finalGhostPosts.map(convertGhostToArticle);
+			const ghostArticles = finalGhostPosts.map((post) => convertGhostToArticle(post));
 			articles.push(...ghostArticles);
 
 			astroLogger.info(
@@ -279,7 +277,7 @@ export async function getFeaturedArticles(
 		});
 
 		if (ghostPosts) {
-			return ghostPosts.map(convertGhostToArticle);
+			return ghostPosts.map((post) => convertGhostToArticle(post));
 		}
 	} catch (error) {
 		errorHandler.handleError(error as Error, {

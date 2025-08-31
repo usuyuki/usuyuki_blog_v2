@@ -1,6 +1,6 @@
 ---
 import { ghostClient } from "~/libs/ghostClient";
-import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+import { convertGhostToArticle } from "~/libs/articleAggregator";
 import errorHandler from "~/libs/errorHandler";
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 const { ulClass = "", liClass = "" } = Astro.props;
 
-const posts = await ghostClient.posts
+const rawPosts = await ghostClient.posts
 	.browse({
 		limit: 5,
 		order: "published_at DESC",
@@ -17,12 +17,15 @@ const posts = await ghostClient.posts
 	.catch((err: Error) => {
 		errorHandler.handleComponentError("LatestArticleList", err);
 	});
+
+// 内部的にはnullableとして扱いたくないので変換
+const posts = (rawPosts || []).map(convertGhostToArticle);
 ---
 
 {
 	posts && posts.length > 0 ? (
 		<ul class={ulClass}>
-			{posts.map((post: ArticleArchiveType) => (
+			{posts.map((post) => (
 				<li class={`text-lg my-2 ${liClass}`}>
 					<a href={`/${post.slug}`}>📰{post.title}</a>
 				</li>

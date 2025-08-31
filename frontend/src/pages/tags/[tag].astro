@@ -6,6 +6,7 @@ import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { isTag } from "~/libs/validation/isTag";
 import type { HeadMetaType } from "~/types/HeadMetaType";
+import { convertGhostToArticle } from "~/libs/articleAggregator";
 
 //バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
@@ -19,7 +20,7 @@ if (
 	return new Response(null, { status: 404 });
 }
 
-const posts = await ghostApiWithRetry.posts.browse(
+const rawPosts = await ghostApiWithRetry.posts.browse(
 	{
 		filter: `tag:${tagSlug}`,
 		limit: 100,
@@ -41,8 +42,11 @@ if (!tag) {
 	return new Response(null, { status: 404 });
 }
 
+// 内部的にはnullableとして扱いたくないので変換
+const posts = (rawPosts || []).map(convertGhostToArticle);
+
 const postsData = {
-	posts: posts || [],
+	posts,
 };
 
 const headMeta: HeadMetaType = {
