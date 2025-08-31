@@ -32,7 +32,7 @@ interface GhostTagOptions {
 export const ghostClient = new GhostContentAPI({
 	url: getGhostApiUrl(),
 	key: getGhostContentKey(),
-	version: "v5.0",
+	version: "v6.0",
 });
 
 // キャッシュ用のシンプルなメモリストア
