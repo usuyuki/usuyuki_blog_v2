@@ -6,7 +6,6 @@ import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { isTag } from "~/libs/validation/isTag";
 import type { HeadMetaType } from "~/types/HeadMetaType";
-import { convertGhostToArticle } from "~/libs/articleAggregator";
 
 //バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
@@ -20,15 +19,16 @@ if (
 	return new Response(null, { status: 404 });
 }
 
-const rawPosts = await ghostApiWithRetry.posts.browse(
-	{
-		filter: `tag:${tagSlug}`,
-		limit: 100,
-		order: "published_at DESC",
-	},
-	3,
-	Astro.request,
-);
+const posts =
+	(await ghostApiWithRetry.posts.browse(
+		{
+			filter: `tag:${tagSlug}`,
+			limit: 100,
+			order: "published_at DESC",
+		},
+		3,
+		Astro.request,
+	)) || [];
 
 const tag = await ghostApiWithRetry.tags.read(
 	{
@@ -41,9 +41,6 @@ const tag = await ghostApiWithRetry.tags.read(
 if (!tag) {
 	return new Response(null, { status: 404 });
 }
-
-// 内部的にはnullableとして扱いたくないので変換
-const posts = (rawPosts || []).map(convertGhostToArticle);
 
 const postsData = {
 	posts,

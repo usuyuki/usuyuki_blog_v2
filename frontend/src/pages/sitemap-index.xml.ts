@@ -40,8 +40,8 @@ export const GET: APIRoute = async ({ request }) => {
 		if (posts && posts.length > 0) {
 			const sortedByDate = posts.sort(
 				(a: GhostPost, b: GhostPost) =>
-					new Date(b.published_at || '').getTime() -
-					new Date(a.published_at || '').getTime(),
+					new Date(b.published_at || "").getTime() -
+					new Date(a.published_at || "").getTime(),
 			);
 			astroLogger.info(
 				`Sitemap: Latest post date: ${sortedByDate[0]?.published_at}`,
@@ -67,7 +67,7 @@ export const GET: APIRoute = async ({ request }) => {
 				? new Date(
 						Math.max(
 							...posts.map((post: GhostPost) =>
-								new Date(post.updated_at || post.published_at || '').getTime(),
+								new Date(post.updated_at || post.published_at || "").getTime(),
 							),
 						),
 					)
@@ -95,7 +95,7 @@ export const GET: APIRoute = async ({ request }) => {
 		const postPages =
 			posts?.map((post: GhostPost) => ({
 				url: `${SITE_URL}/${post.slug}`,
-				lastmod: new Date(post.updated_at || post.published_at || '')
+				lastmod: new Date(post.updated_at || post.published_at || "")
 					.toISOString()
 					.split("T")[0],
 			})) || [];

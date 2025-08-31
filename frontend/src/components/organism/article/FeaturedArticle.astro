@@ -1,19 +1,16 @@
 ---
 import ArticleArchive from "~/components/molecule/articleArchive/YMDArticleArchive.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
-import { convertGhostToArticle } from "~/libs/articleAggregator";
 
-const rawPosts = await ghostApiWithRetry.posts.browse(
-	{
-		order: "published_at DESC",
-		filter: "featured:true",
-	},
-	3,
-	Astro.request,
-);
-
-// 内部的にはnullableとして扱いたくないので変換
-const posts = (rawPosts || []).map(convertGhostToArticle);
+const posts =
+	(await ghostApiWithRetry.posts.browse(
+		{
+			order: "published_at DESC",
+			filter: "featured:true",
+		},
+		3,
+		Astro.request,
+	)) || [];
 
 const postsData = {
 	posts,

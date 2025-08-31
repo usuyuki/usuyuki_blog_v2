@@ -8,9 +8,6 @@ import errorHandler from "./errorHandler";
 
 import type { PostOrPage } from "@tryghost/content-api";
 
-// GhostPost型をPostOrPageに統一（変換関数との互換性のため）
-type GhostPost = PostOrPage;
-
 function convertRSSToArticle(
 	rssItem: RSSItem,
 	blogConfig?: ExternalBlogConfig,
@@ -28,10 +25,10 @@ function convertRSSToArticle(
 
 export function convertGhostToArticle(post: PostOrPage): ArticleArchiveType {
 	return {
-		slug: post.slug || '',
-		published_at: post.published_at || '',
+		slug: post.slug || "",
+		published_at: post.published_at || "",
 		feature_image: post.feature_image || undefined,
-		title: post.title || '',
+		title: post.title || "",
 		isExternal: false,
 	};
 }
@@ -49,7 +46,7 @@ export async function getLatestArticles(
 
 	// Ghost記事の取得（ページネーション対応で全記事を取得）
 	try {
-		let allGhostPosts: GhostPost[] = [];
+		let allGhostPosts: ArticleArchiveType[] = [];
 		let page = 1;
 		const apiLimit = 100; // Ghost v6.0の最大制限
 
@@ -123,8 +120,8 @@ export async function getLatestArticles(
 			const finalGhostPosts = unlimited
 				? allGhostPosts
 				: allGhostPosts.slice(0, limit);
-			const ghostArticles = finalGhostPosts.map((post) => convertGhostToArticle(post));
-			articles.push(...ghostArticles);
+			// ghostApiWithRetry.posts.browse は既に ArticleArchiveType[] を返すので変換不要
+			articles.push(...finalGhostPosts);
 
 			astroLogger.info(
 				`Retrieved ${finalGhostPosts.length} Ghost posts ${unlimited ? "(unlimited)" : `(requested: ${limit})`}`,
@@ -277,7 +274,8 @@ export async function getFeaturedArticles(
 		});
 
 		if (ghostPosts) {
-			return ghostPosts.map((post) => convertGhostToArticle(post));
+			// ghostApiWithRetry.posts.browse は既に ArticleArchiveType[] を返すので変換不要
+			return ghostPosts;
 		}
 	} catch (error) {
 		errorHandler.handleError(error as Error, {

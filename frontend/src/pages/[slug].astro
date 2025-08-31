@@ -57,20 +57,20 @@ if (!post) {
 	});
 	return new Response(null, { status: 404 });
 }
-const publishedDate = iso8601TimeToDate(post.published_at || '');
+const publishedDate = iso8601TimeToDate(post.published_at || "");
 
 astroLogger.requestLog(Astro.request, { status: 200 });
 
 const headMeta = {
-	title: post.title || '',
+	title: post.title || "",
 	slug: post.slug,
 	// excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
-	description: (post.excerpt || '').replace(/\r?\n/g, "").slice(0, 150),
+	description: (post.excerpt || "").replace(/\r?\n/g, "").slice(0, 150),
 	ogImage: createProxyImageUrl(post.feature_image || ""),
 };
 
-const tocList: TOCType[] = generateTOC(post.html || '');
-const isWpArticle = judgeWpArticle(post.html || '');
+const tocList: TOCType[] = generateTOC(post.html || "");
+const isWpArticle = judgeWpArticle(post.html || "");
 ---
 
 <ArticleLayout {...headMeta}>

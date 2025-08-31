@@ -1,8 +1,7 @@
 ---
 import ArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
-import { ghostClient } from "~/libs/ghostClient";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
 import errorHandler from "~/libs/errorHandler";
-import { convertGhostToArticle } from "~/libs/articleAggregator";
 
 const today = new Date();
 const lastDay = new Date(today.getFullYear(), today.getMonth(), 0);
@@ -13,17 +12,16 @@ const formatDate = (date: Date) => {
 	).padStart(2, "0")}`;
 };
 
-const rawPosts = await ghostClient.posts
-	.browse({
-		filter: `published_at:>='${formatDate(lastDay)}'`,
-		order: "published_at ASC",
-	})
-	.catch((err: Error) => {
-		errorHandler.handleComponentError("ThisMonthArticle", err);
-	});
-
-// 内部的にはnullableとして扱いたくないので変換
-const posts = (rawPosts || []).map(convertGhostToArticle);
+const posts =
+	(await ghostApiWithRetry.posts
+		.browse({
+			filter: `published_at:>='${formatDate(lastDay)}'`,
+			order: "published_at ASC",
+		})
+		.catch((err: Error) => {
+			errorHandler.handleComponentError("ThisMonthArticle", err);
+			return [];
+		})) || [];
 
 const postsData = {
 	posts,

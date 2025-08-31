@@ -10,6 +10,18 @@ import type {
 	PostOrPage,
 	Tag,
 } from "@tryghost/content-api";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// Ghost APIのnullable型を内部型に変換(Astro内部ではnullableを気にしなくて良くなるようにしたいので)
+function convertToArticleArchiveType(post: PostOrPage): ArticleArchiveType {
+	return {
+		slug: post.slug || "",
+		published_at: post.published_at || "",
+		feature_image: post.feature_image || undefined,
+		title: post.title || "",
+		isExternal: false,
+	};
+}
 
 type GhostPostOptions = {
 	slug?: string;
@@ -196,17 +208,27 @@ export const ghostApiWithRetry = {
 							limit: 1,
 							...cleanOptions,
 						};
-						const finalBrowseOptions: Record<string, any> = {};
-						if (browseOptions.filter) finalBrowseOptions.filter = browseOptions.filter;
-						if (browseOptions.limit) finalBrowseOptions.limit = browseOptions.limit;
-						if (browseOptions.include) finalBrowseOptions.include = browseOptions.include;
-						if (browseOptions.fields) finalBrowseOptions.fields = browseOptions.fields;
-						
-						const browseResult = await ghostClient.posts.browse(finalBrowseOptions);
+						const finalBrowseOptions: Record<
+							string,
+							string | number | undefined
+						> = {};
+						if (browseOptions.filter)
+							finalBrowseOptions.filter = browseOptions.filter;
+						if (browseOptions.limit)
+							finalBrowseOptions.limit = browseOptions.limit;
+						if (browseOptions.include)
+							finalBrowseOptions.include = browseOptions.include;
+						if (browseOptions.fields)
+							finalBrowseOptions.fields = browseOptions.fields;
+
+						const browseResult =
+							await ghostClient.posts.browse(finalBrowseOptions);
 						const result = browseResult?.[0] || null;
 						return result;
 					} else if (cleanOptions.id) {
-						const result = await ghostClient.posts.read({ id: cleanOptions.id });
+						const result = await ghostClient.posts.read({
+							id: cleanOptions.id,
+						});
 						return result;
 					} else {
 						return null;
@@ -240,12 +262,12 @@ export const ghostApiWithRetry = {
 			options: GhostPostOptions,
 			maxRetries = 3,
 			request?: Request,
-		): Promise<PostsOrPages | null> => {
+		): Promise<ArticleArchiveType[] | null> => {
 			// 通常キャッシュをチェック
 			const cacheKey = getCacheKey("posts.browse", options);
 			const cached = getFromCache<PostsOrPages>(cacheKey);
 			if (cached) {
-				return cached;
+				return cached.map(convertToArticleArchiveType);
 			}
 
 			// 長期キャッシュもチェック
@@ -253,16 +275,16 @@ export const ghostApiWithRetry = {
 
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const browseOptions: Record<string, any> = {};
+					const browseOptions: Record<string, string | number | undefined> = {};
 					if (options.filter) browseOptions.filter = options.filter;
 					if (options.limit) browseOptions.limit = options.limit;
 					if (options.page) browseOptions.page = options.page;
 					if (options.order) browseOptions.order = options.order;
 					if (options.fields) browseOptions.fields = options.fields;
 					if (options.include) browseOptions.include = options.include;
-					
+
 					const result = await ghostClient.posts.browse(browseOptions);
-					// 成功時に通常と長期両方のキャッシュに保存
+					// 成功時に通常と長期両方のキャッシュに保存（生データをキャッシュ）
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ
 					setLongTermCache(cacheKey, result); // 1週間キャッシュ
 					astroLogger.info(
@@ -274,7 +296,8 @@ export const ghostApiWithRetry = {
 							method: "posts.browse",
 						},
 					);
-					return result;
+					// 変換した結果を返す
+					return result.map(convertToArticleArchiveType);
 				} catch (error) {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
@@ -292,7 +315,7 @@ export const ghostApiWithRetry = {
 									"Rate limit: Returning long-term cached data",
 									{ logType: LOG_TYPES.API, service: "ghost-api" },
 								);
-								return longTermCached;
+								return longTermCached.map(convertToArticleArchiveType);
 							} else {
 								astroLogger.warn("Rate limit: No cached data available", {
 									logType: LOG_TYPES.API,
@@ -311,7 +334,7 @@ export const ghostApiWithRetry = {
 							console.warn(
 								"Non-rate-limit error: Returning long-term cached data",
 							);
-							return longTermCached;
+							return longTermCached.map(convertToArticleArchiveType);
 						}
 						return null;
 					}
@@ -364,12 +387,19 @@ export const ghostApiWithRetry = {
 							limit: 1,
 							...cleanOptions,
 						};
-						const finalBrowseOptions: Record<string, any> = {};
-						if (browseOptions.filter) finalBrowseOptions.filter = browseOptions.filter;
-						if (browseOptions.limit) finalBrowseOptions.limit = browseOptions.limit;
-						if (browseOptions.fields) finalBrowseOptions.fields = browseOptions.fields;
-						
-						const browseResult = await ghostClient.tags.browse(finalBrowseOptions);
+						const finalBrowseOptions: Record<
+							string,
+							string | number | undefined
+						> = {};
+						if (browseOptions.filter)
+							finalBrowseOptions.filter = browseOptions.filter;
+						if (browseOptions.limit)
+							finalBrowseOptions.limit = browseOptions.limit;
+						if (browseOptions.fields)
+							finalBrowseOptions.fields = browseOptions.fields;
+
+						const browseResult =
+							await ghostClient.tags.browse(finalBrowseOptions);
 						const result = browseResult?.[0] || null;
 						return result;
 					} else if (cleanOptions.id) {
@@ -417,13 +447,13 @@ export const ghostApiWithRetry = {
 
 			for (let i = 0; i < maxRetries; i++) {
 				try {
-					const browseOptions: Record<string, any> = {};
+					const browseOptions: Record<string, string | number | undefined> = {};
 					if (options.filter) browseOptions.filter = options.filter;
 					if (options.limit) browseOptions.limit = options.limit;
 					if (options.page) browseOptions.page = options.page;
 					if (options.order) browseOptions.order = options.order;
 					if (options.fields) browseOptions.fields = options.fields;
-					
+
 					const result = await ghostClient.tags.browse(browseOptions);
 					// 成功時にキャッシュに保存
 					setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）

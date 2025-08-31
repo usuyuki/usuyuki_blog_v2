@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { RSSItem } from "~/types/RSSType";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 // Mock the dependencies
 vi.mock("~/libs/ghostClient", () => ({
@@ -27,11 +28,12 @@ import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { fetchMultipleRSS } from "~/libs/rssClient";
 
 describe("ArticleAggregator", () => {
-	const mockGhostPost = {
+	const mockGhostPost: ArticleArchiveType = {
 		slug: "ghost-post",
 		published_at: "2023-12-15T10:00:00.000Z",
 		feature_image: "https://example.com/image.jpg",
 		title: "Ghost Post Title",
+		isExternal: false,
 	};
 
 	const mockRSSItem: RSSItem = {
