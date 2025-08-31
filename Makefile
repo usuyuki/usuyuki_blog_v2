@@ -4,3 +4,5 @@ sh:
 	docker compose exec astro pnpm 1
 test:
 	docker compose exec astro pnpm test:run
+log:
+	docker compose logs astro
