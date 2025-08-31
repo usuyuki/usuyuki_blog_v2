@@ -19,15 +19,16 @@ if (
 	return new Response(null, { status: 404 });
 }
 
-const posts = await ghostApiWithRetry.posts.browse(
-	{
-		filter: `tag:${tagSlug}`,
-		limit: 100,
-		order: "published_at DESC",
-	},
-	3,
-	Astro.request,
-);
+const posts =
+	(await ghostApiWithRetry.posts.browse(
+		{
+			filter: `tag:${tagSlug}`,
+			limit: 100,
+			order: "published_at DESC",
+		},
+		3,
+		Astro.request,
+	)) || [];
 
 const tag = await ghostApiWithRetry.tags.read(
 	{
@@ -42,7 +43,7 @@ if (!tag) {
 }
 
 const postsData = {
-	posts: posts || [],
+	posts,
 };
 
 const headMeta: HeadMetaType = {
