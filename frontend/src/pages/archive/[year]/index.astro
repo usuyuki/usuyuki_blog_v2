@@ -13,15 +13,37 @@ if (!isYear(yearSlug)) {
 	return new Response(null, { status: 404 });
 }
 
-const posts = await ghostApiWithRetry.posts.browse(
-	{
-		filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
-		limit: "all",
-		order: "published_at ASC",
-	},
-	3,
-	Astro.request,
-);
+// 年別アーカイブの全記事を取得（ページネーション対応）
+let allPosts: any[] = [];
+let page = 1;
+const limit = 100;
+
+while (true) {
+	const posts = await ghostApiWithRetry.posts.browse(
+		{
+			filter: `published_at:>='${yearSlug}-01-01 00:00:00'+published_at:<='${yearSlug}-12-31 23:59:59'`,
+			limit,
+			page,
+			order: "published_at ASC",
+		},
+		3,
+		Astro.request,
+	);
+
+	if (!posts || posts.length === 0) {
+		break;
+	}
+
+	allPosts = allPosts.concat(posts);
+
+	if (posts.length < limit) {
+		break;
+	}
+
+	page++;
+}
+
+const posts = allPosts;
 
 const postsData = {
 	posts: posts || [],

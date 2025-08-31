@@ -12,7 +12,8 @@ interface GhostPostOptions {
 	slug?: string;
 	id?: string;
 	filter?: string;
-	limit?: number | "all";
+	limit?: number;
+	page?: number;
 	order?: string;
 	include?: string;
 	fields?: string;
@@ -22,7 +23,8 @@ interface GhostTagOptions {
 	slug?: string;
 	id?: string;
 	filter?: string;
-	limit?: number | "all";
+	limit?: number;
+	page?: number;
 	order?: string;
 	include?: string;
 	fields?: string;

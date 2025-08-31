@@ -13,16 +13,38 @@ interface GhostPost {
 
 export const GET: APIRoute = async ({ request }) => {
 	try {
-		// Ghost記事を取得
-		const posts = (await ghostApiWithRetry.posts.browse(
-			{
-				limit: "all",
-				fields: "slug,updated_at,published_at",
-				filter: "status:published",
-			},
-			3,
-			request,
-		)) as GhostPost[] | null;
+		// Ghost記事を取得（ページネーション対応）
+		let allPosts: GhostPost[] = [];
+		let page = 1;
+		const limit = 100;
+
+		while (true) {
+			const posts = (await ghostApiWithRetry.posts.browse(
+				{
+					limit,
+					page,
+					fields: "slug,updated_at,published_at",
+					filter: "status:published",
+					order: "published_at DESC",
+				},
+				3,
+				request,
+			)) as GhostPost[] | null;
+
+			if (!posts || posts.length === 0) {
+				break;
+			}
+
+			allPosts = allPosts.concat(posts);
+
+			if (posts.length < limit) {
+				break;
+			}
+
+			page++;
+		}
+
+		const posts = allPosts;
 
 		astroLogger.info(
 			`Sitemap: Found ${posts?.length || 0} posts from Ghost API`,
