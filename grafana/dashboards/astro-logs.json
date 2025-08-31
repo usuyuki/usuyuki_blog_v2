@@ -518,7 +518,7 @@
             "uid": "loki-datasource"
           },
           "editorMode": "code",
-          "expr": "{app=\"astro\"} |~ \"error\"",
+          "expr": "{app=\"astro\"} | json | level=\"error\"",
           "queryType": "",
           "refId": "A"
         }
@@ -532,10 +532,47 @@
         "uid": "loki-datasource"
       },
       "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 16,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": true,
+        "showCommonLabels": true,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki-datasource"
+          },
+          "editorMode": "code",
+          "expr": "{app=\"astro\"} |~ \"warn\"",
+          "queryType": "",
+          "refId": "A"
+        }
+      ],
+      "title": "Warning Logs with Details",
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki-datasource"
+      },
+      "gridPos": {
         "h": 10,
         "w": 12,
         "x": 0,
-        "y": 28
+        "y": 40
       },
       "id": 12,
       "options": {
@@ -568,231 +605,11 @@
         "type": "loki",
         "uid": "loki-datasource"
       },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 0,
-        "y": 50
-      },
-      "id": 13,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "topk(10, sum by (url, method, status) (count_over_time({app=\"astro\"} |~ \"error\" | json | __error__=\"\" | status != \"\" [$__range])))",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Top Error URLs",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value": "Count"
-            }
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "vis": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 8,
-        "y": 50
-      },
-      "id": 14,
-      "options": {
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "values": false,
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": ""
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "sum by (status) (count_over_time({app=\"astro\"} |~ \"error\" | json | __error__=\"\" | status != \"\" [$__range]))",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Error Status Codes",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-datasource"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "auto"
-            },
-            "inspect": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 8,
-        "x": 16,
-        "y": 50
-      },
-      "id": 15,
-      "options": {
-        "cellHeight": "sm",
-        "footer": {
-          "countRows": false,
-          "fields": "",
-          "reducer": ["sum"],
-          "show": false
-        },
-        "showHeader": true
-      },
-      "pluginVersion": "10.0.3",
-      "targets": [
-        {
-          "datasource": {
-            "type": "loki",
-            "uid": "loki-datasource"
-          },
-          "editorMode": "code",
-          "expr": "topk(10, sum by (userAgent) (count_over_time({app=\"astro\"} |~ \"error\" | json | __error__=\"\" | userAgent != \"\" [$__range])))",
-          "queryType": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Top Error User Agents",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value": "Count"
-            }
-          }
-        }
-      ],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "loki",
-        "uid": "loki-datasource"
-      },
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 38
+        "y": 52
       },
       "id": 6,
       "options": {
@@ -829,7 +646,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 38
+        "y": 52
       },
       "id": 7,
       "options": {
@@ -866,7 +683,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 58
+        "y": 60
       },
       "id": 8,
       "options": {
@@ -903,7 +720,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 58
+        "y": 60
       },
       "id": 9,
       "options": {
@@ -940,7 +757,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 66
+        "y": 68
       },
       "id": 10,
       "options": {
