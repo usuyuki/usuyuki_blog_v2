@@ -16,10 +16,40 @@ let {
 	initialNextBefore = null,
 }: Props = $props();
 
-let posts = $state(initialPosts);
-let monthKeys = $state([...initialMonthKeys]);
+// Ensure safe initialization even if props are undefined during hydration
+let posts = $state(initialPosts || {});
+let monthKeys = $state(
+	Array.isArray(initialMonthKeys) ? [...initialMonthKeys] : [],
+);
 
-let nextBefore = $state<string | null>(initialNextBefore); // 次のページの基準日付
+let nextBefore = $state<string | null>(initialNextBefore || null);
+
+// Computed month sections for safe rendering
+let monthSections = $derived.by(() => {
+	if (!monthKeys || !posts) return [];
+
+	return monthKeys
+		.map((monthKey) => {
+			if (!monthKey || typeof monthKey !== "string") return null;
+
+			const keyParts = monthKey.split("-");
+			const year = keyParts[0];
+			const month = keyParts[1];
+
+			if (!year || !month) return null;
+
+			const monthName = `${year}年${parseInt(month, 10)}月`;
+			const monthPosts = posts[monthKey] || [];
+
+			return {
+				monthKey,
+				monthName,
+				monthPosts,
+				hasData: monthPosts.length > 0,
+			};
+		})
+		.filter(Boolean);
+}); // 次のページの基準日付
 let isLoading = $state(false);
 let hasMorePosts = $state(true);
 
@@ -123,68 +153,64 @@ async function loadMorePosts() {
 	}
 }
 
-import { onMount } from "svelte";
+let observer: IntersectionObserver | null = null;
 
-let sentinelElement: HTMLElement;
-let observer: IntersectionObserver;
-
-onMount(() => {
-	// Intersection Observer for infinite scroll
-	observer = new IntersectionObserver(
-		(entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting && hasMorePosts && !isLoading) {
-					loadMorePosts();
-				}
-			});
-		},
-		{
-			rootMargin: "1000px", // Load more when sentinel is 1000px away from viewport
-			threshold: 0,
-		},
-	);
-
-	return () => {
+function setupIntersectionObserver(element: HTMLElement) {
+	if (
+		typeof window !== "undefined" &&
+		typeof IntersectionObserver !== "undefined"
+	) {
 		if (observer) {
 			observer.disconnect();
 		}
-	};
-});
 
-// Reactive statement to observe sentinel element when it becomes available
-$effect(() => {
-	if (observer && sentinelElement) {
-		observer.observe(sentinelElement);
-		return () => {
-			if (observer && sentinelElement) {
-				observer.unobserve(sentinelElement);
-			}
-		};
+		observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting && hasMorePosts && !isLoading) {
+						loadMorePosts();
+					}
+				});
+			},
+			{
+				rootMargin: "1000px",
+				threshold: 0,
+			},
+		);
+
+		observer.observe(element);
 	}
-});
+
+	return {
+		destroy() {
+			if (observer) {
+				observer.disconnect();
+				observer = null;
+			}
+		},
+	};
+}
 </script>
 
 <div id="archive-content">
-	{#each monthKeys as monthKey}
-		{@const [year, month] = monthKey.split('-')}
-		{@const monthName = `${year}年${parseInt(month)}月`}
-		{@const monthPosts = posts[monthKey]}
-
-		<section class="mb-12">
-			<h2 class="text-2xl font-bold mb-6 text-center text-green">{monthName}</h2>
-			<div class="flex flex-wrap items-stretch">
-				{#each monthPosts as post}
-					<ArticleCard {post} />
-				{/each}
-			</div>
-		</section>
+	{#each monthSections as section}
+		{#if section && section.hasData}
+			<section class="mb-12">
+				<h2 class="text-2xl font-bold mb-6 text-center text-green">{section.monthName}</h2>
+				<div class="flex flex-wrap items-stretch">
+					{#each section.monthPosts as post}
+						<ArticleCard {post} />
+					{/each}
+				</div>
+			</section>
+		{/if}
 	{/each}
 </div>
 
 {#if hasMorePosts}
 	<!-- Sentinel element for Intersection Observer -->
 	<div 
-		bind:this={sentinelElement}
+		use:setupIntersectionObserver
 		class="py-2"
 		style="height: 1px;"
 	></div>

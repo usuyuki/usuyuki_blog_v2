@@ -55,11 +55,17 @@ const sortedMonthKeys = Object.keys(groupedPosts).sort((a, b) =>
 	b.localeCompare(a),
 );
 
-// 次のページのための基準日付を計算
-const nextBefore =
-	firstPageArticles.length > 0
-		? firstPageArticles[firstPageArticles.length - 1].published_at
-		: null;
+// 次のページのための基準日付を計算（文字列に変換して確実にシリアライズ可能にする）
+let nextBefore: string | null = null;
+if (firstPageArticles.length > 0) {
+	const lastArticle = firstPageArticles[firstPageArticles.length - 1];
+	if (typeof lastArticle.published_at === "string") {
+		nextBefore = lastArticle.published_at;
+	} else {
+		// DateType format を文字列に変換
+		nextBefore = `${lastArticle.published_at.year}-${lastArticle.published_at.month.toString().padStart(2, "0")}-${lastArticle.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`;
+	}
+}
 ---
 
 <div class="container mx-auto px-4">
@@ -69,6 +75,6 @@ const nextBefore =
 		initialPosts={groupedPosts} 
 		initialMonthKeys={sortedMonthKeys}
 		initialNextBefore={nextBefore}
-		client:load 
+		client:only="svelte"
 	/>
 </div>
