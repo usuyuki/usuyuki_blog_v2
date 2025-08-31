@@ -35,7 +35,7 @@ const recentArticlesWithFormattedDate = recentArticles.map(
 	<div class="flex justify-center flex-wrap">
 		<div class="w-full">
 			<h2 class="text-2xl font-bold mb-12">Recent Articles</h2>
-			<YMDArticleArchive posts={recentArticlesWithFormattedDate} />
+			<YMDArticleArchive posts={recentArticlesWithFormattedDate} contextPrefix="recent-" />
 		</div>
 
 		<div class="w-full md:w-1/2">

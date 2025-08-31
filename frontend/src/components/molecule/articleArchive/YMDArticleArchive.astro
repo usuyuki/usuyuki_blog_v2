@@ -7,8 +7,9 @@ import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 interface Props {
 	posts: ArticleArchiveType[];
+	contextPrefix?: string;
 }
-const { posts } = Astro.props;
+const { posts, contextPrefix = "" } = Astro.props;
 //日付の変換
 posts?.forEach((post: ArticleArchiveType) => {
 	if (typeof post.published_at === "string") {
@@ -30,7 +31,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 							year={typeof post.published_at === 'string' ? 0 : post.published_at.year}
 							month={typeof post.published_at === 'string' ? 0 : post.published_at.month}
 							day={typeof post.published_at === 'string' ? 0 : post.published_at.day}
-							slug={post.slug}
+							slug={contextPrefix + post.slug}
 						/>
 						<div>
 							{post.feature_image ? (
@@ -42,7 +43,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 									quality={80}
 									class="object-cover w-40 h-40 rounded-md"
 									alt="記事サムネイル"
-									transition:name={'image-' + post.slug}
+									transition:name={'image-' + contextPrefix + post.slug}
 									loading={index === 0 ? "eager" : "lazy"}
 									fetchpriority={index === 0 ? "high" : "auto"}
 									sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
@@ -53,7 +54,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 						</div>
 						<h3
 							class="text-xl text-black pt-2 text-wrap-balance text-center"
-							transition:name={'title-' + post.slug}
+							transition:name={'title-' + contextPrefix + post.slug}
 						>
 							{post.title}
 						</h3>
