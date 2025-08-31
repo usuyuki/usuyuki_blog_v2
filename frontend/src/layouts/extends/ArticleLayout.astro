@@ -4,7 +4,7 @@ import TagList from "~/components/organism/tag/TagList.astro";
 import { getLatestArticles } from "~/libs/articleAggregator";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
-import ArticleCard from "../../components/organism/article/ArticleCard.svelte";
+import YMDArticleArchive from "~/components/molecule/articleArchive/YMDArticleArchive.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
@@ -34,17 +34,13 @@ const recentArticlesWithFormattedDate = recentArticles.map(
 	<hr class="mt-20 mb-4" />
 	<div class="flex justify-center flex-wrap">
 		<div class="w-full">
-			<h2 class="text-2xl font-bold">Recent Articles</h2>
-			<div class="flex flex-wrap">
-				{recentArticlesWithFormattedDate.map((post: ArticleArchiveType) => (
-					<ArticleCard post={post} client:load />
-				))}
-			</div>
+			<h2 class="text-2xl font-bold mb-12">Recent Articles</h2>
+			<YMDArticleArchive posts={recentArticlesWithFormattedDate} />
 		</div>
 
 		<div class="w-full md:w-1/2">
 			<h2 class="text-2xl font-bold">Tags</h2>
-			<TagList />
+			<TagList ulClass="mx-auto slim-tag" />
 		</div>
 
 		<div class="w-full md:w-1/2">
