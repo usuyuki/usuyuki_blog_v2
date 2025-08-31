@@ -21,7 +21,7 @@ export async function GET(context: { request: Request }) {
 		}
 
 		// Ghost記事のみをフィルター（念のため）
-		const ghostPosts = allArticles.filter(article => !article.isExternal);
+		const ghostPosts = allArticles.filter((article) => !article.isExternal);
 
 		return rss({
 			title: SITE_TITLE,
@@ -30,13 +30,19 @@ export async function GET(context: { request: Request }) {
 			customData: "<language>ja</language>",
 			items: ghostPosts.map((article) => ({
 				title: article.title,
-				pubDate: article.published_at,
+				pubDate:
+					typeof article.published_at === "string"
+						? new Date(article.published_at)
+						: new Date(
+								`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
+							),
 				link: `/${article.slug}`,
 				content: article.title, // articleAggregatorではexcerptは含まれないため
 			})),
 		});
-	} catch (err: any) {
-		astroLogger.apiRequestError("/rss.xml", context.request, err, {
+	} catch (err) {
+		const error = err instanceof Error ? err : new Error(String(err));
+		astroLogger.apiRequestError("/rss.xml", context.request, error, {
 			route: "/rss.xml",
 		});
 		return new Response("Internal Server Error", { status: 500 });

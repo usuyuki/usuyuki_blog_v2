@@ -20,14 +20,16 @@ export const GET: APIRoute = async ({ request }) => {
 		});
 
 		// ArticleArchiveType から GhostPost 形式に変換
-		const posts: GhostPost[] = allArticles.map(article => ({
+		const posts: GhostPost[] = allArticles.map((article) => ({
 			slug: article.slug,
-			published_at: typeof article.published_at === "string" 
-				? article.published_at 
-				: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`,
-			updated_at: typeof article.published_at === "string" 
-				? article.published_at 
-				: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`
+			published_at:
+				typeof article.published_at === "string"
+					? article.published_at
+					: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`,
+			updated_at:
+				typeof article.published_at === "string"
+					? article.published_at
+					: `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}T00:00:00.000Z`,
 		}));
 
 		astroLogger.info(
