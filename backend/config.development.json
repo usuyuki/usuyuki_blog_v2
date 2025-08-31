@@ -11,5 +11,9 @@
   },
   "paths": {
     "contentPath": "/var/lib/ghost/content"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 2368
   }
 }
