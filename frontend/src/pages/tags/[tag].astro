@@ -22,7 +22,7 @@ if (
 const posts = await ghostApiWithRetry.posts.browse(
 	{
 		filter: `tag:${tagSlug}`,
-		limit: "all",
+		limit: 100,
 		order: "published_at DESC",
 	},
 	3,

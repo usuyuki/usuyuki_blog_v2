@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Current Status (feat/v6-api branch)**: Project upgraded to Ghost v6 API with enhanced article aggregation system that combines internal Ghost CMS content with external RSS feeds (Qiita, Zenn). Ghost v6 API now has a maximum limit of 100 posts per request, requiring pagination for larger datasets.
+
 ## Project Overview
 
 This is a blog application with two main components:
@@ -11,13 +13,13 @@ This is a blog application with two main components:
 ## Architecture
 
 The project uses a Docker-based development and deployment setup:
-- Frontend runs on Astro with Tailwind CSS
-- Backend uses Ghost CMS as a headless CMS
+- Frontend runs on **Astro 5** with **Tailwind CSS 4** and **Svelte 5**
+- Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Promtail for log aggregation and visualization
-  - **Loki**: Log aggregation system (port 3100)
-  - **Grafana**: Metrics visualization and alerting dashboard (port 1002 in dev)
-  - **Promtail**: Log collection agent for Docker containers
+  - **Loki 3.5**: Log aggregation system (port 3100)
+  - **Grafana 12.1**: Metrics visualization and alerting dashboard (port 1002 in dev)
+  - **Promtail 3.5**: Log collection agent for Docker containers
 
 ## Development Commands
 
@@ -60,7 +62,7 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:5-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.0-debian && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.0 && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d
 ```
 
@@ -74,8 +76,13 @@ The frontend follows Atomic Design principles:
 ## Key Files and Directories
 
 - `frontend/src/consts.ts` - Site configuration constants
-- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client
-- `frontend/src/libs/astroLogger.ts` - Astro-specific logger with structured logging
+- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching
+- `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost and RSS feeds
+- `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs
+- `frontend/src/libs/config.ts` - Configuration management for external integrations
+- `frontend/src/libs/errorHandler.ts` - Centralized error handling and logging
+- `frontend/src/libs/cache.ts` - In-memory caching system for API responses
 - `frontend/src/components/` - Astro components organized by atomic design
 - `frontend/src/pages/` - Astro pages and routes
 - `frontend/src/styles/` - CSS files including Ghost content styling
@@ -124,16 +131,19 @@ astroLogger.systemLog('System startup completed');
 - `BACKEND_API_URL` - Ghost CMS backend URL (e.g., http://localhost:1001)
 - `GHOST_API_URL` - Ghost CMS API endpoint
 - `GHOST_CONTENT_KEY` - Ghost CMS content API key
+- `FRONTEND_URL` - Frontend application URL (e.g., http://localhost:1000)
+- `GHOST_FRONT_URL` - Ghost frontend URL for admin interface
 
 ### Optional Variables
 - `TUNNEL_TOKEN` - Cloudflare tunnel token for production deployment
-- `EXTERNAL_BLOGS` - JSON array of external blog RSS feeds
+- `EXTERNAL_BLOGS` - JSON array of external blog RSS feeds for article aggregation
   ```json
   [
     {"name": "Qiita", "rssUrl": "https://qiita.com/username/feed", "color": "#55c500"},
     {"name": "Zenn", "rssUrl": "https://zenn.dev/username/feed", "color": "#3ea8ff"}
   ]
   ```
+- `LOKI_URL` - Loki log aggregation endpoint (default: http://loki:3100)
 
 ### Monitoring Variables
 - `GF_SECURITY_ADMIN_USER` - Grafana admin username (default: admin)
@@ -199,6 +209,35 @@ This runs:
 5. Build process
 
 **IMPORTANT**: Always verify that `make 1` completes without any errors before considering any task complete. This ensures code quality and prevents broken builds.
+
+## Caching System
+
+The application uses multiple layers of caching for performance:
+
+### In-Memory Application Cache
+- **Location**: `frontend/src/libs/cache.ts`
+- **Scope**: In-memory cache that persists during container runtime
+- **Used by**: Archive API (`/api/archive`), Ghost client, RSS client
+- **Cache Duration**: 
+  - Archive articles: 1 hour (`ONE_HOUR_MS`)
+  - Ghost API responses: 1 hour (configurable per endpoint)
+  - RSS feed responses: Varies by feed freshness
+
+### Cache Management Commands
+
+```bash
+# Clear all caches by restarting containers
+docker compose restart astro
+
+# For production
+docker compose -f compose-prod.yml restart astro
+```
+
+### Important Notes
+- **Cache Keys**: When modifying data aggregation logic (like `articleAggregator.ts`), change cache keys to force cache invalidation
+- **Development**: Caches persist until container restart - always restart after significant changes
+- **Production**: Caches improve performance but may require container restart for immediate updates
+- **Ghost Client Cache**: Individual Ghost API calls are cached with TTL, check logs for cache HIT/MISS status
 
 ## Monitoring and Observability
 
