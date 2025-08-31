@@ -187,7 +187,7 @@ export const ghostApiWithRetry = {
 					const { slug, ...cleanOptions } = options;
 					if (slug) {
 						const browseOptions = {
-							filter: `slug:'${slug}'`,
+							filter: `slug:${encodeURIComponent(`'${slug}'`)}`,
 							limit: 1,
 							...cleanOptions,
 						};
@@ -337,7 +337,7 @@ export const ghostApiWithRetry = {
 					const { slug, ...cleanOptions } = options;
 					if (slug) {
 						const browseOptions = {
-							filter: `slug:'${slug}'`,
+							filter: `slug:${encodeURIComponent(`'${slug}'`)}`,
 							limit: 1,
 							...cleanOptions,
 						};
