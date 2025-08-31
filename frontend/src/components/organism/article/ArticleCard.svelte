@@ -7,6 +7,18 @@ interface Props {
 
 let { post }: Props = $props();
 
+let postYear = $derived(
+	typeof post.published_at === "string"
+		? new Date(post.published_at).getFullYear()
+		: post.published_at.year,
+);
+
+let postMonth = $derived(
+	typeof post.published_at === "string"
+		? new Date(post.published_at).getMonth() + 1
+		: post.published_at.month,
+);
+
 let postDay = $derived(
 	typeof post.published_at === "string"
 		? new Date(post.published_at).getDate()
@@ -25,8 +37,23 @@ let postDay = $derived(
     <div class="flex justify-center items-center flex-col">
       <div class="relative z-10">
         <div class="relative">
-          <div class="absolute -top-4 right-12 w-10 h-10 rounded-md text-white font-numbers bg-blue flex items-center justify-center">
+          <div
+            class="absolute rotate-6 -top-9 right-5 w-16 h-6 rounded-full text-white font-numbers bg-green flex items-center justify-center"
+            style="view-transition-name: year-{post.slug};"
+          >
+            <p class="text-lg">{postYear}</p>
+          </div>
+          <div
+            class="absolute -top-4 right-8 w-12 h-12 rounded-full text-white font-numbers bg-blue flex items-center justify-center"
+            style="view-transition-name: day-{post.slug};"
+          >
             <p class="text-xl">{postDay}</p>
+          </div>
+          <div
+            class="absolute -top-6 right-16 w-8 h-8 rounded-full text-white font-numbers bg-pink flex items-center justify-center"
+            style="view-transition-name: month-{post.slug};"
+          >
+            <p class="text-lg">{postMonth}</p>
           </div>
         </div>
       </div>

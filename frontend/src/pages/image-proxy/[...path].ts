@@ -62,14 +62,11 @@ export const GET: APIRoute = async ({ params }) => {
 			},
 		});
 	} catch (error) {
-		await loggerService.warn(
-			`Image proxy error: ${(error as Error).message}`,
-			{
-				endpoint: "/image-proxy",
-				imagePath,
-				errorType: "image_proxy_error",
-			},
-		);
+		await loggerService.warn(`Image proxy error: ${(error as Error).message}`, {
+			endpoint: "/image-proxy",
+			imagePath,
+			errorType: "image_proxy_error",
+		});
 
 		return new Response(JSON.stringify({ error: "Failed to proxy image" }), {
 			status: 404,

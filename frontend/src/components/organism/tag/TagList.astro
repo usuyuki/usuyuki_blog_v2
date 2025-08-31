@@ -31,3 +31,13 @@ const tags = await ghostApiWithRetry.tags.browse(
 		<p>タグはありません</p>
 	)
 }
+
+<style>
+	/* 長すぎるの嫌なので、スクロールさせる */
+	.slim-tag {
+		padding-left: 1rem !important;
+		padding-right: 3rem !important;
+		overflow-y: scroll;
+		height: 600px;
+	}
+</style>
