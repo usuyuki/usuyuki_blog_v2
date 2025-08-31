@@ -9,9 +9,10 @@ const { ulClass = "", liClass = "" } = Astro.props;
 
 const tags = await ghostApiWithRetry.tags.browse(
 	{
-		limit: "all",
-		order: "slug ASC",
+		limit: 100,
+		order: "count.posts DESC",
 		filter: "visibility:public",
+		include: "count.posts",
 	},
 	3,
 	Astro.request,
