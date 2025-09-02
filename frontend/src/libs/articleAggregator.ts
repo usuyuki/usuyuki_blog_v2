@@ -73,15 +73,6 @@ export async function getLatestArticles(
 				page: page,
 			});
 
-			astroLogger.info(
-				`Ghost API response page ${page}: ${ghostPosts?.length || 0} posts`,
-				{
-					service: "article-aggregator",
-					page,
-					receivedPosts: ghostPosts?.length || 0,
-					totalSoFar: allGhostPosts.length,
-				},
-			);
 
 			if (!ghostPosts || ghostPosts.length === 0) {
 				// これ以上記事がない場合は終了

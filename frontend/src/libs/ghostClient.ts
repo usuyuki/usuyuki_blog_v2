@@ -267,6 +267,12 @@ export const ghostApiWithRetry = {
 						if (result) {
 							// ポジティブキャッシュ（記事が見つかった場合）
 							setCache(cacheKey, result, 3600000); // 1時間キャッシュ
+							astroLogger.info("Ghost API success: fetched single post", {
+								slug: options.slug,
+								title: result.title,
+								service: "ghost-api",
+								logType: LOG_TYPES.API,
+							});
 							astroLogger.cacheLog("SET", cacheKey, false, {
 								source: "ghost",
 								method: "posts.read",
@@ -376,6 +382,8 @@ export const ghostApiWithRetry = {
 							count: result?.length || 0,
 							service: "ghost-api",
 							method: "posts.browse",
+							page: options.page,
+							limit: options.limit,
 						},
 					);
 					// 変換した結果を返す
