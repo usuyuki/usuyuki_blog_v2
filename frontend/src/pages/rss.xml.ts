@@ -1,17 +1,18 @@
 import rss from "@astrojs/rss";
 import { SITE_DESCRIPTION, SITE_TITLE, SITE_URL } from "~/consts";
-import { getLatestArticles } from "~/libs/articleAggregator";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
 import astroLogger from "~/libs/astroLogger";
 
 export async function GET(context: { request: Request }) {
 	try {
-		// getLatestArticles関数でGhost記事のみを全件取得
-		const allArticles = await getLatestArticles({
-			includeExternal: false, // RSS記事は含めない（RSS XMLにはGhost記事のみ）
-			unlimited: true, // 全記事を取得
-		});
+		// Ghost APIから直接記事を取得（excerptを含む）
+		const latestArticles = await ghostApiWithRetry.posts.browse({
+			order: "published_at DESC",
+			limit: 50,
+			include: "tags,authors",
+		}, 3, context.request);
 
-		if (allArticles.length === 0) {
+		if (!latestArticles || latestArticles.length === 0) {
 			const error = new Error("No articles available for RSS feed");
 			astroLogger.apiRequestError("/rss.xml", context.request, error, {
 				route: "/rss.xml",
@@ -20,24 +21,16 @@ export async function GET(context: { request: Request }) {
 			return new Response("Internal Server Error", { status: 500 });
 		}
 
-		// Ghost記事のみをフィルター（念のため）
-		const ghostPosts = allArticles.filter((article) => !article.isExternal);
-
 		return rss({
 			title: SITE_TITLE,
 			description: SITE_DESCRIPTION,
 			site: SITE_URL,
 			customData: "<language>ja</language>",
-			items: ghostPosts.map((article) => ({
-				title: article.title,
-				pubDate:
-					typeof article.published_at === "string"
-						? new Date(article.published_at)
-						: new Date(
-								`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
-							),
+			items: latestArticles.map((article) => ({
+				title: article.title || "",
+				pubDate: new Date(article.published_at || ""),
 				link: `/${article.slug}`,
-				content: article.title, // articleAggregatorではexcerptは含まれないため
+				content: article.excerpt || article.title || "",
 			})),
 		});
 	} catch (err) {
