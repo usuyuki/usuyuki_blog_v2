@@ -224,15 +224,17 @@ export const ghostApiWithRetry = {
 
 			// ネガティブキャッシュをチェック（404エラーのキャッシュ）
 			const negativeCacheKey = `negative_${cacheKey}`;
-			const negativeCached = getFromCache<null>(negativeCacheKey);
-			if (negativeCached === null && cache.has(negativeCacheKey)) {
-				astroLogger.cacheLog("HIT", negativeCacheKey, true, {
-					source: "ghost",
-					type: "negative",
-					method: "posts.read",
-					slug: options.slug
-				});
-				return null;
+			if (cache.has(negativeCacheKey)) {
+				const cached = cache.get(negativeCacheKey);
+				if (cached && cached.expiry > Date.now()) {
+					astroLogger.cacheLog("HIT", negativeCacheKey, true, {
+						source: "ghost",
+						type: "negative",
+						method: "posts.read",
+						slug: options.slug
+					});
+					return null;
+				}
 			}
 
 			for (let i = 0; i < maxRetries; i++) {
