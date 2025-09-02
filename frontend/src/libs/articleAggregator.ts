@@ -74,7 +74,6 @@ export async function getLatestArticles(
 				page: page,
 			});
 
-
 			if (!ghostPosts || ghostPosts.length === 0) {
 				// これ以上記事がない場合は終了
 				astroLogger.info(

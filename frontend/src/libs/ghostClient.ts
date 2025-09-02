@@ -215,10 +215,10 @@ export const ghostApiWithRetry = {
 			const cacheKey = getCacheKey("posts.read", options);
 			const cached = getFromCache<PostOrPage>(cacheKey);
 			if (cached) {
-				astroLogger.cacheLog("HIT", cacheKey, true, { 
+				astroLogger.cacheLog("HIT", cacheKey, true, {
 					source: "ghost",
 					method: "posts.read",
-					slug: options.slug
+					slug: options.slug,
 				});
 				return cached;
 			}
@@ -232,7 +232,7 @@ export const ghostApiWithRetry = {
 						source: "ghost",
 						type: "negative",
 						method: "posts.read",
-						slug: options.slug
+						slug: options.slug,
 					});
 					return null;
 				}
