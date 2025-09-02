@@ -29,6 +29,7 @@ export function convertGhostToArticle(post: PostOrPage): ArticleArchiveType {
 		published_at: post.published_at || "",
 		feature_image: post.feature_image || undefined,
 		title: post.title || "",
+		excerpt: post.excerpt || undefined,
 		isExternal: false,
 	};
 }
@@ -72,7 +73,6 @@ export async function getLatestArticles(
 				limit: apiLimit,
 				page: page,
 			});
-
 
 			if (!ghostPosts || ghostPosts.length === 0) {
 				// これ以上記事がない場合は終了
