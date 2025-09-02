@@ -19,7 +19,11 @@ function convertToArticleArchiveType(post: PostOrPage): ArticleArchiveType {
 		published_at: post.published_at || "",
 		feature_image: post.feature_image || undefined,
 		title: post.title || "",
-		excerpt: post.excerpt || undefined,
+		excerpt: post.excerpt
+			? post.excerpt.length > 300
+				? `${post.excerpt.substring(0, 300)}…`
+				: post.excerpt
+			: undefined,
 		isExternal: false,
 	};
 }
