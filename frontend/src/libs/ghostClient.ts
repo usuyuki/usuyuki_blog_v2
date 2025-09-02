@@ -55,6 +55,17 @@ export const ghostClient = new GhostContentAPI({
 // キャッシュ用のシンプルなメモリストア
 const cache = new Map<string, { data: object | null; expiry: number }>();
 
+export function clearCache(): number {
+	const clearedCount = cache.size;
+	cache.clear();
+	astroLogger.cacheLog("CLEAR", "all", false, {
+		source: "ghost",
+		clearedCount,
+		operation: "manual_clear",
+	});
+	return clearedCount;
+}
+
 function getCacheKey(method: string, options: object): string {
 	return `${method}-${JSON.stringify(options)}`;
 }
@@ -203,6 +214,11 @@ export const ghostApiWithRetry = {
 			const cacheKey = getCacheKey("posts.read", options);
 			const cached = getFromCache<PostOrPage>(cacheKey);
 			if (cached) {
+				astroLogger.cacheLog("HIT", cacheKey, true, { 
+					source: "ghost",
+					method: "posts.read",
+					slug: options.slug
+				});
 				return cached;
 			}
 
@@ -213,6 +229,8 @@ export const ghostApiWithRetry = {
 				astroLogger.cacheLog("HIT", negativeCacheKey, true, {
 					source: "ghost",
 					type: "negative",
+					method: "posts.read",
+					slug: options.slug
 				});
 				return null;
 			}
@@ -247,21 +265,21 @@ export const ghostApiWithRetry = {
 						if (result) {
 							// ポジティブキャッシュ（記事が見つかった場合）
 							setCache(cacheKey, result, 3600000); // 1時間キャッシュ
-							astroLogger.info("Ghost API success: cached post", {
-								logType: LOG_TYPES.API,
-								slug: options.slug,
-								service: "ghost-api",
+							astroLogger.cacheLog("SET", cacheKey, false, {
+								source: "ghost",
 								method: "posts.read",
+								slug: options.slug,
+								ttl: 3600000,
 							});
 						} else {
 							// ネガティブキャッシュ（記事が見つからなかった場合）
 							setCache(negativeCacheKey, null, 3600000); // 1時間キャッシュ
-							astroLogger.info("Ghost API: cached 404 result", {
-								logType: LOG_TYPES.API,
-								slug: options.slug,
-								service: "ghost-api",
+							astroLogger.cacheLog("SET", negativeCacheKey, false, {
+								source: "ghost",
+								type: "negative",
 								method: "posts.read",
-								cacheType: "negative",
+								slug: options.slug,
+								ttl: 3600000,
 							});
 						}
 
@@ -274,8 +292,21 @@ export const ghostApiWithRetry = {
 						// ID指定の場合もキャッシュ
 						if (result) {
 							setCache(cacheKey, result, 3600000);
+							astroLogger.cacheLog("SET", cacheKey, false, {
+								source: "ghost",
+								method: "posts.read",
+								id: cleanOptions.id,
+								ttl: 3600000,
+							});
 						} else {
 							setCache(negativeCacheKey, null, 3600000);
+							astroLogger.cacheLog("SET", negativeCacheKey, false, {
+								source: "ghost",
+								type: "negative",
+								method: "posts.read",
+								id: cleanOptions.id,
+								ttl: 3600000,
+							});
 						}
 
 						return result;
@@ -518,13 +549,13 @@ export const ghostApiWithRetry = {
 						if (errResponse?.response?.status === 404) {
 							const negativeCacheKey = `negative_${cacheKey}`;
 							setCache(negativeCacheKey, null, 3600000); // 1時間キャッシュ
-							astroLogger.info("Ghost API: cached 404 error result", {
-								logType: LOG_TYPES.API,
-								slug: options.slug,
-								service: "ghost-api",
+							astroLogger.cacheLog("SET", negativeCacheKey, false, {
+								source: "ghost",
+								type: "negative",
 								method: "posts.read",
-								cacheType: "negative",
+								slug: options.slug,
 								status: 404,
+								ttl: 3600000,
 							});
 						}
 						return null;
