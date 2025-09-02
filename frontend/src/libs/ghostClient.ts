@@ -382,6 +382,8 @@ export const ghostApiWithRetry = {
 							count: result?.length || 0,
 							service: "ghost-api",
 							method: "posts.browse",
+							page: options.page,
+							limit: options.limit,
 						},
 					);
 					// 変換した結果を返す
