@@ -53,7 +53,7 @@ export const ghostClient = new GhostContentAPI({
 });
 
 // キャッシュ用のシンプルなメモリストア
-const cache = new Map<string, { data: object; expiry: number }>();
+const cache = new Map<string, { data: object | null; expiry: number }>();
 
 function getCacheKey(method: string, options: object): string {
 	return `${method}-${JSON.stringify(options)}`;
@@ -74,7 +74,7 @@ function getFromCache<T>(key: string): T | null {
 	return null;
 }
 
-function setCache(key: string, data: object, ttlMs = 60000): void {
+function setCache(key: string, data: object | null, ttlMs = 60000): void {
 	cache.set(key, {
 		data,
 		expiry: Date.now() + ttlMs,
@@ -83,7 +83,7 @@ function setCache(key: string, data: object, ttlMs = 60000): void {
 }
 
 // 長期キャッシュ（1週間）
-function setLongTermCache(key: string, data: object): void {
+function setLongTermCache(key: string, data: object | null): void {
 	const longTermKey = `longterm_${key}`;
 	cache.set(longTermKey, {
 		data,
@@ -199,6 +199,24 @@ export const ghostApiWithRetry = {
 				return null;
 			}
 
+			// キャッシュをチェック（ポジティブキャッシュ）
+			const cacheKey = getCacheKey("posts.read", options);
+			const cached = getFromCache<PostOrPage>(cacheKey);
+			if (cached) {
+				return cached;
+			}
+
+			// ネガティブキャッシュをチェック（404エラーのキャッシュ）
+			const negativeCacheKey = `negative_${cacheKey}`;
+			const negativeCached = getFromCache<null>(negativeCacheKey);
+			if (negativeCached === null && cache.has(negativeCacheKey)) {
+				astroLogger.cacheLog("HIT", negativeCacheKey, true, {
+					source: "ghost",
+					type: "negative",
+				});
+				return null;
+			}
+
 			for (let i = 0; i < maxRetries; i++) {
 				try {
 					const { slug, ...cleanOptions } = options;
@@ -224,11 +242,42 @@ export const ghostApiWithRetry = {
 						const browseResult =
 							await ghostClient.posts.browse(finalBrowseOptions);
 						const result = browseResult?.[0] || null;
+
+						// 結果をキャッシュに保存
+						if (result) {
+							// ポジティブキャッシュ（記事が見つかった場合）
+							setCache(cacheKey, result, 3600000); // 1時間キャッシュ
+							astroLogger.info("Ghost API success: cached post", {
+								logType: LOG_TYPES.API,
+								slug: options.slug,
+								service: "ghost-api",
+								method: "posts.read",
+							});
+						} else {
+							// ネガティブキャッシュ（記事が見つからなかった場合）
+							setCache(negativeCacheKey, null, 3600000); // 1時間キャッシュ
+							astroLogger.info("Ghost API: cached 404 result", {
+								logType: LOG_TYPES.API,
+								slug: options.slug,
+								service: "ghost-api",
+								method: "posts.read",
+								cacheType: "negative",
+							});
+						}
+
 						return result;
 					} else if (cleanOptions.id) {
 						const result = await ghostClient.posts.read({
 							id: cleanOptions.id,
 						});
+
+						// ID指定の場合もキャッシュ
+						if (result) {
+							setCache(cacheKey, result, 3600000);
+						} else {
+							setCache(negativeCacheKey, null, 3600000);
+						}
+
 						return result;
 					} else {
 						return null;
@@ -464,6 +513,20 @@ export const ghostApiWithRetry = {
 
 					// レート制限エラー以外（404含む）はリトライしない
 					if (!isRateLimitError(err)) {
+						// 404エラーの場合はネガティブキャッシュに保存
+						const errResponse = err as { response?: { status?: number } };
+						if (errResponse?.response?.status === 404) {
+							const negativeCacheKey = `negative_${cacheKey}`;
+							setCache(negativeCacheKey, null, 3600000); // 1時間キャッシュ
+							astroLogger.info("Ghost API: cached 404 error result", {
+								logType: LOG_TYPES.API,
+								slug: options.slug,
+								service: "ghost-api",
+								method: "posts.read",
+								cacheType: "negative",
+								status: 404,
+							});
+						}
 						return null;
 					}
 
