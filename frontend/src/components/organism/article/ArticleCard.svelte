@@ -24,6 +24,12 @@ let postDay = $derived(
 		? new Date(post.published_at).getDate()
 		: post.published_at.day,
 );
+
+let imageError = $state(false);
+
+function handleImageError() {
+	imageError = true;
+}
 </script>
 
 <div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
@@ -58,7 +64,7 @@ let postDay = $derived(
         </div>
       </div>
       <div>
-        {#if post.feature_image}
+        {#if post.feature_image && !imageError}
           <img 
             src={post.feature_image} 
             width="500" 
@@ -67,8 +73,9 @@ let postDay = $derived(
             alt="記事サムネイル" 
             loading="lazy"
             style="view-transition-name: image-{post.slug};"
+            onerror={handleImageError}
           />
-        {:else if post.isExternal && post.source}
+        {:else if (post.feature_image && imageError) || (!post.feature_image && post.isExternal && post.source)}
           {#if post.sourceColor && post.sourceColor.startsWith('#')}
             <div 
               class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg"
@@ -83,6 +90,12 @@ let postDay = $derived(
               <span>{post.source?.slice(0, 5) || 'Blog'}</span>
             </div>
           {/if}
+        {:else if post.feature_image && imageError}
+          <div 
+            class="w-40 h-40 rounded-md flex items-center justify-center font-bold text-white text-xl shadow-lg bg-gray-600"
+          >
+            <span>No Image</span>
+          </div>
         {:else}
           <div class="aspect-square h-40 object-cover bg-gray-200 rounded-md"></div>
         {/if}
