@@ -29,7 +29,7 @@
 		"jsdom": "^26.1.0",
 		"sharp": "^0.34.3",
 		"svelte": "^5.38.6",
-		"tailwindcss": "^4.1.12",
+		"tailwindcss": "^4.1.13",
 		"winston": "^3.17.0"
 	},
 	"devDependencies": {
