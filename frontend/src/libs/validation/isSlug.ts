@@ -10,6 +10,8 @@ export function isSlug(slug: string | undefined): boolean {
 		slug.length <= 100 &&
 		/^[a-zA-Z0-9\-_]+$/.test(slug) &&
 		!slug.startsWith("_") &&
-		!["assets", "api", "admin", "undefined", "null"].includes(slug.toLowerCase())
+		!["assets", "api", "admin", "undefined", "null"].includes(
+			slug.toLowerCase(),
+		)
 	);
 }
