@@ -30,6 +30,7 @@ export function convertGhostToArticle(post: PostOrPage): ArticleArchiveType {
 		feature_image: post.feature_image || undefined,
 		title: post.title || "",
 		excerpt: post.excerpt || undefined,
+		source: undefined,
 		isExternal: false,
 	};
 }

@@ -4,18 +4,11 @@ import TagList from "~/components/organism/tag/TagList.astro";
 import { SITE_URL } from "~/consts";
 import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
-import { isTag } from "~/libs/validation/isTag";
+import { isSlug } from "~/libs/validation/isSlug";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
-//バリデーション(無くても問題ないが、英数記号以外は事前に弾くことでAPIへのアクセスを減らす)
 const tagSlug = Astro.params.tag;
-if (
-	!tagSlug ||
-	typeof tagSlug !== "string" ||
-	tagSlug === "undefined" ||
-	tagSlug.trim() === "" ||
-	!isTag(tagSlug)
-) {
+if (!isSlug(tagSlug)) {
 	return new Response(null, { status: 404 });
 }
 
