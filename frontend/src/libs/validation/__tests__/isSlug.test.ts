@@ -21,6 +21,7 @@ describe("isSlug", () => {
 		expect(isSlug(undefined)).toBe(false);
 		expect(isSlug("test:invalid")).toBe(false);
 		expect(isSlug("test.invalid")).toBe(false);
+		expect(isSlug("test=invalid")).toBe(false);
 		expect(isSlug("_invalid")).toBe(false);
 		expect(isSlug("assets")).toBe(false);
 	});

@@ -13,32 +13,42 @@ export function isSlug(slug: string | undefined): boolean {
 		return false;
 	}
 
-	// 長さ制限・URLパターン・特殊文字の除外
+	// 除外パターン - 特殊文字（最も可能性が高いため最初にチェック）
+	const specialChars = [".", ":", "%", "&", "="];
+	if (specialChars.some((char) => slug.includes(char))) {
+		return false;
+	}
+
+	// 長さ制限
+	if (slug.length > 100) {
+		return false;
+	}
+
+	// 除外パターン - 特定ドメイン（特殊文字チェックで捕捉されないもの）
+	const domainPatterns = ["blogapi.usuyuki.net"];
+	if (domainPatterns.some((pattern) => slug.includes(pattern))) {
+		return false;
+	}
+
+	// 除外パターン - startsWith チェック
+	const prefixPatterns = ["http", "https", "_"];
+	if (prefixPatterns.some((prefix) => slug.startsWith(prefix))) {
+		return false;
+	}
+
+	// 除外パターン - 予約語
+	const reservedWords = ["assets", "api", "admin", "undefined", "null"];
+	if (reservedWords.includes(slug.toLowerCase())) {
+		return false;
+	}
+
+	// 除外パターン - UUID形式
 	if (
-		slug.length > 100 ||
-		slug.includes("://") ||
-		slug.includes("%2F") ||
-		slug.includes("%3A") ||
-		slug.startsWith("http") ||
-		slug.startsWith("https") ||
-		slug.includes("blogapi.usuyuki.net") ||
-		slug.includes("&w=") ||
-		slug.includes("&h=") ||
-		slug.includes("&q=") ||
-		slug.includes("&f=") ||
-		slug.includes(".") ||
-		slug.includes(":") ||
-		slug.includes("%") ||
-		slug.includes("&") ||
-		slug.startsWith("_") ||
-		/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
-			slug,
-		) ||
-		["assets", "api", "admin", "undefined", "null"].includes(slug.toLowerCase())
+		/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(slug)
 	) {
 		return false;
 	}
 
-	// 英数字とハイフン、アンダースコアのみ許可
-	return /^[a-zA-Z0-9\-_]+$/.test(slug);
+	// 全てのチェックを通過
+	return true;
 }
