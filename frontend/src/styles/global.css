@@ -31,7 +31,7 @@
 }
 
 body {
-	word-break: break-all;
+	word-break: auto-phrase;
 	scroll-behavior: smooth !important;
 	background-color: var(--white);
 	color: var(--black);
