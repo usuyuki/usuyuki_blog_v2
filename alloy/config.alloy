@@ -1,0 +1,125 @@
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "5s"
+}
+
+discovery.relabel "filter_containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_logging"]
+    regex = "promtail"
+    action = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "container_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label = "stream"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = ".*ghost.*"
+    target_label = "app"
+    replacement = "ghost"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = ".*astro.*"
+    target_label = "app"
+    replacement = "astro"
+  }
+}
+
+loki.process "astro_logs" {
+  forward_to = [loki.write.loki.receiver]
+
+  stage.match {
+    selector = "{app=\"astro\"}"
+
+    stage.regex {
+      expression = "^(?P<level>error):"
+    }
+
+    stage.labels {
+      values = {
+        level = "",
+      }
+    }
+  }
+
+  stage.match {
+    selector = "{app=\"astro\"}"
+
+    stage.regex {
+      expression = "^(?P<level>info):"
+    }
+
+    stage.labels {
+      values = {
+        level = "",
+      }
+    }
+  }
+
+  stage.match {
+    selector = "{app=\"astro\"}"
+
+    stage.regex {
+      expression = "^(?P<level>warn):"
+    }
+
+    stage.labels {
+      values = {
+        level = "",
+      }
+    }
+  }
+
+  stage.match {
+    selector = "{app=\"astro\"}"
+
+    stage.regex {
+      expression = "\"logType\":\"(?P<log_type>[^\"]*)\""
+    }
+
+    stage.labels {
+      values = {
+        log_type = "",
+      }
+    }
+  }
+
+  stage.match {
+    selector = "{app=\"ghost\"}"
+
+    stage.regex {
+      expression = "] \\x1b\\[\\d+m(?P<level>ERROR|INFO|WARN)\\x1b\\[\\d+m"
+    }
+
+    stage.labels {
+      values = {
+        level = "",
+      }
+    }
+  }
+}
+
+loki.source.docker "docker_logs" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.filter_containers.output
+  forward_to = [loki.process.astro_logs.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

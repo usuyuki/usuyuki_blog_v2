@@ -110,14 +110,13 @@ services:
     networks:
       - app-network
 
-  promtail:
-    image: grafana/promtail:3.5
+  alloy:
+    image: grafana/alloy:latest
     restart: always
     volumes:
-      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/lib/docker/containers:/var/lib/docker/containers:ro
-    command: -config.file=/etc/promtail/config.yml
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
     depends_on:
       - loki
     networks:

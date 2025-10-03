@@ -16,10 +16,10 @@ The project uses a Docker-based development and deployment setup:
 - Frontend runs on **Astro 5** with **Tailwind CSS 4** and **Svelte 5**
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
-- **Monitoring Stack**: Grafana + Loki + Promtail for log aggregation and visualization
+- **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
   - **Loki 3.5**: Log aggregation system (port 3100)
   - **Grafana 12.1**: Metrics visualization and alerting dashboard (port 1002 in dev)
-  - **Promtail 3.5**: Log collection agent for Docker containers
+  - **Alloy**: Unified telemetry collector for Docker container logs (port 12345)
 
 ## Development Commands
 
@@ -62,7 +62,7 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.0 && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.0 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d
 ```
 
@@ -95,7 +95,7 @@ The frontend follows Atomic Design principles:
   - `dashboards/` - Pre-configured dashboards (astro-logs.json, ghost-logs.json)
   - `provisioning/` - Automated provisioning configuration
 - `loki/loki-config.yml` - Loki log aggregation configuration
-- `promtail/promtail-config.yml` - Promtail log collection configuration
+- `alloy/config.alloy` - Alloy telemetry collector configuration for Docker log collection
 
 ## Logging
 
@@ -248,9 +248,10 @@ docker compose -f compose-prod.yml restart astro
 
 ### Log Aggregation
 - **Loki** aggregates logs from all Docker containers
-- **Promtail** collects and forwards container logs to Loki
+- **Alloy** collects and forwards container logs to Loki (replaces deprecated Promtail)
 - **astroLogger** sends structured logs to Loki via LOKI_URL environment variable
 - Logs are automatically labeled with container information
+- Alloy UI available at http://localhost:12345 in development
 
 ### Alert Notifications
 - Discord notifications for critical errors (configure DISCORD_WEBHOOK_URL)
