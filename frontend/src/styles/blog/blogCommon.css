@@ -42,7 +42,7 @@
 		@apply text-lg font-bold;
 	}
 	.blog-content > p {
-		@apply mt-4 text-lg;
+		@apply mt-4 pb-6 text-lg leading-loose;
 	}
 	.blog-content > iframe {
 		@apply mx-auto;
