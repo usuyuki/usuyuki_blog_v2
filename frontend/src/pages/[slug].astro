@@ -11,6 +11,7 @@ import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
 import type { TOCType } from "~/types/TOCType";
@@ -67,9 +68,9 @@ const isWpArticle = judgeWpArticle(post.html || "");
 			{
 				post.feature_image ? (
 					<img
-						src={post.feature_image}
-						width={800}
-						height={800}
+						src={optimizeGhostImageUrl(post.feature_image, { width: 600, height: 600 })}
+						width={600}
+						height={600}
 						class="object-cover w-96 h-96 rounded-md"
 						alt="記事サムネイル"
 						transition:name={'image-' + post.slug}
