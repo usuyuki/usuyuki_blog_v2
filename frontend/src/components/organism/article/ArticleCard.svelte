@@ -1,43 +1,43 @@
 <script lang="ts">
-import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+	import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
-interface Props {
-	post: ArticleArchiveType;
-}
+	interface Props {
+		post: ArticleArchiveType;
+	}
 
-let { post }: Props = $props();
+	let { post }: Props = $props();
 
-// Ensure safe property access during hydration
-let safePost = $derived({
-	...post,
-	source: post.source ?? undefined,
-	sourceColor: post.sourceColor ?? undefined,
-	isExternal: post.isExternal ?? false,
-});
+	// Ensure safe property access during hydration
+	let safePost = $derived({
+		...post,
+		source: post.source ?? undefined,
+		sourceColor: post.sourceColor ?? undefined,
+		isExternal: post.isExternal ?? false,
+	});
 
-let postYear = $derived(
-	typeof post.published_at === "string"
-		? new Date(post.published_at).getFullYear()
-		: post.published_at.year,
-);
+	let postYear = $derived(
+		typeof post.published_at === "string"
+			? new Date(post.published_at).getFullYear()
+			: post.published_at.year,
+	);
 
-let postMonth = $derived(
-	typeof post.published_at === "string"
-		? new Date(post.published_at).getMonth() + 1
-		: post.published_at.month,
-);
+	let postMonth = $derived(
+		typeof post.published_at === "string"
+			? new Date(post.published_at).getMonth() + 1
+			: post.published_at.month,
+	);
 
-let postDay = $derived(
-	typeof post.published_at === "string"
-		? new Date(post.published_at).getDate()
-		: post.published_at.day,
-);
+	let postDay = $derived(
+		typeof post.published_at === "string"
+			? new Date(post.published_at).getDate()
+			: post.published_at.day,
+	);
 
-let imageError = $state(false);
+	let imageError = $state(false);
 
-function handleImageError() {
-	imageError = true;
-}
+	function handleImageError() {
+		imageError = true;
+	}
 </script>
 
 <div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
