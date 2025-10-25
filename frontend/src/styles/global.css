@@ -32,7 +32,7 @@
 
 body {
 	word-break: auto-phrase;
-	scroll-behavior: smooth !important;
+	scroll-behavior: smooth;
 	background-color: var(--white);
 	color: var(--black);
 	tab-size: 4;
@@ -51,7 +51,7 @@ h4,
 h5,
 h6 {
 	letter-spacing: 0.025em;
-	font-weight: bold !important;
+	font-weight: bold;
 	font-family: var(--font-family-main);
 }
 
