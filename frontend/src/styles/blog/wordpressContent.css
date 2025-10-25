@@ -1,7 +1,7 @@
 /* 下記がサイズ無視するので抑える */
 .wp-block-verse,
 .wp-block-preformatted {
-	padding: 1em 1em !important;
+	padding: 1em 1em;
 	white-space: pre-wrap;
 	overflow-x: hidden;
 }
@@ -82,7 +82,7 @@ th {
 	font-weight: bold;
 }
 .toc_list ul {
-	margin-left: 1rem !important;
+	margin-left: 1rem;
 }
 .toc_list li {
 	margin: 0.5rem 0;
