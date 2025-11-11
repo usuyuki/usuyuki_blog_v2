@@ -4,9 +4,6 @@
 	.kg-bookmark-card {
 		@apply mx-auto my-2 p-4 md:w-4/5 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
 	}
-	.kg-image-card {
-		@apply md:px-12;
-	}
 	.kg-callout-card {
 		@apply flex my-4 px-2 py-4 rounded-lg border-2 w-full items-center border-orange;
 	}
