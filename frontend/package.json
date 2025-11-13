@@ -24,7 +24,7 @@
 		"@tailwindcss/vite": "^4.1.16",
 		"@tryghost/content-api": "^1.12.0",
 		"@tryghost/helpers": "^1.1.97",
-		"astro": "^5.15.3",
+		"astro": "^5.15.6",
 		"image-size": "^2.0.2",
 		"jsdom": "^27.1.0",
 		"sharp": "^0.34.4",
