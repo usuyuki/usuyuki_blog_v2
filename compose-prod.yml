@@ -57,7 +57,7 @@ services:
       - app-network
 
   db:
-    image: mysql:8.4-debian
+    image: mysql:8.4
     restart: always
     volumes:
       - db-store:/var/lib/mysql
