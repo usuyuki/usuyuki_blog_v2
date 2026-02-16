@@ -62,7 +62,7 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.0 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d
 ```
 
