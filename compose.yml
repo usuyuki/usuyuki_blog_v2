@@ -48,14 +48,14 @@ services:
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
 
   db:
-    image: mysql:8.0
+    image: mysql:8.4
     volumes:
       - db-store:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: example
 
   loki:
-    image: grafana/loki:3.5
+    image: grafana/loki:3.6.5
     ports:
       - "3100:3100"
     volumes:
@@ -64,7 +64,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
 
   grafana:
-    image: grafana/grafana:12.1.0
+    image: grafana/grafana:12.3.3
     ports:
       - "1002:3000"
     environment:

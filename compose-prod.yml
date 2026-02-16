@@ -57,7 +57,7 @@ services:
       - app-network
 
   db:
-    image: mysql:8.0-debian
+    image: mysql:8.4-debian
     restart: always
     volumes:
       - db-store:/var/lib/mysql
@@ -83,7 +83,7 @@ services:
       - app-network
 
   loki:
-    image: grafana/loki:3.5
+    image: grafana/loki:3.6.5
     restart: always
     volumes:
       - ./loki/loki-config.yml:/etc/loki/local-config.yaml
@@ -93,7 +93,7 @@ services:
       - app-network
 
   grafana:
-    image: grafana/grafana:12.1.0
+    image: grafana/grafana:12.3.3
     restart: always
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
