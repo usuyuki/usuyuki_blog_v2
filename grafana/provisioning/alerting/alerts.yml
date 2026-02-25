@@ -1,3 +1,5 @@
+apiVersion: 1
+
 groups:
   - name: astro-error-logs
     folder: alerts
@@ -48,7 +50,7 @@ groups:
         for: 0s
         annotations:
           summary: "Error logs detected in Astro application"
-          description: "{{ $values.B.Value }} error logs detected in Astro application over the last 5 minutes"
+          description: "Error logs detected in Astro application over the last 5 minutes"
         labels:
           service: astro
           severity: warning
@@ -99,7 +101,7 @@ groups:
         for: 0s
         annotations:
           summary: "Error logs detected in Ghost application"
-          description: "{{ $values.B.Value }} error logs detected in Ghost application over the last 5 minutes"
+          description: "Error logs detected in Ghost application over the last 5 minutes"
         labels:
           service: ghost
           severity: warning
