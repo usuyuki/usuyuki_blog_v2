@@ -55,7 +55,7 @@ services:
       MYSQL_ROOT_PASSWORD: example
 
   loki:
-    image: grafana/loki:3.6.5
+    image: grafana/loki:3.6.7
     ports:
       - "3100:3100"
     volumes:
@@ -64,7 +64,7 @@ services:
     command: -config.file=/etc/loki/local-config.yaml
 
   grafana:
-    image: grafana/grafana:12.3.3
+    image: grafana/grafana:12.4.0
     ports:
       - "1002:3000"
     environment:
