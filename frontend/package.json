@@ -24,7 +24,7 @@
 		"@tailwindcss/vite": "^4.1.18",
 		"@tryghost/content-api": "^1.12.3",
 		"@tryghost/helpers": "^1.1.100",
-		"astro": "^5.17.2",
+		"astro": "^5.17.3",
 		"image-size": "^2.0.2",
 		"jsdom": "^27.4.0",
 		"sharp": "^0.34.5",
@@ -48,6 +48,6 @@
 	},
 	"packageManager": "pnpm@10.14.0",
 	"engines": {
-		"node": ">=22.0.0"
+		"node": ">=24.0.0"
 	}
 }
