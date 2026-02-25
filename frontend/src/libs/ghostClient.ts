@@ -132,6 +132,12 @@ function isRateLimitError(error: Error): boolean {
 	return err?.type === "TooManyRequestsError" || err?.response?.status === 429;
 }
 
+function isRetryableError(error: Error): boolean {
+	if (isRateLimitError(error)) return true;
+	const code = (error as { code?: string }).code;
+	return code === "EAI_AGAIN" || code === "ECONNRESET" || code === "ETIMEDOUT" || code === "ECONNREFUSED";
+}
+
 // エラーログを簡潔に出力する関数
 function logGhostError(
 	error: Error,
@@ -330,15 +336,14 @@ export const ghostApiWithRetry = {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
 
-					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(err)) {
+					// リトライ可能なエラー以外（404含む）はリトライしない
+					if (!isRetryableError(err)) {
 						return null;
 					}
 
 					if (i === maxRetries - 1) {
 						return null;
 					}
-					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
 					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
 						logType: LOG_TYPES.API,
@@ -397,54 +402,33 @@ export const ghostApiWithRetry = {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
 
-					// レート制限エラーの場合のみリトライ
-					if (isRateLimitError(err)) {
-						astroLogger.warn("Rate limit detected", {
-							logType: LOG_TYPES.API,
-							service: "ghost-api",
-						});
+					if (isRetryableError(err)) {
 						if (i === maxRetries - 1) {
 							// 最後のリトライ失敗時は長期キャッシュを返す
 							if (longTermCached) {
 								astroLogger.warn(
-									"Rate limit: Returning long-term cached data",
+									"Returning long-term cached data after retries exhausted",
 									{ logType: LOG_TYPES.API, service: "ghost-api" },
 								);
 								return longTermCached.map(convertToArticleArchiveType);
-							} else {
-								astroLogger.warn("Rate limit: No cached data available", {
-									logType: LOG_TYPES.API,
-									service: "ghost-api",
-								});
-								return null;
 							}
+							return null;
 						}
-						// レート制限エラーの場合の待機時間
 						const waitTime = 2000 * (i + 1); // 2秒、4秒、6秒
-						console.log(`Waiting ${waitTime}ms before retry...`);
+						astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
+							logType: LOG_TYPES.API,
+							waitTime,
+							attempt: i + 1,
+							service: "ghost-api",
+						});
 						await new Promise((resolve) => setTimeout(resolve, waitTime));
 					} else {
-						// レート制限エラー以外はリトライせずに長期キャッシュを返す
+						// リトライ不可なエラーは長期キャッシュを返す
 						if (longTermCached) {
-							console.warn(
-								"Non-rate-limit error: Returning long-term cached data",
-							);
 							return longTermCached.map(convertToArticleArchiveType);
 						}
 						return null;
 					}
-
-					// 待機時間を短くする（テスト環境では長すぎる）
-					const waitTime = isRateLimitError(err)
-						? 2000 * (i + 1) // 2秒、4秒、6秒
-						: 1000 * (i + 1); // 1秒、2秒、3秒
-					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
-						logType: LOG_TYPES.API,
-						waitTime,
-						attempt: i + 1,
-						service: "ghost-api",
-					});
-					await new Promise((resolve) => setTimeout(resolve, waitTime));
 				}
 			}
 			return null;
@@ -507,15 +491,14 @@ export const ghostApiWithRetry = {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
 
-					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(err)) {
+					// リトライ可能なエラー以外（404含む）はリトライしない
+					if (!isRetryableError(err)) {
 						return null;
 					}
 
 					if (i === maxRetries - 1) {
 						return null;
 					}
-					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
 					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
 						logType: LOG_TYPES.API,
@@ -557,8 +540,8 @@ export const ghostApiWithRetry = {
 					const err = error as Error;
 					logGhostError(err, i + 1, maxRetries, request);
 
-					// レート制限エラー以外（404含む）はリトライしない
-					if (!isRateLimitError(err)) {
+					// リトライ可能なエラー以外（404含む）はリトライしない
+					if (!isRetryableError(err)) {
 						// 404エラーの場合はネガティブキャッシュに保存
 						const errResponse = err as { response?: { status?: number } };
 						if (errResponse?.response?.status === 404) {
@@ -579,7 +562,6 @@ export const ghostApiWithRetry = {
 					if (i === maxRetries - 1) {
 						return null;
 					}
-					// レート制限エラーの場合の待機時間
 					const waitTime = 5000 * (i + 1); // 5秒、10秒、15秒
 					astroLogger.info(`Waiting ${waitTime}ms before retry...`, {
 						logType: LOG_TYPES.API,
