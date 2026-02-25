@@ -1,3 +1,5 @@
+apiVersion: 1
+
 contactPoints:
   - name: discord-webhook
     receivers:
@@ -5,18 +7,4 @@ contactPoints:
         type: discord
         settings:
           url: "${DISCORD_WEBHOOK_URL}"
-          title: "🚨 {{ .GroupLabels.service | title }} Alert"
-          message: |
-            **{{ .GroupLabels.alertname }}**
-            
-            {{ range .Alerts }}
-            **Service:** {{ .Labels.service }} | **Log Type:** {{ .Labels.log_type }}
-            
-            📋 **Summary:** {{ .Annotations.summary }}
-            📝 **Description:** {{ .Annotations.description }}
-            ⏰ **Started:** {{ .StartsAt }}
-            
-            🔗 **View in Grafana:** ${GRAFANA_BASE_URL}/alerting/list
-            📊 **View Dashboard:** ${GRAFANA_BASE_URL}/d/{{ if eq .Labels.service "astro" }}astro-logs-by-type{{ else if eq .Labels.service "ghost" }}ghost-logs{{ end }}/
-            {{ end }}
         disableResolveMessage: false
