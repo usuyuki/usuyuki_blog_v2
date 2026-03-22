@@ -31,7 +31,8 @@
 }
 
 body {
-	word-break: auto-phrase;
+	/* auto-phraseにすると日本語文節で改行できるが意外と読みにくいのでbreak-allでよい */
+	word-break: break-all;
 	scroll-behavior: smooth;
 	background-color: var(--white);
 	color: var(--black);
