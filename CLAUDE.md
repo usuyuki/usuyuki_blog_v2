@@ -23,6 +23,8 @@ The project uses a Docker-based development and deployment setup:
 
 ## Development Commands
 
+**IMPORTANT: NEVER run `pnpm` commands directly on the host. ALWAYS use `docker compose exec astro pnpm` to ensure commands run inside the container with the correct store and environment.**
+
 All development work happens in the `frontend/` directory. Use these commands:
 
 ```bash
