@@ -531,6 +531,7 @@ export const ghostApiWithRetry = {
 					if (options.page) browseOptions.page = options.page;
 					if (options.order) browseOptions.order = options.order;
 					if (options.fields) browseOptions.fields = options.fields;
+					if (options.include) browseOptions.include = options.include;
 
 					const result = await ghostClient.tags.browse(browseOptions);
 					// 成功時にキャッシュに保存
