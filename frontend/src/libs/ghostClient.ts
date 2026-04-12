@@ -135,7 +135,12 @@ function isRateLimitError(error: Error): boolean {
 function isRetryableError(error: Error): boolean {
 	if (isRateLimitError(error)) return true;
 	const code = (error as { code?: string }).code;
-	return code === "EAI_AGAIN" || code === "ECONNRESET" || code === "ETIMEDOUT" || code === "ECONNREFUSED";
+	return (
+		code === "EAI_AGAIN" ||
+		code === "ECONNRESET" ||
+		code === "ETIMEDOUT" ||
+		code === "ECONNREFUSED"
+	);
 }
 
 // エラーログを簡潔に出力する関数
