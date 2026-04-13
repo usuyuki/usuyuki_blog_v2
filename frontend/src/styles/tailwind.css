@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-@utility auto-phrase {
-	word-break: auto-phrase;
-}
-
 @theme {
 	--color-white: #fcf7f4;
 	--color-black: #540610;
