@@ -55,7 +55,6 @@ h6 {
 	font-weight: bold;
 	font-family: var(--font-family-main);
 }
-
 main {
 	padding: 1rem;
 	max-width: var(--main-max-width);
@@ -73,4 +72,7 @@ a {
 /* text-wrap: balance; Chrome114から追加、今のところはChromeのみだけど適応されなくてマイナスが少ないので入れる */
 .text-wrap-balance {
 	text-wrap: balance;
+}
+.auto-phrase {
+	word-break: auto-phrase;
 }
