@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { getNsfwBlocklist } from "./env";
 
 export interface EmojiReaction {
@@ -77,8 +77,18 @@ export async function toggleReaction(
 		return "removed";
 	}
 
-	await client.emojiReaction.create({
-		data: { slug, emoji, clientId },
-	});
+	try {
+		await client.emojiReaction.create({
+			data: { slug, emoji, clientId },
+		});
+	} catch (e) {
+		if (
+			e instanceof Prisma.PrismaClientKnownRequestError &&
+			e.code === "P2002"
+		) {
+			return "added";
+		}
+		throw e;
+	}
 	return "added";
 }

@@ -47,10 +47,10 @@ services:
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       GHOST_FRONT_URL: ${GHOST_FRONT_URL}
       LOKI_URL: http://loki:3100
-      DATABASE_URL: ${DATABASE_URL:-mysql://root:example@db:3306/usuyuki_blog}
+      DATABASE_URL: ${DATABASE_URL}
       REACTIONS_DB_HOST: db
       REACTIONS_DB_USER: root
-      REACTIONS_DB_PASSWORD: example
+      REACTIONS_DB_PASSWORD: ${REACTIONS_DB_PASSWORD}
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
     user: "1000:1000"
