@@ -39,9 +39,16 @@
 		let destroyed = false;
 		let picker: HTMLElement | null = null;
 
-		import("emoji-picker-element").then(({ Picker }) => {
+		Promise.all([
+			import("emoji-picker-element"),
+			import("emoji-picker-element/i18n/ja.js"),
+		]).then(([{ Picker }, i18nModule]) => {
 			if (destroyed || !container.isConnected) return;
-			const p = new Picker() as unknown as HTMLElement;
+			const p = new Picker({
+				locale: "ja",
+				dataSource: "/emoji-data-ja.json",
+				i18n: i18nModule.default,
+			}) as unknown as HTMLElement;
 
 			p.addEventListener("emoji-click", (e: Event) => {
 				const unicode = (e as CustomEvent<{ unicode: string }>).detail.unicode;
@@ -175,5 +182,17 @@
 	:global(emoji-picker) {
 		max-width: min(340px, calc(100vw - 2rem));
 		--border-radius: 0.75rem;
+		--background: #ffffff;
+		--border-color: #e5e7eb;
+		--button-active-background: #dbeafe;
+		--button-hover-background: #f3f4f6;
+		--category-font-color: #6b7280;
+		--emoji-padding: 0.4rem;
+		--indicator-color: #3b82f6;
+		--input-border-color: #d1d5db;
+		--input-font-color: #111827;
+		--input-placeholder-color: #9ca3af;
+		--outline-color: #93c5fd;
+		--skintone-border-radius: 1rem;
 	}
 </style>
