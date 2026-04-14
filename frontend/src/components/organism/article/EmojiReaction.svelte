@@ -185,17 +185,17 @@
 	:global(emoji-picker) {
 		max-width: min(340px, calc(100vw - 2rem));
 		--border-radius: 0.75rem;
-		--background: #ffffff;
-		--border-color: #e5e7eb;
-		--button-active-background: #dbeafe;
-		--button-hover-background: #f3f4f6;
-		--category-font-color: #6b7280;
+		--background: var(--white);
+		--border-color: var(--brown);
+		--button-active-background: color-mix(in srgb, var(--blue) 15%, var(--white));
+		--button-hover-background: color-mix(in srgb, var(--brown) 15%, var(--white));
+		--category-font-color: color-mix(in srgb, var(--brown) 70%, var(--black));
 		--emoji-padding: 0.4rem;
-		--indicator-color: #3b82f6;
-		--input-border-color: #d1d5db;
-		--input-font-color: #111827;
-		--input-placeholder-color: #9ca3af;
-		--outline-color: #93c5fd;
+		--indicator-color: var(--blue);
+		--input-border-color: var(--brown);
+		--input-font-color: var(--black);
+		--input-placeholder-color: color-mix(in srgb, var(--brown) 60%, var(--white));
+		--outline-color: var(--blue);
 		--skintone-border-radius: 1rem;
 	}
 </style>
