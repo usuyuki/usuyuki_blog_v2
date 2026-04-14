@@ -49,7 +49,7 @@
 				dataSource: "/emoji-data-ja.json",
 				i18n: {
 					...i18nModule.default,
-					searchLabel: "日本語と英語でemojiを検索できます",
+					searchLabel: "日本語か英語で検索できるよ",
 				},
 			}) as unknown as HTMLElement;
 
@@ -119,9 +119,7 @@
 <div class="w-full">
 	{#if loaded}
 		{#if reactions.length > 0}
-			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">
-				記事への反応
-			</p>
+			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
 		{:else}
 			<p class="text-sm text-gray-400 py-1">絵文字で記事に反応できます</p>
 		{/if}
