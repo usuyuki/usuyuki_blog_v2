@@ -152,7 +152,7 @@
 		</div>
 	{:else}
 		<div class="h-11 flex items-center">
-			<span class="text-sm text-gray-300">読み込み中...</span>
+			<span class="text-sm text-gray-300">みんなの反応を探し中...</span>
 		</div>
 	{/if}
 </div>
