@@ -11,9 +11,17 @@ const MAX_CODEPOINTS = 8;
 
 let prisma: PrismaClient | null = null;
 
+function buildDatasourceUrl(): string {
+	const host = process.env.REACTIONS_DB_HOST ?? "localhost";
+	const user = process.env.REACTIONS_DB_USER ?? "root";
+	const password = process.env.REACTIONS_DB_PASSWORD ?? "";
+	const name = process.env.REACTIONS_DB_NAME ?? "usuyuki_blog";
+	return `mysql://${user}:${encodeURIComponent(password)}@${host}/${name}`;
+}
+
 function getClient(): PrismaClient {
 	if (!prisma) {
-		prisma = new PrismaClient();
+		prisma = new PrismaClient({ datasourceUrl: buildDatasourceUrl() });
 	}
 	return prisma;
 }

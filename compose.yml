@@ -40,7 +40,6 @@ services:
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       GHOST_FRONT_URL: ${GHOST_FRONT_URL}
       LOKI_URL: http://loki:3100
-      DATABASE_URL: mysql://root:example@db:3306/usuyuki_blog
       REACTIONS_DB_HOST: db
       REACTIONS_DB_USER: root
       REACTIONS_DB_PASSWORD: example

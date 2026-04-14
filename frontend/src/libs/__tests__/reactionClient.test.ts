@@ -1,15 +1,40 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+	describe,
+	it,
+	expect,
+	vi,
+	beforeAll,
+	beforeEach,
+	afterEach,
+} from "vitest";
+
+const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
+	() => {
+		class MockPrismaClientKnownRequestError extends Error {
+			code: string;
+			constructor(message: string, { code }: { code: string }) {
+				super(message);
+				this.code = code;
+			}
+		}
+		return {
+			mockEmojiReaction: {
+				groupBy: vi.fn(),
+				findMany: vi.fn(),
+				findUnique: vi.fn(),
+				create: vi.fn(),
+				delete: vi.fn(),
+			},
+			MockPrismaClientKnownRequestError,
+		};
+	},
+);
 
 vi.mock("@prisma/client", () => ({
-	PrismaClient: vi.fn(() => ({
-		emojiReaction: {
-			groupBy: vi.fn().mockResolvedValue([]),
-			findMany: vi.fn().mockResolvedValue([]),
-			findUnique: vi.fn().mockResolvedValue(null),
-			create: vi.fn().mockResolvedValue({}),
-			delete: vi.fn().mockResolvedValue({}),
-		},
-	})),
+	PrismaClient: vi.fn(function () {
+		return { emojiReaction: mockEmojiReaction };
+	}),
+	Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
 }));
 
 describe("reactionClient", () => {
@@ -84,18 +109,108 @@ describe("reactionClient", () => {
 			});
 		});
 	});
+});
 
-	describe("getReactions", () => {
-		it("is defined as a function", async () => {
-			const { getReactions } = await import("../reactionClient");
-			expect(typeof getReactions).toBe("function");
-		});
+describe("getReactions", () => {
+	let getReactions: (slug: string, clientId: string) => Promise<unknown>;
+	let savedNsfwList: string | undefined;
+
+	beforeAll(async () => {
+		vi.resetModules();
+		const mod = await import("../reactionClient");
+		getReactions = mod.getReactions;
 	});
 
-	describe("toggleReaction", () => {
-		it("is defined as a function", async () => {
-			const { toggleReaction } = await import("../reactionClient");
-			expect(typeof toggleReaction).toBe("function");
-		});
+	beforeEach(() => {
+		savedNsfwList = process.env.REACTIONS_NSFW_BLOCKLIST;
+		delete process.env.REACTIONS_NSFW_BLOCKLIST;
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		if (savedNsfwList !== undefined) {
+			process.env.REACTIONS_NSFW_BLOCKLIST = savedNsfwList;
+		} else {
+			delete process.env.REACTIONS_NSFW_BLOCKLIST;
+		}
+	});
+
+	it("returns reaction with count and reacted: true when client has reacted", async () => {
+		mockEmojiReaction.groupBy.mockResolvedValue([
+			{ emoji: "👍", _count: { emoji: 3 }, _min: { createdAt: new Date() } },
+		]);
+		mockEmojiReaction.findMany.mockResolvedValue([{ emoji: "👍" }]);
+
+		const result = await getReactions("my-slug", "client-xyz");
+		expect(result).toEqual([{ emoji: "👍", count: 3, reacted: true }]);
+	});
+
+	it("returns reacted: false when client has not reacted", async () => {
+		mockEmojiReaction.groupBy.mockResolvedValue([
+			{ emoji: "❤️", _count: { emoji: 2 }, _min: { createdAt: new Date() } },
+		]);
+		mockEmojiReaction.findMany.mockResolvedValue([]);
+
+		const result = await getReactions("my-slug", "other-client");
+		expect(result).toEqual([{ emoji: "❤️", count: 2, reacted: false }]);
+	});
+
+	it("filters out NSFW emoji from results", async () => {
+		mockEmojiReaction.groupBy.mockResolvedValue([
+			{ emoji: "👍", _count: { emoji: 1 }, _min: { createdAt: new Date() } },
+			{ emoji: "🍆", _count: { emoji: 5 }, _min: { createdAt: new Date() } },
+		]);
+		mockEmojiReaction.findMany.mockResolvedValue([]);
+
+		const result = await getReactions("my-slug", "client-xyz");
+		expect(result).toHaveLength(1);
+		expect((result as Array<{ emoji: string }>)[0].emoji).toBe("👍");
+	});
+});
+
+describe("toggleReaction", () => {
+	let toggleReaction: (
+		slug: string,
+		emoji: string,
+		clientId: string,
+	) => Promise<unknown>;
+
+	beforeAll(async () => {
+		const mod = await import("../reactionClient");
+		toggleReaction = mod.toggleReaction;
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("returns 'removed' and calls delete when reaction already exists", async () => {
+		mockEmojiReaction.findUnique.mockResolvedValue({ id: 1 });
+		mockEmojiReaction.delete.mockResolvedValue({});
+
+		const result = await toggleReaction("my-slug", "👍", "client-xyz");
+		expect(result).toBe("removed");
+		expect(mockEmojiReaction.delete).toHaveBeenCalledOnce();
+	});
+
+	it("returns 'added' and calls create when reaction does not exist", async () => {
+		mockEmojiReaction.findUnique.mockResolvedValue(null);
+		mockEmojiReaction.create.mockResolvedValue({});
+
+		const result = await toggleReaction("my-slug", "👍", "client-xyz");
+		expect(result).toBe("added");
+		expect(mockEmojiReaction.create).toHaveBeenCalledOnce();
+	});
+
+	it("returns 'added' on P2002 unique constraint violation", async () => {
+		mockEmojiReaction.findUnique.mockResolvedValue(null);
+		mockEmojiReaction.create.mockRejectedValue(
+			new MockPrismaClientKnownRequestError("Unique constraint failed", {
+				code: "P2002",
+			}),
+		);
+
+		const result = await toggleReaction("my-slug", "👍", "client-xyz");
+		expect(result).toBe("added");
 	});
 });

@@ -47,7 +47,10 @@
 			const p = new Picker({
 				locale: "ja",
 				dataSource: "/emoji-data-ja.json",
-				i18n: i18nModule.default,
+				i18n: {
+					...i18nModule.default,
+					searchLabel: "日本語と英語でemojiを検索できます",
+				},
 			}) as unknown as HTMLElement;
 
 			p.addEventListener("emoji-click", (e: Event) => {
