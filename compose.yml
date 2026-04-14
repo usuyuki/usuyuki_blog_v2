@@ -45,6 +45,8 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
+      # MacのDocker DesktopはinotifyイベントがホストからVMに伝播しないためポーリングで代替
+      CHOKIDAR_USEPOLLING: "true"
     user: "1000:1000"
     depends_on:
       - loki
