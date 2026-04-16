@@ -48,7 +48,10 @@ export function validateEmoji(emoji: string): boolean {
 	// \p{Emoji_Presentation} だけでは数字キーキャップ絵文字（1️⃣ など）や
 	// variation selector-16（\uFE0F）合成絵文字がマッチしないため、
 	// \p{Emoji} も対象に含める。ただし数字・記号単体（1, # 等）が通らないよう
-	// 絵文字修飾子・ZWJ・variation selector との組み合わせも考慮する。
+	// \p{Emoji}\uFE0F の形で VS-16 との合成を必須にしている。
+	// 注意: \p{Emoji} は数字・記号を含むため、将来的に ZWJ シーケンスの複雑な
+	// ケース（例: 新しい複合絵文字）で意図外マッチが起きる可能性がある。
+	// その場合は MAX_CODEPOINTS による長さ制限が安全網として機能する。
 	const emojiRegex =
 		/\p{Emoji_Presentation}|\p{Extended_Pictographic}|\p{Emoji}\uFE0F/u;
 	return emojiRegex.test(emoji);

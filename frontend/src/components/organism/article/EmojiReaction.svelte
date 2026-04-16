@@ -39,8 +39,8 @@
 			const rect = pickerWrapper.getBoundingClientRect();
 			const maxPickerWidth = Math.min(340, window.innerWidth - 32);
 			pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
-			// ピッカーを上に開くと画面外に出る場合は下に開く（概算高さ 450px）
-			pickerOpenDown = rect.top < 450;
+			// ピッカーを上に開くと画面外に出る場合は下に開く（ピッカー高さ概算: 画面の半分）
+			pickerOpenDown = rect.top < window.innerHeight / 2;
 		}
 	}
 

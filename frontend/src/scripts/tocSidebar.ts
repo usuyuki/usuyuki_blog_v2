@@ -72,21 +72,24 @@ document.addEventListener("astro:page-load", () => {
 	// article-end が上半分に入った = Recent Articles が下半分以上を占めている状態。
 	const articleEnd = document.getElementById("article-end");
 	if (articleEnd && tocAnchor) {
-		const endObserver = new IntersectionObserver((entries) => {
-			for (const entry of entries) {
-				if (entry.isIntersecting) {
-					hideAll();
-				} else {
-					// article-end が上半分から外れた（画面下方向に戻った）場合のみ復元
-					if (
-						entry.boundingClientRect.top > 0 &&
-						tocAnchor.getBoundingClientRect().top < 0
-					) {
-						showAll();
+		const endObserver = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						hideAll();
+					} else {
+						// article-end が上半分から外れた（画面下方向に戻った）場合のみ復元
+						if (
+							entry.boundingClientRect.top > 0 &&
+							tocAnchor.getBoundingClientRect().top < 0
+						) {
+							showAll();
+						}
 					}
 				}
-			}
-		}, { rootMargin: "0px 0px -50% 0px" });
+			},
+			{ rootMargin: "0px 0px -50% 0px" },
+		);
 		endObserver.observe(articleEnd);
 		observers.push(endObserver);
 	}
