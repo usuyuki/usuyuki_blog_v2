@@ -6,7 +6,7 @@ export const addHeadingIds = (html: string): string => {
 	const idCount: Record<string, number> = {};
 
 	return html.replace(
-		/<h([1-6])(?![^>]*\bid\s*=)([^>]*)>(.*?)<\/h[1-6]>/g,
+		/<h([1-6])(?![^>]*\bid\s*=)([^>]*?)>([\s\S]*?)<\/h[1-6]>/g,
 		(_match, level: string, attrs: string, content: string) => {
 			const text = content.replace(/<[^>]+>/g, "").trim();
 			let slug = text
@@ -17,7 +17,7 @@ export const addHeadingIds = (html: string): string => {
 			if (!slug) slug = `heading-${level}`;
 
 			idCount[slug] = (idCount[slug] || 0) + 1;
-			const uniqueId = idCount[slug] > 1 ? `${slug}-${idCount[slug] - 1}` : slug;
+			const uniqueId = idCount[slug] > 1 ? `${slug}-${idCount[slug]}` : slug;
 
 			return `<h${level}${attrs} id="${uniqueId}">${content}</h${level}>`;
 		},
