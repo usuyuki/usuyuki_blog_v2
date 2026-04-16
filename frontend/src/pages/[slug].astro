@@ -133,7 +133,7 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 			<div
 				id="toc-sidebar"
 				class="hidden xl:block fixed z-50 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
-				style="right: 2rem; width: calc((100vw - var(--article-max-width)) / 2 - 4rem); background-color: var(--white)"
+				style="left: calc(50vw + var(--article-max-width) / 2 + 2rem); width: calc((100vw - var(--article-max-width)) / 2 - 4rem); max-width: 20rem; background-color: var(--white)"
 			>
 				<TOC tocList={tocList} extraClass="ghost-toc-sidebar" />
 			</div>
