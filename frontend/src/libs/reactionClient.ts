@@ -47,7 +47,7 @@ export async function getReactions(
 		_count: { emoji: true },
 		_min: { createdAt: true },
 		orderBy: [{ _min: { createdAt: "asc" } }],
-		take: 20,
+		take: 100,
 	});
 
 	const clientReactions = await client.emojiReaction.findMany({

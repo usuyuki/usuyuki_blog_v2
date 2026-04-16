@@ -22,6 +22,9 @@
 	let pickerWrapper = $state<HTMLDivElement | null>(null);
 	let pickerOpenLeft = $state(true);
 	let pickerCentered = $state(false);
+	let reactionsContainer = $state<HTMLDivElement | null>(null);
+	let collapsed = $state(true);
+	let hasOverflow = $state(false);
 
 	function handleOpenPicker() {
 		showPicker = !showPicker;
@@ -47,6 +50,41 @@
 		} finally {
 			loaded = true;
 		}
+	});
+
+	// 2行を超えたら「もっと見る」トグルを表示する
+	// max-heightを一時解除して実際の行数をカウントし、正確に判定する
+	$effect(() => {
+		const el = reactionsContainer;
+		if (!el) return;
+		void reactions;
+		requestAnimationFrame(() => {
+			if (!el.isConnected) return;
+
+			// max-heightを一時解除してアイテムの実際のoffsetTopを取得（forced reflow）
+			// ブラウザは同一JSタスク内で再描画しないためちらつきは起きない
+			el.style.maxHeight = "none";
+			const items = Array.from(el.children) as HTMLElement[];
+			let rowCount = 1;
+			if (items.length > 1) {
+				let prevTop = items[0].offsetTop;
+				for (let i = 1; i < items.length; i++) {
+					const top = items[i].offsetTop;
+					if (top > prevTop + 4) {
+						rowCount++;
+						prevTop = top;
+					}
+				}
+			}
+			el.style.maxHeight = ""; // クラスによるmax-heightを復元
+
+			const overflows = rowCount > 2;
+			hasOverflow = overflows;
+			if (!overflows) {
+				collapsed = false; // 溢れない場合は制限不要
+			}
+			// 溢れる場合はcollapsedの現状を維持（初期true、ユーザー操作後はその値）
+		});
 	});
 
 	$effect(() => {
@@ -150,27 +188,41 @@
 	{#if loaded}
 		{#if reactions.length > 0}
 			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
+			<div
+				class="flex flex-wrap items-center gap-2 overflow-hidden"
+				class:max-h-24={collapsed}
+				bind:this={reactionsContainer}
+			>
+				{#each reactions as reaction (reaction.emoji)}
+					<button
+						class="flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm transition-all duration-150 min-w-11 min-h-11 cursor-pointer"
+						class:bg-blue-50={reaction.reacted}
+						class:border-blue-400={reaction.reacted}
+						class:border-gray-200={!reaction.reacted}
+						class:bounce={bouncing === reaction.emoji}
+						onclick={() => toggleReaction(reaction.emoji)}
+						disabled={posting !== null}
+						aria-label="{reaction.emoji} {reaction.count}件"
+						aria-pressed={reaction.reacted}
+					>
+						<span>{reaction.emoji}</span>
+						<span class="font-numbers text-gray-600">{reaction.count}</span>
+					</button>
+				{/each}
+			</div>
 		{:else}
 			<p class="text-sm text-gray-400 py-1">絵文字で記事に反応できます</p>
 		{/if}
-		<div class="flex flex-wrap items-center gap-2">
-			{#each reactions as reaction (reaction.emoji)}
-				<button
-					class="flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm transition-all duration-150 min-w-11 min-h-11 cursor-pointer"
-					class:bg-blue-50={reaction.reacted}
-					class:border-blue-400={reaction.reacted}
-					class:border-gray-200={!reaction.reacted}
-					class:bounce={bouncing === reaction.emoji}
-					onclick={() => toggleReaction(reaction.emoji)}
-					disabled={posting !== null}
-					aria-label="{reaction.emoji} {reaction.count}件"
-					aria-pressed={reaction.reacted}
-				>
-					<span>{reaction.emoji}</span>
-					<span class="font-numbers text-gray-600">{reaction.count}</span>
-				</button>
-			{/each}
 
+		<div class="flex items-center gap-2 mt-2">
+			{#if hasOverflow}
+				<button
+					class="text-xs text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+					onclick={() => (collapsed = !collapsed)}
+				>
+					{collapsed ? "もっと見る ▼" : "閉じる ▲"}
+				</button>
+			{/if}
 			<div class="relative" bind:this={pickerWrapper}>
 				<button
 					class="flex items-center justify-center w-11 h-11 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
