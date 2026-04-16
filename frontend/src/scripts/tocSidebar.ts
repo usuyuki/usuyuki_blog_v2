@@ -150,7 +150,10 @@ document.addEventListener("astro:page-load", () => {
 			const target =
 				document.getElementById(id) ||
 				document.getElementById(decodeURIComponent(id));
-			target?.scrollIntoView({ behavior: "smooth" });
+			if (target) {
+				target.scrollIntoView({ behavior: "smooth" });
+				history.pushState(null, "", href);
+			}
 		};
 
 		const allTocLinks = Array.from(
