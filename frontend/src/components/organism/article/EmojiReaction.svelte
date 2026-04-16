@@ -247,8 +247,6 @@
 				{/each}
 			</div>
 			</div>
-		{:else}
-			<p class="text-sm text-gray-400 py-1 text-center">絵文字で記事に反応できます</p>
 		{/if}
 
 		<div class="flex items-center gap-2 mt-2">
@@ -295,6 +293,9 @@
 					class:right-0={!pickerCentered && !pickerOpenLeft}
 				></div>
 			</div>
+			{#if reactions.length === 0}
+				<p class="text-sm text-gray-400" style="word-break: auto-phrase">絵文字で記事に反応できます</p>
+			{/if}
 		</div>
 	{:else}
 		<div class="h-11 flex items-center">
