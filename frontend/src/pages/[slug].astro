@@ -129,8 +129,8 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		!isWpArticle && tocList.length > 0 && (
 			<div
 				id="toc-sidebar"
-				class="hidden xl:block fixed z-10 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
-				style="right: 2rem; width: calc((100vw - var(--article-max-width)) / 2 - 4rem)"
+				class="hidden xl:block fixed z-50 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
+				style="right: 2rem; width: calc((100vw - var(--article-max-width)) / 2 - 4rem); background-color: var(--white)"
 			>
 				<TOC tocList={tocList} extraClass="ghost-toc-sidebar" />
 			</div>
@@ -201,17 +201,23 @@ const isWpArticle = judgeWpArticle(post.html || "");
 			window.addEventListener("scroll", updateActive, { passive: true });
 			updateActive();
 
-			// サイドバーリンクをスムーズスクロールに
-			for (const link of sidebarLinks) {
+			// 目次リンクをスムーズスクロールに（インライン・サイドバー共通）
+			const smoothScrollTo = (href: string) => {
+				const id = href.slice(1);
+				const target =
+					document.getElementById(id) ||
+					document.getElementById(decodeURIComponent(id));
+				target?.scrollIntoView({ behavior: "smooth" });
+			};
+
+			const allTocLinks = Array.from(
+				document.querySelectorAll("#toc-inline-wrapper a[href^='#'], #toc-sidebar a[href^='#']"),
+			);
+			for (const link of allTocLinks) {
 				link.addEventListener("click", (e) => {
 					e.preventDefault();
 					const href = link.getAttribute("href");
-					if (!href) return;
-					const id = href.slice(1);
-					const target =
-						document.getElementById(id) ||
-						document.getElementById(decodeURIComponent(id));
-					target?.scrollIntoView({ behavior: "smooth" });
+					if (href) smoothScrollTo(href);
 				});
 			}
 		}
