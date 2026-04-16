@@ -37,6 +37,15 @@ vi.mock("@prisma/client", () => ({
 	Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
 }));
 
+// キャッシュをモックしてテスト間の状態汚染を防ぐ
+vi.mock("../cache", () => ({
+	cache: {
+		get: vi.fn(() => null),
+		set: vi.fn(),
+		delete: vi.fn(),
+	},
+}));
+
 describe("reactionClient", () => {
 	describe("validateEmoji", () => {
 		let validateEmoji: (emoji: string) => boolean;
