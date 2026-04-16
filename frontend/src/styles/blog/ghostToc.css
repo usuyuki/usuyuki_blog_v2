@@ -24,4 +24,30 @@
 	.ghost-toc .text-6 {
 		@apply ml-8 md:ml-10;
 	}
+
+	/* サイドバー用（小さめテキスト） */
+	.ghost-toc-sidebar {
+		max-width: none;
+		word-break: normal;
+		overflow-wrap: break-word;
+	}
+	.ghost-toc-sidebar h3 {
+		@apply text-base;
+	}
+	.ghost-toc-sidebar .text-1,
+	.ghost-toc-sidebar .text-2 {
+		@apply text-sm;
+	}
+	.ghost-toc-sidebar .text-3 {
+		@apply text-xs ml-2;
+	}
+	.ghost-toc-sidebar .text-4 {
+		@apply text-xs ml-4;
+	}
+	.ghost-toc-sidebar .text-5 {
+		@apply text-xs ml-6;
+	}
+	.ghost-toc-sidebar .text-6 {
+		@apply text-xs ml-8;
+	}
 }

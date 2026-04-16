@@ -9,6 +9,7 @@ import TagList from "~/components/atom/tag/TagList.astro";
 import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { addHeadingIds } from "~/libs/helper/addHeadingIds";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
@@ -59,8 +60,12 @@ const headMeta = {
 	ogImage: createProxyImageUrl(post.feature_image || ""),
 };
 
-const tocList: TOCType[] = generateTOC(post.html || "");
 const isWpArticle = judgeWpArticle(post.html || "");
+// WP記事は見出しにidがないため、テキストからidを生成して付与する
+const processedHtml = isWpArticle
+	? addHeadingIds(post.html || "")
+	: post.html || "";
+const tocList: TOCType[] = generateTOC(processedHtml);
 ---
 
 <ArticleLayout {...headMeta}>
@@ -116,12 +121,26 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		isWpArticle ? (
 			''
 		) : (
-			<div class="flex justify-center">
+			<div class="flex justify-center" id="toc-inline-wrapper">
 				<TOC tocList={tocList} />
 			</div>
 		)
 	}
 	{}
-	<article class="blog-content" set:html={post.html} />
+	<article class="blog-content" set:html={processedHtml} />
 	{}
+	<!-- PC用スクロール追従サイドバー目次（xl以上で表示） -->
+	{
+		tocList.length > 0 && (
+			<div
+				id="toc-sidebar"
+				class="hidden xl:block fixed z-50 top-4 max-h-[calc(100vh-2rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
+				style="left: calc(50vw + var(--article-max-width, 800px) / 2 + 2rem); width: calc((100vw - var(--article-max-width, 800px)) / 2 - 4rem); max-width: 20rem; background-color: var(--white)"
+			>
+				<TOC tocList={tocList} extraClass="ghost-toc-sidebar" />
+			</div>
+		)
+	}
+
+	<script src="../scripts/tocSidebar.ts"></script>
 </ArticleLayout>

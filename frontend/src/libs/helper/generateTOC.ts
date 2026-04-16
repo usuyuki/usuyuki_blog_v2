@@ -9,9 +9,11 @@ export const generateTOC = (content: string): TOCType[] => {
 			const title = tag.match(/>(.*?)<\/h[1-6]>/);
 			const heading = tag.match(/<h([1-6])/);
 			if (id && title && heading) {
+				// タグを除去してテキストのみ取得（WP記事のspan等に対応）
+				const titleText = title[1].replace(/<[^>]+>/g, "").trim();
 				toc.push({
 					id: id[1],
-					title: title[1],
+					title: titleText,
 					heading: parseInt(heading[1], 10),
 				});
 			}
