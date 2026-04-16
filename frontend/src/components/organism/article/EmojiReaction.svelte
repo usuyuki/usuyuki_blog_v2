@@ -201,9 +201,13 @@
 	{#if loaded}
 		{#if reactions.length > 0}
 			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
+			<!-- collapsed 時のみ overflow-hidden + max-h を付与し、通常時は制約なし。
+				 常時 overflow-hidden にすると scale(1.3) アニメーションがコンテナ端でクリップされる。
+				 py-1 は collapsed 時のアニメーション余白。max-h-28 = 2行(96px) + py-1(8px) + 余白 -->
 			<div
-				class="flex flex-wrap items-center gap-2 overflow-hidden"
-				class:max-h-24={collapsed}
+				class="flex flex-wrap items-center gap-2 py-1"
+				class:overflow-hidden={collapsed}
+				class:max-h-28={collapsed}
 				bind:this={reactionsContainer}
 			>
 				{#each reactions as reaction (reaction.emoji)}
