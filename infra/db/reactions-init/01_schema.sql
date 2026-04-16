@@ -1,6 +1,6 @@
 CREATE DATABASE IF NOT EXISTS usuyuki_blog
   CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+  COLLATE utf8mb4_bin;
 
 USE usuyuki_blog;
 
