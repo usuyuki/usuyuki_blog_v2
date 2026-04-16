@@ -3,11 +3,11 @@ import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchiv
 import { getLatestArticles } from "~/libs/articleAggregator";
 
 const articles = await getLatestArticles({
-	limit: 10,
-	includeExternal: true,
+  limit: 10,
+  includeExternal: true,
 });
 const postsData = {
-	posts: articles,
+  posts: articles,
 };
 ---
 

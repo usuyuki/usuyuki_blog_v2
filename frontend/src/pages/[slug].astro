@@ -24,49 +24,49 @@ import { isSlug } from "~/libs/validation/isSlug";
 
 const slug = Astro.params.slug;
 if (!isSlug(slug)) {
-	astroLogger.warn("Invalid slug parameter", {
-		logType: LOG_TYPES.ACCESS,
-		slug: slug,
-		slugType: typeof slug,
-		route: Astro.url.pathname,
-	});
-	return new Response(null, { status: 404 });
+  astroLogger.warn("Invalid slug parameter", {
+    logType: LOG_TYPES.ACCESS,
+    slug: slug,
+    slugType: typeof slug,
+    route: Astro.url.pathname,
+  });
+  return new Response(null, { status: 404 });
 }
 
 const post = await ghostApiWithRetry.posts.read(
-	{
-		slug: slug,
-		include: "tags",
-	},
-	3,
-	Astro.request,
+  {
+    slug: slug,
+    include: "tags",
+  },
+  3,
+  Astro.request,
 );
 
 if (!post) {
-	astroLogger.warn("Post not found", {
-		logType: LOG_TYPES.ACCESS,
-		slug,
-		route: `/${slug}`,
-	});
-	return new Response(null, { status: 404 });
+  astroLogger.warn("Post not found", {
+    logType: LOG_TYPES.ACCESS,
+    slug,
+    route: `/${slug}`,
+  });
+  return new Response(null, { status: 404 });
 }
 const publishedDate = iso8601TimeToDate(post.published_at || "");
 
 astroLogger.requestLog(Astro.request, { status: 200 });
 
 const headMeta = {
-	title: post.title || "",
-	slug: post.slug,
-	// excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
-	description: (post.excerpt || "").replace(/\r?\n/g, "").slice(0, 150),
-	ogImage: createProxyImageUrl(post.feature_image || ""),
+  title: post.title || "",
+  slug: post.slug,
+  // excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
+  description: (post.excerpt || "").replace(/\r?\n/g, "").slice(0, 150),
+  ogImage: createProxyImageUrl(post.feature_image || ""),
 };
 
 const isWpArticle = judgeWpArticle(post.html || "");
 // WP記事は見出しにidがないため、テキストからidを生成して付与する
 const processedHtml = isWpArticle
-	? addHeadingIds(post.html || "")
-	: post.html || "";
+  ? addHeadingIds(post.html || "")
+  : post.html || "";
 const tocList: TOCType[] = generateTOC(processedHtml);
 ---
 

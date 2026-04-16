@@ -1,58 +1,58 @@
 import astroLogger from "./astroLogger";
 
 interface CacheItem<T> {
-	data: T;
-	timestamp: number;
-	ttl: number;
+  data: T;
+  timestamp: number;
+  ttl: number;
 }
 
 class MemoryCache {
-	private cache = new Map<string, CacheItem<object>>();
+  private cache = new Map<string, CacheItem<object>>();
 
-	set(key: string, data: object, ttlMs: number): void {
-		this.cache.set(key, {
-			data,
-			timestamp: Date.now(),
-			ttl: ttlMs,
-		});
-		astroLogger.debug(`Cache SET: ${key}`, { key, ttl: ttlMs });
-	}
+  set(key: string, data: object, ttlMs: number): void {
+    this.cache.set(key, {
+      data,
+      timestamp: Date.now(),
+      ttl: ttlMs,
+    });
+    astroLogger.debug(`Cache SET: ${key}`, { key, ttl: ttlMs });
+  }
 
-	get<T extends object>(key: string): T | null {
-		const item = this.cache.get(key);
-		if (!item) {
-			astroLogger.debug(`Cache MISS: ${key}`, { key });
-			return null;
-		}
+  get<T extends object>(key: string): T | null {
+    const item = this.cache.get(key);
+    if (!item) {
+      astroLogger.debug(`Cache MISS: ${key}`, { key });
+      return null;
+    }
 
-		const now = Date.now();
-		if (now - item.timestamp > item.ttl) {
-			this.cache.delete(key);
-			astroLogger.debug(`Cache EXPIRED: ${key}`, { key });
-			return null;
-		}
+    const now = Date.now();
+    if (now - item.timestamp > item.ttl) {
+      this.cache.delete(key);
+      astroLogger.debug(`Cache EXPIRED: ${key}`, { key });
+      return null;
+    }
 
-		astroLogger.debug(`Cache HIT: ${key}`, { key });
-		return item.data as T;
-	}
+    astroLogger.debug(`Cache HIT: ${key}`, { key });
+    return item.data as T;
+  }
 
-	clear(): void {
-		this.cache.clear();
-	}
+  clear(): void {
+    this.cache.clear();
+  }
 
-	delete(key: string): boolean {
-		return this.cache.delete(key);
-	}
+  delete(key: string): boolean {
+    return this.cache.delete(key);
+  }
 
-	// キャッシュサイズを制限するためのヘルパー
-	cleanup(): void {
-		const now = Date.now();
-		for (const [key, item] of this.cache.entries()) {
-			if (now - item.timestamp > item.ttl) {
-				this.cache.delete(key);
-			}
-		}
-	}
+  // キャッシュサイズを制限するためのヘルパー
+  cleanup(): void {
+    const now = Date.now();
+    for (const [key, item] of this.cache.entries()) {
+      if (now - item.timestamp > item.ttl) {
+        this.cache.delete(key);
+      }
+    }
+  }
 }
 
 export const cache = new MemoryCache();

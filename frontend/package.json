@@ -1,65 +1,65 @@
 {
-	"name": "frontend",
-	"type": "module",
-	"version": "0.0.1",
-	"scripts": {
-		"1": "pnpm format && pnpm lint && pnpm check && pnpm test:run && pnpm build",
-		"dev": "astro dev",
-		"start": "astro dev",
-		"build": "prisma generate && node scripts/build-emoji-data.mjs && astro build",
-		"preview": "astro preview",
-		"check": "astro check",
-		"astro": "astro",
-		"lint": "biome lint .",
-		"format": "biome format --write .",
-		"test": "vitest",
-		"test:ui": "vitest --ui",
-		"test:run": "vitest run"
-	},
-	"dependencies": {
-		"@astrojs/node": "^9.5.5",
-		"@astrojs/partytown": "^2.1.6",
-		"@astrojs/rss": "^4.0.18",
-		"@astrojs/svelte": "^7.2.5",
-		"@prisma/client": "^5.22.0",
-		"@tailwindcss/vite": "^4.2.2",
-		"@tryghost/content-api": "^1.12.6",
-		"@tryghost/helpers": "^1.1.103",
-		"astro": "^5.18.1",
-		"emoji-picker-element": "^1.29.1",
-		"emoji-picker-element-data": "^1.8.0",
-		"image-size": "^2.0.2",
-		"jsdom": "^28.1.0",
-		"sharp": "^0.34.5",
-		"svelte": "^5.55.3",
-		"tailwindcss": "^4.2.2",
-		"winston": "^3.19.0"
-	},
-	"devDependencies": {
-		"@astrojs/check": "^0.9.8",
-		"@biomejs/biome": "^2.4.11",
-		"@sveltejs/vite-plugin-svelte": "^6.2.4",
-		"@testing-library/jest-dom": "^6.9.1",
-		"@testing-library/svelte": "^5.3.1",
-		"@types/jsdom": "^28.0.1",
-		"@types/tryghost__content-api": "^1.3.17",
-		"@vitest/ui": "^4.1.4",
-		"postcss-html": "^1.8.1",
-		"prisma": "^5.22.0",
-		"typescript": "^5.9.3",
-		"vite": "^7.3.2",
-		"vitest": "^4.1.4"
-	},
-	"packageManager": "pnpm@10.33.0",
-	"engines": {
-		"node": ">=24.0.0"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@prisma/engines",
-			"prisma",
-			"@prisma/client",
-			"sharp"
-		]
-	}
+  "name": "frontend",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "1": "pnpm format && pnpm lint && pnpm check && pnpm test:run && pnpm build",
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "prisma generate && node scripts/build-emoji-data.mjs && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "astro": "astro",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.5",
+    "@astrojs/partytown": "^2.1.6",
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/svelte": "^7.2.5",
+    "@prisma/client": "^5.22.0",
+    "@tailwindcss/vite": "^4.2.2",
+    "@tryghost/content-api": "^1.12.6",
+    "@tryghost/helpers": "^1.1.103",
+    "astro": "^5.18.1",
+    "emoji-picker-element": "^1.29.1",
+    "emoji-picker-element-data": "^1.8.0",
+    "image-size": "^2.0.2",
+    "jsdom": "^28.1.0",
+    "sharp": "^0.34.5",
+    "svelte": "^5.55.3",
+    "tailwindcss": "^4.2.2",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.8",
+    "@biomejs/biome": "^2.4.11",
+    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/svelte": "^5.3.1",
+    "@types/jsdom": "^28.0.1",
+    "@types/tryghost__content-api": "^1.3.17",
+    "@vitest/ui": "^4.1.4",
+    "postcss-html": "^1.8.1",
+    "prisma": "^5.22.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.2",
+    "vitest": "^4.1.4"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "prisma",
+      "@prisma/client",
+      "sharp"
+    ]
+  }
 }
