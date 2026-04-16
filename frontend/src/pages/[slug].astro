@@ -115,9 +115,6 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 	<div class="mb-4 mt-4 p-2 m-2">
 		<TagList tags={post.tags?.map(tag => ({ name: tag.name || '', slug: tag.slug || '', visibility: tag.visibility || 'public' })) || []} />
 	</div>
-	<div class="px-4 mb-4 mx-auto" style="max-width: var(--article-max-width)">
-		<EmojiReaction slug={post.slug} client:load />
-	</div>
 	<!-- 基本的にWordPress記事では目次生成の正規表現でマッチしないが、WordPressから移行した記事を一度Ghostで保存すると目次生成が可能になってしまい、spanタグの付いたぶっ壊れ目次が生まれるので防ぐ -->
 	{
 		isWpArticle ? (
@@ -130,6 +127,10 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 	}
 	{}
 	<article class="blog-content" set:html={processedHtml} />
+	<!-- モバイル用絵文字リアクション（xl未満でのみ表示） -->
+	<div class="px-4 mb-4 mx-auto xl:hidden" style="max-width: var(--article-max-width)">
+		<EmojiReaction slug={post.slug} client:load />
+	</div>
 	<div class="px-4 mx-auto" style="max-width: var(--article-max-width)">
 		<ArticleShareButtons url={`${getFrontendUrl()}${Astro.url.pathname}`} title={post.title || ""} />
 	</div>
@@ -146,6 +147,14 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 			</div>
 		)
 	}
+	<!-- PC用スクロール追従サイドバー絵文字リアクション（xl以上で表示、左側・記事端寄せ） -->
+	<div
+		id="reaction-sidebar"
+		class="hidden xl:block fixed z-50 top-20 opacity-0 pointer-events-none transition-opacity duration-300"
+		style="right: calc(50vw + var(--article-max-width, 800px) / 2 + 0.5rem); width: 14rem; background-color: var(--white)"
+	>
+		<EmojiReaction slug={post.slug} client:load />
+	</div>
 
 	<script src="../scripts/tocSidebar.ts"></script>
 </ArticleLayout>
