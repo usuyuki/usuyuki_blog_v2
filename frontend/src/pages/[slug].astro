@@ -151,7 +151,7 @@ const isWpArticle = judgeWpArticle(post.html || "");
 				sidebarToc.classList.add("opacity-0", "pointer-events-none");
 			};
 
-			const observer = new IntersectionObserver((entries) => {
+			const tocObserver = new IntersectionObserver((entries) => {
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						// インライン目次が画面内に見えている → サイドバーを隠す
@@ -169,7 +169,37 @@ const isWpArticle = judgeWpArticle(post.html || "");
 				}
 			});
 
-			observer.observe(inlineToc);
+			tocObserver.observe(inlineToc);
+
+			// 現在位置のハイライト
+			const articleHeadings = Array.from(
+				document.querySelectorAll("article.blog-content [id]"),
+			);
+			const sidebarLinks = Array.from(
+				sidebarToc.querySelectorAll("a[href^='#']"),
+			);
+
+			const setActive = (id: string) => {
+				for (const link of sidebarLinks) {
+					const isActive = link.getAttribute("href") === `#${id}`;
+					(link as HTMLElement).style.fontWeight = isActive ? "bold" : "";
+					(link as HTMLElement).style.color = isActive ? "var(--orange)" : "";
+				}
+			};
+
+			const updateActive = () => {
+				// スクロール位置より上にある見出しのうち最後のものをアクティブに
+				let current = "";
+				for (const heading of articleHeadings) {
+					if (heading.getBoundingClientRect().top <= 80) {
+						current = heading.id;
+					}
+				}
+				setActive(current);
+			};
+
+			window.addEventListener("scroll", updateActive, { passive: true });
+			updateActive();
 		}
 	</script>
 </ArticleLayout>
