@@ -117,9 +117,22 @@
 			container.appendChild(p);
 			picker = p;
 
-			// 1文字のCJK文字（漢字・かな）でも検索できるようにする
-			// emoji-picker-elementはMIN_SEARCH_TEXT_LENGTH=2のため1文字はフィルタされる
-			// inputイベントを監視し、1文字CJK入力時に内部的に2文字として扱う
+			// 【背景】emoji-picker-elementはMIN_SEARCH_TEXT_LENGTH=2をハードコードしており、
+			// 1文字の入力は検索クエリとして処理される前に内部でフィルタ・破棄される。
+			// 日本語の漢字・かなは1文字で意味を持つ（「猫」「笑」等）ため、そのままでは検索不能。
+			//
+			// 【データ側の対処】build-emoji-data.mjsで1文字CJKタグを二重化（「猫」→「猫猫」）済み。
+			// しかしユーザーが「猫」と入力してもクエリ自体が1文字として捨てられるため、
+			// 「猫猫」タグがあっても「猫」ではヒットしない。
+			//
+			// 【このハックの必要性】ライブラリに検索テキストを外から設定するパブリックAPIが
+			// 存在しないため、内部Svelteコンポーネント（_cmp）の$setを直接呼び出して
+			// rawSearchTextを二重化した文字列に差し替えることで、MIN_SEARCH_TEXT_LENGTHを回避する。
+			// Shadow DOM内のinput要素に直接値をセットする方法では内部の検索ロジックが発火しない。
+			//
+			// 【リスク】_cmpはemoji-picker-elementの非公開内部APIであり、ライブラリのバージョン
+			// アップ（特にSvelteコンパイラ出力の変更）で動作しなくなる可能性がある。
+			// その場合の劣化挙動: 1文字CJKでの検索結果が表示されないだけで、ピッカー自体は動作する。
 			p.addEventListener("input", () => {
 				const shadowInput = p.shadowRoot?.querySelector(".search");
 				if (!shadowInput) return;
