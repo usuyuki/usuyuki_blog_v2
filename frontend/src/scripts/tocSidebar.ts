@@ -16,41 +16,86 @@ document.addEventListener("astro:page-load", () => {
 
 	const inlineToc = document.getElementById("toc-inline-wrapper");
 	const sidebarToc = document.getElementById("toc-sidebar");
+	const reactionSidebar = document.getElementById("reaction-sidebar");
 
-	if (sidebarToc) {
-		const showSidebar = () => {
+	// 目次サイドバーとリアクションサイドバーをまとめて表示・非表示にする
+	const showAll = () => {
+		if (sidebarToc) {
 			sidebarToc.classList.remove("opacity-0", "pointer-events-none");
 			sidebarToc.classList.add("opacity-100");
-		};
-		const hideSidebar = () => {
+		}
+		if (reactionSidebar) {
+			reactionSidebar.classList.remove("opacity-0", "pointer-events-none");
+			reactionSidebar.classList.add("opacity-100");
+		}
+	};
+	const hideAll = () => {
+		if (sidebarToc) {
 			sidebarToc.classList.remove("opacity-100");
 			sidebarToc.classList.add("opacity-0", "pointer-events-none");
-		};
+		}
+		if (reactionSidebar) {
+			reactionSidebar.classList.remove("opacity-100");
+			reactionSidebar.classList.add("opacity-0", "pointer-events-none");
+		}
+	};
 
-		// Ghost記事はインライン目次、WP記事は記事内toc_containerを基準点にする
-		const tocAnchor = inlineToc ?? document.getElementById("toc_container");
+	// どちらかのサイドバーが存在する場合のみ表示制御を行う
+	if (!sidebarToc && !reactionSidebar) return;
 
-		if (tocAnchor) {
-			const tocObserver = new IntersectionObserver((entries) => {
+	// Ghost記事はインライン目次、WP記事は記事内toc_containerを基準点にする
+	const tocAnchor = inlineToc ?? document.getElementById("toc_container");
+
+	if (tocAnchor) {
+		const tocObserver = new IntersectionObserver((entries) => {
+			for (const entry of entries) {
+				if (entry.isIntersecting) {
+					hideAll();
+				} else {
+					if (entry.boundingClientRect.top < 0) {
+						showAll();
+					} else {
+						hideAll();
+					}
+				}
+			}
+		});
+		tocObserver.observe(tocAnchor);
+		observers.push(tocObserver);
+	} else {
+		// 目次要素が一切ない場合は常時表示
+		showAll();
+	}
+
+	// Recent Articles が画面の半分を占めたらフェードアウト、戻ったら復元
+	// rootMargin "0px 0px -50% 0px" により検出領域を画面上半分に限定する。
+	// article-end が上半分に入った = Recent Articles が下半分以上を占めている状態。
+	const articleEnd = document.getElementById("article-end");
+	if (articleEnd && tocAnchor) {
+		const endObserver = new IntersectionObserver(
+			(entries) => {
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
-						hideSidebar();
+						hideAll();
 					} else {
-						if (entry.boundingClientRect.top < 0) {
-							showSidebar();
-						} else {
-							hideSidebar();
+						// article-end が上半分から外れた（画面下方向に戻った）場合のみ復元
+						if (
+							entry.boundingClientRect.top > 0 &&
+							tocAnchor.getBoundingClientRect().top < 0
+						) {
+							showAll();
 						}
 					}
 				}
-			});
-			tocObserver.observe(tocAnchor);
-			observers.push(tocObserver);
-		} else {
-			// 目次要素が一切ない場合は常時表示
-			showSidebar();
-		}
+			},
+			{ rootMargin: "0px 0px -50% 0px" },
+		);
+		endObserver.observe(articleEnd);
+		observers.push(endObserver);
+	}
 
+	// 以下は目次サイドバー固有の処理（現在位置ハイライト・スムーズスクロール）
+	if (sidebarToc) {
 		// 現在位置のハイライト（h1-h6のみ対象、spanなどは除外）
 		const articleHeadings = Array.from(
 			document.querySelectorAll<HTMLElement>(
@@ -120,29 +165,6 @@ document.addEventListener("astro:page-load", () => {
 		}
 		updateActiveFromPositions();
 		observers.push(headingObserver);
-
-		// Recent Articles エリアに入ったらフェードアウト、戻ったら復元
-		const articleEnd = document.getElementById("article-end");
-		if (articleEnd && tocAnchor) {
-			const endObserver = new IntersectionObserver((entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						hideSidebar();
-					} else {
-						// article-end が画面下に消えた（上スクロールで戻った）場合のみ復元
-						// top > 0 = 下方向にある = 上スクロールで戻ってきた
-						if (
-							entry.boundingClientRect.top > 0 &&
-							tocAnchor.getBoundingClientRect().top < 0
-						) {
-							showSidebar();
-						}
-					}
-				}
-			});
-			endObserver.observe(articleEnd);
-			observers.push(endObserver);
-		}
 
 		// 目次リンクをスムーズスクロールに（インライン・サイドバー共通）
 		const smoothScrollTo = (href: string) => {
