@@ -18,25 +18,6 @@ const misskeyUrl = buildMisskeyShareUrl(url, title);
 
 <div class="my-6 flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
 	<div class="flex flex-col items-center gap-4 sm:flex-row sm:flex-wrap">
-		<!-- 公式はてなブックマークボタン（ブックマーク数付き） -->
-		<a
-			href={hatenaUrl}
-			class="hatena-bookmark-button"
-			data-hatena-bookmark-layout="basic-label-counter"
-			data-hatena-bookmark-lang="ja"
-			title="このエントリーをはてなブックマークに追加"
-			target="_blank"
-			rel="noopener noreferrer"
-		>
-			<img
-				src="https://b.st-hatena.com/images/v4/public/entry-button/button-only@2x.png"
-				alt="このエントリーをはてなブックマークに追加"
-				width="20"
-				height="20"
-				style="border: none;"
-			/>
-		</a>
-		<script src="https://b.st-hatena.com/js/bookmark_button.js" async></script>
 		<a
 			href={twitterUrl}
 			target="_blank"
@@ -66,6 +47,40 @@ const misskeyUrl = buildMisskeyShareUrl(url, title);
 				class="w-5 h-5"
 			/>
 			<span>Misskey でシェア</span>
+		</a>
+		<!-- 公式はてなブックマークボタン（ブックマーク数付き） -->
+		<div class="flex items-center justify-center py-2">
+			<a
+				href={hatenaUrl}
+				class="hatena-bookmark-button"
+				data-hatena-bookmark-layout="basic-label-counter"
+				data-hatena-bookmark-lang="ja"
+				title="このエントリーをはてなブックマークに追加"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				<img
+					src="https://b.st-hatena.com/images/v4/public/entry-button/button-only@2x.png"
+					alt="このエントリーをはてなブックマークに追加"
+					width="20"
+					height="20"
+					style="border: none;"
+				/>
+			</a>
+			<script src="https://b.st-hatena.com/js/bookmark_button.js" async></script>
+		</div>
+		<a
+			href="https://feedly.com/i/subscription/feed%2Fhttps%3A%2F%2Fblog.usuyuki.net%2Frss.xml"
+			target="_blank"
+			rel="noopener noreferrer"
+			class="flex items-center justify-center px-4 py-2 hover:opacity-80 duration-300"
+		>
+			<img
+				src="https://s1.feedly.com/legacy/feedly-follow-circle-flat-black_2x.png"
+				alt="follow us in feedly"
+				width="28"
+				height="28"
+			/>
 		</a>
 	</div>
 	<button
