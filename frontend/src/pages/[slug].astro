@@ -141,6 +141,8 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 	}
 
 	<script>
+		// View Transitions（ClientRouter）対応: ページ遷移のたびに再初期化する
+		document.addEventListener("astro:page-load", () => {
 		const inlineToc = document.getElementById("toc-inline-wrapper");
 		const sidebarToc = document.getElementById("toc-sidebar");
 
@@ -228,5 +230,6 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 				});
 			}
 		}
+		}); // astro:page-load
 	</script>
 </ArticleLayout>
