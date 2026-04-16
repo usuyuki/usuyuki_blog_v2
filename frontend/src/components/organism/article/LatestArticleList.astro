@@ -3,21 +3,21 @@ import { ghostApiWithRetry } from "~/libs/ghostClient";
 import errorHandler from "~/libs/errorHandler";
 
 interface Props {
-	ulClass?: string;
-	liClass?: string;
+  ulClass?: string;
+  liClass?: string;
 }
 const { ulClass = "", liClass = "" } = Astro.props;
 
 const posts =
-	(await ghostApiWithRetry.posts
-		.browse({
-			limit: 5,
-			order: "published_at DESC",
-		})
-		.catch((err: Error) => {
-			errorHandler.handleComponentError("LatestArticleList", err);
-			return [];
-		})) || [];
+  (await ghostApiWithRetry.posts
+    .browse({
+      limit: 5,
+      order: "published_at DESC",
+    })
+    .catch((err: Error) => {
+      errorHandler.handleComponentError("LatestArticleList", err);
+      return [];
+    })) || [];
 ---
 
 {

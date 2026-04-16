@@ -10,13 +10,13 @@ import type { HeadMetaType } from "~/types/HeadMetaType";
 const yearSlug = Number(Astro.params.year);
 //数字かつ整数かつ4桁であるか
 if (!isYear(yearSlug)) {
-	return new Response(null, { status: 404 });
+  return new Response(null, { status: 404 });
 }
 
 // getLatestArticles関数で全記事取得後、年でフィルタリング
 const allArticles = await getLatestArticles({
-	includeExternal: true, // RSS記事も含める
-	unlimited: true, // 全記事を取得
+  includeExternal: true, // RSS記事も含める
+  unlimited: true, // 全記事を取得
 });
 
 // 指定年の記事のみフィルタリング
@@ -24,48 +24,48 @@ const yearStart = new Date(`${yearSlug}-01-01T00:00:00`);
 const yearEnd = new Date(`${yearSlug}-12-31T23:59:59`);
 
 const posts = allArticles
-	.filter((article) => {
-		let articleDate: Date;
+  .filter((article) => {
+    let articleDate: Date;
 
-		if (typeof article.published_at === "string") {
-			articleDate = new Date(article.published_at);
-		} else {
-			// DateType format
-			articleDate = new Date(
-				`${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
-			);
-		}
+    if (typeof article.published_at === "string") {
+      articleDate = new Date(article.published_at);
+    } else {
+      // DateType format
+      articleDate = new Date(
+        `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
+      );
+    }
 
-		return articleDate >= yearStart && articleDate <= yearEnd;
-	})
-	.sort((a, b) => {
-		// 日付順でソート（古い順 = ASC）
-		const dateA =
-			typeof a.published_at === "string"
-				? new Date(a.published_at).getTime()
-				: new Date(
-						`${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`,
-					).getTime();
+    return articleDate >= yearStart && articleDate <= yearEnd;
+  })
+  .sort((a, b) => {
+    // 日付順でソート（古い順 = ASC）
+    const dateA =
+      typeof a.published_at === "string"
+        ? new Date(a.published_at).getTime()
+        : new Date(
+            `${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`,
+          ).getTime();
 
-		const dateB =
-			typeof b.published_at === "string"
-				? new Date(b.published_at).getTime()
-				: new Date(
-						`${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`,
-					).getTime();
+    const dateB =
+      typeof b.published_at === "string"
+        ? new Date(b.published_at).getTime()
+        : new Date(
+            `${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`,
+          ).getTime();
 
-		return dateA - dateB; // ASC order
-	});
+    return dateA - dateB; // ASC order
+  });
 
 const postsData = {
-	posts: posts || [],
+  posts: posts || [],
 };
 
 const headMeta: HeadMetaType = {
-	title: `${yearSlug}年の記事`,
-	slug: `/archive/${yearSlug}`,
-	description: `うすゆきブログ${yearSlug}年のアーカイブです`,
-	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  title: `${yearSlug}年の記事`,
+  slug: `/archive/${yearSlug}`,
+  description: `うすゆきブログ${yearSlug}年のアーカイブです`,
+  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 ---
 

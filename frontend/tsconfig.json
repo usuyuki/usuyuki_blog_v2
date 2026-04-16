@@ -1,12 +1,12 @@
 {
-	"extends": "astro/tsconfigs/strict",
-	"compilerOptions": {
-		"strictNullChecks": true,
-		"types": ["@astrojs/image/client"],
-		"baseUrl": ".",
-		"paths": {
-			// astro.config.mjsにも定義
-			"~/*": ["src/*"]
-		}
-	}
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "types": ["@astrojs/image/client"],
+    "baseUrl": ".",
+    "paths": {
+      // astro.config.mjsにも定義
+      "~/*": ["src/*"]
+    }
+  }
 }

@@ -4,15 +4,15 @@
  * 1番最新の月はアクセスされた月、最古の月は手動で設定(変わらないものなのでAPI叩かずハードコーディングする)
  */
 interface Props {
-	ulClass?: string;
-	liClass?: string;
+  ulClass?: string;
+  liClass?: string;
 }
 const { ulClass = "", liClass = "" } = Astro.props;
 
 type ListContent = {
-	year: number;
-	month: number;
-	link: string;
+  year: number;
+  month: number;
+  link: string;
 };
 
 // 現在の年と月を取得
@@ -27,19 +27,19 @@ const oldestMonth = 10;
 //最新から最古までの月ごとのリンクを作成
 const archiveList: ListContent[] = [];
 for (let year = latestYear; year >= oldestYear; year--) {
-	for (let month = 12; month >= 1; month--) {
-		if (year === oldestYear && month < oldestMonth) {
-			break;
-		}
-		if (year === latestYear && month > latestMonth) {
-			continue;
-		}
-		archiveList.push({
-			year: year,
-			month: month,
-			link: `/archive/${year}/${month}`,
-		});
-	}
+  for (let month = 12; month >= 1; month--) {
+    if (year === oldestYear && month < oldestMonth) {
+      break;
+    }
+    if (year === latestYear && month > latestMonth) {
+      continue;
+    }
+    archiveList.push({
+      year: year,
+      month: month,
+      link: `/archive/${year}/${month}`,
+    });
+  }
 }
 ---
 

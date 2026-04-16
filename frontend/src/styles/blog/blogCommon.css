@@ -1,99 +1,99 @@
 /* なぜか本番のビルドだとこれらのファイルの後にTailwindが読み込まれて、優先度的に反映されないためクラス指定で行う */
 @import "../tailwind.css";
 @layer components {
-	code {
-		max-width: var(--article-max-width);
-		white-space: pre-wrap;
-		/* overflow: auto;←これはコードではうまく行かない */
-	}
-	/* wordpressの目次が競合するのでそこに関しては別で上書きする */
-	article li {
-		@apply py-1 pl-2 md:pl-4;
-	}
-	article li a {
-		@apply text-dark-blue duration-500;
-	}
-	article li a:hover {
-		@apply text-blue duration-500;
-	}
-	/* ghostもwordpressもpタグの中にaタグを入れるのでそれを利用してスタイルを当てる */
-	article p a {
-		@apply text-dark-blue duration-500;
-	}
-	article p a:hover {
-		@apply text-blue duration-500;
-	}
-	.blog-content > h1 {
-		@apply text-5xl font-bold;
-	}
-	.blog-content > h2 {
-		@apply text-4xl font-bold;
-	}
-	.blog-content > h3 {
-		@apply text-3xl font-bold;
-	}
-	.blog-content > h4 {
-		@apply text-2xl font-bold;
-	}
-	.blog-content > h5 {
-		@apply text-xl font-bold;
-	}
-	.blog-content > h6 {
-		@apply text-lg font-bold;
-	}
-	.blog-content > p {
-		@apply mt-4 pb-6 text-lg leading-loose;
-	}
-	.blog-content > iframe {
-		@apply mx-auto;
-	}
-	/* 画像の説明 */
-	.blog-content > figure > figcaption {
-		@apply text-center;
-	}
-	.blog-content > table {
-		@apply my-2;
-	}
-	.blog-content > hr {
-		@apply my-6 mx-4;
-	}
-	.blog-content > blockquote {
-		@apply border-l-2 border-black p-2 m-2 italic text-lg;
-	}
-	.blog-content > em {
-		@apply italic;
-	}
+  code {
+    max-width: var(--article-max-width);
+    white-space: pre-wrap;
+    /* overflow: auto;←これはコードではうまく行かない */
+  }
+  /* wordpressの目次が競合するのでそこに関しては別で上書きする */
+  article li {
+    @apply py-1 pl-2 md:pl-4;
+  }
+  article li a {
+    @apply text-dark-blue duration-500;
+  }
+  article li a:hover {
+    @apply text-blue duration-500;
+  }
+  /* ghostもwordpressもpタグの中にaタグを入れるのでそれを利用してスタイルを当てる */
+  article p a {
+    @apply text-dark-blue duration-500;
+  }
+  article p a:hover {
+    @apply text-blue duration-500;
+  }
+  .blog-content > h1 {
+    @apply text-5xl font-bold;
+  }
+  .blog-content > h2 {
+    @apply text-4xl font-bold;
+  }
+  .blog-content > h3 {
+    @apply text-3xl font-bold;
+  }
+  .blog-content > h4 {
+    @apply text-2xl font-bold;
+  }
+  .blog-content > h5 {
+    @apply text-xl font-bold;
+  }
+  .blog-content > h6 {
+    @apply text-lg font-bold;
+  }
+  .blog-content > p {
+    @apply mt-4 pb-6 text-lg leading-loose;
+  }
+  .blog-content > iframe {
+    @apply mx-auto;
+  }
+  /* 画像の説明 */
+  .blog-content > figure > figcaption {
+    @apply text-center;
+  }
+  .blog-content > table {
+    @apply my-2;
+  }
+  .blog-content > hr {
+    @apply my-6 mx-4;
+  }
+  .blog-content > blockquote {
+    @apply border-l-2 border-black p-2 m-2 italic text-lg;
+  }
+  .blog-content > em {
+    @apply italic;
+  }
 
-	.blog-content > pre {
-		@apply bg-black text-white p-2 rounded-xl my-2;
-	}
+  .blog-content > pre {
+    @apply bg-black text-white p-2 rounded-xl my-2;
+  }
 
-	.blog-content ul {
-		@apply list-disc list-inside text-lg my-4;
-	}
-	.blog-content ul ul {
-		@apply ml-6 my-2;
-	}
-	.blog-content ol {
-		@apply list-decimal list-inside text-lg my-4;
-	}
-	.blog-content ol ol {
-		@apply ml-6 my-2;
-	}
+  .blog-content ul {
+    @apply list-disc list-inside text-lg my-4;
+  }
+  .blog-content ul ul {
+    @apply ml-6 my-2;
+  }
+  .blog-content ol {
+    @apply list-decimal list-inside text-lg my-4;
+  }
+  .blog-content ol ol {
+    @apply ml-6 my-2;
+  }
 
-	.blog-content > h1,
-	.blog-content > h2,
-	.blog-content > h3,
-	.blog-content > h4,
-	.blog-content > h5,
-	.blog-content > h6 {
-		@apply mt-12 mb-4 tracking-wide;
-	}
+  .blog-content > h1,
+  .blog-content > h2,
+  .blog-content > h3,
+  .blog-content > h4,
+  .blog-content > h5,
+  .blog-content > h6 {
+    @apply mt-12 mb-4 tracking-wide;
+  }
 
-	.blog-content > figure {
-		@apply mt-0 mb-2;
-	}
-	.blog-content > iframe {
-		@apply w-5/6 aspect-video;
-	}
+  .blog-content > figure {
+    @apply mt-0 mb-2;
+  }
+  .blog-content > iframe {
+    @apply w-5/6 aspect-video;
+  }
 }

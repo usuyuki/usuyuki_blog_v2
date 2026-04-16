@@ -12,20 +12,20 @@ interface Props extends HeadMetaType {}
 const headMeta: Props = Astro.props;
 
 const recentArticles = await getLatestArticles({
-	limit: 5,
-	includeExternal: false,
+  limit: 5,
+  includeExternal: false,
 });
 
 const recentArticlesWithFormattedDate = recentArticles.map(
-	(article: ArticleArchiveType) => {
-		if (article.isExternal || typeof article.published_at !== "string") {
-			return article;
-		}
-		return {
-			...article,
-			published_at: iso8601TimeToDate(article.published_at),
-		};
-	},
+  (article: ArticleArchiveType) => {
+    if (article.isExternal || typeof article.published_at !== "string") {
+      return article;
+    }
+    return {
+      ...article,
+      published_at: iso8601TimeToDate(article.published_at),
+    };
+  },
 );
 ---
 

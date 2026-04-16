@@ -1,5 +1,5 @@
 export type TagType = {
-	visibility: string;
-	name: string;
-	slug: string;
+  visibility: string;
+  name: string;
+  slug: string;
 };

@@ -1,212 +1,212 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+  import { onMount } from "svelte";
 
-	interface Props {
-		slug: string;
-		scrollable?: boolean;
-	}
+  interface Props {
+    slug: string;
+    scrollable?: boolean;
+  }
 
-	interface Reaction {
-		emoji: string;
-		count: number;
-		reacted: boolean;
-	}
+  interface Reaction {
+    emoji: string;
+    count: number;
+    reacted: boolean;
+  }
 
-	let { slug, scrollable = false }: Props = $props();
+  let { slug, scrollable = false }: Props = $props();
 
-	let reactions = $state<Reaction[]>([]);
-	let posting = $state<string | null>(null);
-	let showPicker = $state(false);
-	let loaded = $state(false);
-	let bouncing = $state<string | null>(null);
-	let pickerContainer = $state<HTMLDivElement | null>(null);
-	let pickerWrapper = $state<HTMLDivElement | null>(null);
-	let pickerOpenLeft = $state(true);
-	let pickerOpenDown = $state(false);
-	let pickerCentered = $state(false);
-	let reactionsContainer = $state<HTMLDivElement | null>(null);
-	let collapsed = $state(true);
-	let hasOverflow = $state(false);
+  let reactions = $state<Reaction[]>([]);
+  let posting = $state<string | null>(null);
+  let showPicker = $state(false);
+  let loaded = $state(false);
+  let bouncing = $state<string | null>(null);
+  let pickerContainer = $state<HTMLDivElement | null>(null);
+  let pickerWrapper = $state<HTMLDivElement | null>(null);
+  let pickerOpenLeft = $state(true);
+  let pickerOpenDown = $state(false);
+  let pickerCentered = $state(false);
+  let reactionsContainer = $state<HTMLDivElement | null>(null);
+  let collapsed = $state(true);
+  let hasOverflow = $state(false);
 
-	function handleOpenPicker() {
-		showPicker = !showPicker;
-		if (!showPicker || !pickerWrapper || !pickerContainer) return;
-		// 画面幅が狭い場合は中央固定ポップアップ、広い場合はボタン基準の相対配置
-		if (window.innerWidth < 600) {
-			pickerCentered = true;
-		} else {
-			pickerCentered = false;
-			const rect = pickerWrapper.getBoundingClientRect();
-			const maxPickerWidth = Math.min(340, window.innerWidth - 32);
-			pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
-			// ピッカーの実際の高さを計測して上下どちらに開くか決める。
-			// visibility:hidden で一時的に表示して offsetHeight を取得することで、
-			// Svelte のリアクティブ更新を挟まずちらつきなく実寸を得られる。
-			// ピッカー未ロード時（height=0）は 450px をフォールバックとして使う。
-			pickerContainer.style.visibility = "hidden";
-			pickerContainer.classList.remove("hidden");
-			const pickerHeight = pickerContainer.offsetHeight || 450;
-			pickerContainer.classList.add("hidden");
-			pickerContainer.style.visibility = "";
-			pickerOpenDown = rect.top < pickerHeight;
-		}
-	}
+  function handleOpenPicker() {
+    showPicker = !showPicker;
+    if (!showPicker || !pickerWrapper || !pickerContainer) return;
+    // 画面幅が狭い場合は中央固定ポップアップ、広い場合はボタン基準の相対配置
+    if (window.innerWidth < 600) {
+      pickerCentered = true;
+    } else {
+      pickerCentered = false;
+      const rect = pickerWrapper.getBoundingClientRect();
+      const maxPickerWidth = Math.min(340, window.innerWidth - 32);
+      pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
+      // ピッカーの実際の高さを計測して上下どちらに開くか決める。
+      // visibility:hidden で一時的に表示して offsetHeight を取得することで、
+      // Svelte のリアクティブ更新を挟まずちらつきなく実寸を得られる。
+      // ピッカー未ロード時（height=0）は 450px をフォールバックとして使う。
+      pickerContainer.style.visibility = "hidden";
+      pickerContainer.classList.remove("hidden");
+      const pickerHeight = pickerContainer.offsetHeight || 450;
+      pickerContainer.classList.add("hidden");
+      pickerContainer.style.visibility = "";
+      pickerOpenDown = rect.top < pickerHeight;
+    }
+  }
 
-	onMount(async () => {
-		try {
-			const res = await fetch(`/api/reactions/${slug}`);
-			if (res.ok) {
-				const data = await res.json();
-				reactions = data.reactions;
-			}
-		} finally {
-			loaded = true;
-		}
-	});
+  onMount(async () => {
+    try {
+      const res = await fetch(`/api/reactions/${slug}`);
+      if (res.ok) {
+        const data = await res.json();
+        reactions = data.reactions;
+      }
+    } finally {
+      loaded = true;
+    }
+  });
 
-	// 2行を超えたら「もっと見る」トグルを表示する
-	// max-heightを一時解除して実際の行数をカウントし、正確に判定する
-	$effect(() => {
-		const el = reactionsContainer;
-		if (!el) return;
-		void reactions;
-		requestAnimationFrame(() => {
-			if (!el.isConnected) return;
+  // 2行を超えたら「もっと見る」トグルを表示する
+  // max-heightを一時解除して実際の行数をカウントし、正確に判定する
+  $effect(() => {
+    const el = reactionsContainer;
+    if (!el) return;
+    void reactions;
+    requestAnimationFrame(() => {
+      if (!el.isConnected) return;
 
-			// max-heightを一時解除してアイテムの実際のoffsetTopを取得（forced reflow）
-			// ブラウザは同一JSタスク内で再描画しないためちらつきは起きない
-			el.style.maxHeight = "none";
-			const items = Array.from(el.children) as HTMLElement[];
-			let rowCount = 1;
-			if (items.length > 1) {
-				let prevTop = items[0].offsetTop;
-				for (let i = 1; i < items.length; i++) {
-					const top = items[i].offsetTop;
-					if (top > prevTop + 4) {
-						rowCount++;
-						prevTop = top;
-					}
-				}
-			}
-			el.style.maxHeight = ""; // クラスによるmax-heightを復元
+      // max-heightを一時解除してアイテムの実際のoffsetTopを取得（forced reflow）
+      // ブラウザは同一JSタスク内で再描画しないためちらつきは起きない
+      el.style.maxHeight = "none";
+      const items = Array.from(el.children) as HTMLElement[];
+      let rowCount = 1;
+      if (items.length > 1) {
+        let prevTop = items[0].offsetTop;
+        for (let i = 1; i < items.length; i++) {
+          const top = items[i].offsetTop;
+          if (top > prevTop + 4) {
+            rowCount++;
+            prevTop = top;
+          }
+        }
+      }
+      el.style.maxHeight = ""; // クラスによるmax-heightを復元
 
-			const overflows = rowCount > 2;
-			hasOverflow = overflows;
-			if (!overflows) {
-				collapsed = false; // 溢れない場合は制限不要
-			}
-			// 溢れる場合はcollapsedの現状を維持（初期true、ユーザー操作後はその値）
-		});
-	});
+      const overflows = rowCount > 2;
+      hasOverflow = overflows;
+      if (!overflows) {
+        collapsed = false; // 溢れない場合は制限不要
+      }
+      // 溢れる場合はcollapsedの現状を維持（初期true、ユーザー操作後はその値）
+    });
+  });
 
-	$effect(() => {
-		const container = pickerContainer;
-		if (!container) return;
+  $effect(() => {
+    const container = pickerContainer;
+    if (!container) return;
 
-		let destroyed = false;
-		let picker: HTMLElement | null = null;
+    let destroyed = false;
+    let picker: HTMLElement | null = null;
 
-		Promise.all([
-			import("emoji-picker-element"),
-			import("emoji-picker-element/i18n/ja.js"),
-		]).then(([{ Picker }, i18nModule]) => {
-			if (destroyed || !container.isConnected) return;
-			const p = new Picker({
-				locale: "ja",
-				dataSource: "/emoji-data-ja.json",
-				i18n: {
-					...i18nModule.default,
-					searchLabel: "日本語か英語で検索できるよ",
-				},
-			}) as unknown as HTMLElement;
+    Promise.all([
+      import("emoji-picker-element"),
+      import("emoji-picker-element/i18n/ja.js"),
+    ]).then(([{ Picker }, i18nModule]) => {
+      if (destroyed || !container.isConnected) return;
+      const p = new Picker({
+        locale: "ja",
+        dataSource: "/emoji-data-ja.json",
+        i18n: {
+          ...i18nModule.default,
+          searchLabel: "日本語か英語で検索できるよ",
+        },
+      }) as unknown as HTMLElement;
 
-			p.addEventListener("emoji-click", (e: Event) => {
-				const unicode = (e as CustomEvent<{ unicode: string }>).detail.unicode;
-				showPicker = false;
-				toggleReaction(unicode);
-			});
+      p.addEventListener("emoji-click", (e: Event) => {
+        const unicode = (e as CustomEvent<{ unicode: string }>).detail.unicode;
+        showPicker = false;
+        toggleReaction(unicode);
+      });
 
-			container.appendChild(p);
-			picker = p;
+      container.appendChild(p);
+      picker = p;
 
-			// 【背景】emoji-picker-elementはMIN_SEARCH_TEXT_LENGTH=2をハードコードしており、
-			// 1文字の入力は検索クエリとして処理される前に内部でフィルタ・破棄される。
-			// 日本語の漢字・かなは1文字で意味を持つ（「猫」「笑」等）ため、そのままでは検索不能。
-			//
-			// 【データ側の対処】build-emoji-data.mjsで1文字CJKタグを二重化（「猫」→「猫猫」）済み。
-			// しかしユーザーが「猫」と入力してもクエリ自体が1文字として捨てられるため、
-			// 「猫猫」タグがあっても「猫」ではヒットしない。
-			//
-			// 【このハックの必要性】ライブラリに検索テキストを外から設定するパブリックAPIが
-			// 存在しないため、内部Svelteコンポーネント（_cmp）の$setを直接呼び出して
-			// rawSearchTextを二重化した文字列に差し替えることで、MIN_SEARCH_TEXT_LENGTHを回避する。
-			// Shadow DOM内のinput要素に直接値をセットする方法では内部の検索ロジックが発火しない。
-			//
-			// 【リスク】_cmpはemoji-picker-elementの非公開内部APIであり、ライブラリのバージョン
-			// アップ（特にSvelteコンパイラ出力の変更）で動作しなくなる可能性がある。
-			// その場合の劣化挙動: 1文字CJKでの検索結果が表示されないだけで、ピッカー自体は動作する。
-			p.addEventListener("input", () => {
-				const shadowInput = p.shadowRoot?.querySelector(".search");
-				if (!shadowInput) return;
-				const val = (shadowInput as HTMLInputElement).value;
-				if (val.length === 1 && /[\u3040-\u9fff\uf900-\ufaff]/.test(val)) {
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					(p as any)._cmp?.$set({ rawSearchText: val + val });
-				}
-			});
-		});
+      // 【背景】emoji-picker-elementはMIN_SEARCH_TEXT_LENGTH=2をハードコードしており、
+      // 1文字の入力は検索クエリとして処理される前に内部でフィルタ・破棄される。
+      // 日本語の漢字・かなは1文字で意味を持つ（「猫」「笑」等）ため、そのままでは検索不能。
+      //
+      // 【データ側の対処】build-emoji-data.mjsで1文字CJKタグを二重化（「猫」→「猫猫」）済み。
+      // しかしユーザーが「猫」と入力してもクエリ自体が1文字として捨てられるため、
+      // 「猫猫」タグがあっても「猫」ではヒットしない。
+      //
+      // 【このハックの必要性】ライブラリに検索テキストを外から設定するパブリックAPIが
+      // 存在しないため、内部Svelteコンポーネント（_cmp）の$setを直接呼び出して
+      // rawSearchTextを二重化した文字列に差し替えることで、MIN_SEARCH_TEXT_LENGTHを回避する。
+      // Shadow DOM内のinput要素に直接値をセットする方法では内部の検索ロジックが発火しない。
+      //
+      // 【リスク】_cmpはemoji-picker-elementの非公開内部APIであり、ライブラリのバージョン
+      // アップ（特にSvelteコンパイラ出力の変更）で動作しなくなる可能性がある。
+      // その場合の劣化挙動: 1文字CJKでの検索結果が表示されないだけで、ピッカー自体は動作する。
+      p.addEventListener("input", () => {
+        const shadowInput = p.shadowRoot?.querySelector(".search");
+        if (!shadowInput) return;
+        const val = (shadowInput as HTMLInputElement).value;
+        if (val.length === 1 && /[\u3040-\u9fff\uf900-\ufaff]/.test(val)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (p as any)._cmp?.$set({ rawSearchText: val + val });
+        }
+      });
+    });
 
-		return () => {
-			destroyed = true;
-			picker?.remove();
-			picker = null;
-		};
-	});
+    return () => {
+      destroyed = true;
+      picker?.remove();
+      picker = null;
+    };
+  });
 
-	async function toggleReaction(emoji: string) {
-		if (posting) return;
-		posting = emoji;
-		bouncing = emoji;
-		setTimeout(() => {
-			bouncing = null;
-		}, 300);
+  async function toggleReaction(emoji: string) {
+    if (posting) return;
+    posting = emoji;
+    bouncing = emoji;
+    setTimeout(() => {
+      bouncing = null;
+    }, 300);
 
-		const prev = reactions;
-		const existing = reactions.find((r) => r.emoji === emoji);
-		if (existing) {
-			reactions = reactions
-				.map((r) =>
-					r.emoji === emoji
-						? {
-								...r,
-								count: r.reacted ? r.count - 1 : r.count + 1,
-								reacted: !r.reacted,
-							}
-						: r,
-				)
-				.filter((r) => r.count > 0);
-		} else {
-			reactions = [...reactions, { emoji, count: 1, reacted: true }];
-		}
+    const prev = reactions;
+    const existing = reactions.find((r) => r.emoji === emoji);
+    if (existing) {
+      reactions = reactions
+        .map((r) =>
+          r.emoji === emoji
+            ? {
+                ...r,
+                count: r.reacted ? r.count - 1 : r.count + 1,
+                reacted: !r.reacted,
+              }
+            : r,
+        )
+        .filter((r) => r.count > 0);
+    } else {
+      reactions = [...reactions, { emoji, count: 1, reacted: true }];
+    }
 
-		try {
-			const res = await fetch(`/api/reactions/${slug}`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ emoji }),
-			});
-			if (res.ok) {
-				const data = await res.json();
-				reactions = data.reactions;
-			} else {
-				reactions = prev;
-			}
-		} catch {
-			reactions = prev;
-		} finally {
-			posting = null;
-		}
-	}
+    try {
+      const res = await fetch(`/api/reactions/${slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        reactions = data.reactions;
+      } else {
+        reactions = prev;
+      }
+    } catch {
+      reactions = prev;
+    } finally {
+      posting = null;
+    }
+  }
 </script>
 
 <div class="w-full">

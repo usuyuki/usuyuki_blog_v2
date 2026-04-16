@@ -1,5 +1,5 @@
 export type TOCType = {
-	id: string;
-	title: string;
-	heading: number;
+  id: string;
+  title: string;
+  heading: number;
 };

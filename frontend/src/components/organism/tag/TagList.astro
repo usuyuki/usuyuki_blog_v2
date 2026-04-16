@@ -2,20 +2,20 @@
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 
 interface Props {
-	ulClass?: string;
-	liClass?: string;
+  ulClass?: string;
+  liClass?: string;
 }
 const { ulClass = "", liClass = "" } = Astro.props;
 
 const tags = await ghostApiWithRetry.tags.browse(
-	{
-		limit: 100,
-		order: "count.posts DESC",
-		filter: "visibility:public",
-		include: "count.posts",
-	},
-	3,
-	Astro.request,
+  {
+    limit: 100,
+    order: "count.posts DESC",
+    filter: "visibility:public",
+    include: "count.posts",
+  },
+  3,
+  Astro.request,
 );
 ---
 
