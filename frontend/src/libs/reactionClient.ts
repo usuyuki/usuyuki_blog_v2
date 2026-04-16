@@ -49,7 +49,10 @@ export function validateEmoji(emoji: string): boolean {
 	return emojiRegex.test(emoji);
 }
 
-async function fetchGrouped(slug: string, client: PrismaClient): Promise<GroupedReaction[]> {
+async function fetchGrouped(
+	slug: string,
+	client: PrismaClient,
+): Promise<GroupedReaction[]> {
 	const cacheKey = `reactions:grouped:${slug}`;
 	const cached = cache.get<GroupedReaction[]>(cacheKey);
 	if (cached) return cached;

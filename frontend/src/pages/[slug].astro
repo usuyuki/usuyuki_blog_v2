@@ -116,7 +116,7 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		isWpArticle ? (
 			''
 		) : (
-			<div class="flex justify-center">
+			<div class="flex justify-center" id="toc-inline-wrapper">
 				<TOC tocList={tocList} />
 			</div>
 		)
@@ -124,4 +124,52 @@ const isWpArticle = judgeWpArticle(post.html || "");
 	{}
 	<article class="blog-content" set:html={post.html} />
 	{}
+	<!-- PC用スクロール追従サイドバー目次（xl以上で表示） -->
+	{
+		!isWpArticle && tocList.length > 0 && (
+			<div
+				id="toc-sidebar"
+				class="hidden xl:block fixed z-10 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
+				style="right: 2rem; width: calc((100vw - var(--article-max-width)) / 2 - 4rem)"
+			>
+				<TOC tocList={tocList} extraClass="ghost-toc-sidebar" />
+			</div>
+		)
+	}
+
+	<script>
+		const inlineToc = document.getElementById("toc-inline-wrapper");
+		const sidebarToc = document.getElementById("toc-sidebar");
+
+		if (inlineToc && sidebarToc) {
+			const showSidebar = () => {
+				sidebarToc.classList.remove("opacity-0", "pointer-events-none");
+				sidebarToc.classList.add("opacity-100");
+			};
+			const hideSidebar = () => {
+				sidebarToc.classList.remove("opacity-100");
+				sidebarToc.classList.add("opacity-0", "pointer-events-none");
+			};
+
+			const observer = new IntersectionObserver((entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						// インライン目次が画面内に見えている → サイドバーを隠す
+						hideSidebar();
+					} else {
+						// インライン目次が画面外へ
+						// top < 0 = スクロールで上に消えた → サイドバーを表示
+						// top > 0 = まだ画面下にある（未スクロール） → サイドバーを隠す
+						if (entry.boundingClientRect.top < 0) {
+							showSidebar();
+						} else {
+							hideSidebar();
+						}
+					}
+				}
+			});
+
+			observer.observe(inlineToc);
+		}
+	</script>
 </ArticleLayout>
