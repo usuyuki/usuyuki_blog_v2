@@ -19,6 +19,23 @@
 	let loaded = $state(false);
 	let bouncing = $state<string | null>(null);
 	let pickerContainer = $state<HTMLDivElement | null>(null);
+	let pickerWrapper = $state<HTMLDivElement | null>(null);
+	let pickerOpenLeft = $state(true);
+	let pickerCentered = $state(false);
+
+	function handleOpenPicker() {
+		showPicker = !showPicker;
+		if (!showPicker || !pickerWrapper) return;
+		// 画面幅が狭い場合は中央固定ポップアップ、広い場合はボタン基準の相対配置
+		if (window.innerWidth < 600) {
+			pickerCentered = true;
+		} else {
+			pickerCentered = false;
+			const rect = pickerWrapper.getBoundingClientRect();
+			const maxPickerWidth = Math.min(340, window.innerWidth - 32);
+			pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -61,6 +78,19 @@
 
 			container.appendChild(p);
 			picker = p;
+
+			// 1文字のCJK文字（漢字・かな）でも検索できるようにする
+			// emoji-picker-elementはMIN_SEARCH_TEXT_LENGTH=2のため1文字はフィルタされる
+			// inputイベントを監視し、1文字CJK入力時に内部的に2文字として扱う
+			p.addEventListener("input", () => {
+				const shadowInput = p.shadowRoot?.querySelector(".search");
+				if (!shadowInput) return;
+				const val = (shadowInput as HTMLInputElement).value;
+				if (val.length === 1 && /[\u3040-\u9fff\uf900-\ufaff]/.test(val)) {
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					(p as any)._cmp?.$set({ rawSearchText: val + val });
+				}
+			});
 		});
 
 		return () => {
@@ -141,20 +171,37 @@
 				</button>
 			{/each}
 
-			<div class="relative">
+			<div class="relative" bind:this={pickerWrapper}>
 				<button
 					class="flex items-center justify-center w-11 h-11 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
-					onclick={() => (showPicker = !showPicker)}
+					onclick={handleOpenPicker}
 					aria-label="絵文字を追加"
 				>
 					➕
 				</button>
 
 				{#if showPicker}
-					<div
-						class="absolute bottom-full mb-2 left-0 z-10"
-						bind:this={pickerContainer}
-					></div>
+					{#if pickerCentered}
+						<!-- 画面幅が狭い場合は中央固定ポップアップ -->
+						<div
+							class="fixed inset-0 z-20 flex items-center justify-center bg-black/20"
+							onclick={() => (showPicker = false)}
+							onkeydown={(e) => e.key === "Escape" && (showPicker = false)}
+							role="presentation"
+						>
+							<div
+								bind:this={pickerContainer}
+								onclick={(e) => e.stopPropagation()}
+							></div>
+						</div>
+					{:else}
+						<div
+							class="absolute bottom-full mb-2 z-10"
+							class:left-0={pickerOpenLeft}
+							class:right-0={!pickerOpenLeft}
+							bind:this={pickerContainer}
+						></div>
+					{/if}
 				{/if}
 			</div>
 		</div>
