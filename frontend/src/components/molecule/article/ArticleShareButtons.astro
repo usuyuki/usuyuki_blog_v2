@@ -1,15 +1,17 @@
 ---
+import {
+	buildTwitterShareUrl,
+	buildHatenaBookmarkUrl,
+} from "~/libs/helper/shareUrl";
+
 interface Props {
 	url: string;
 	title: string;
 }
 const { url, title } = Astro.props;
 
-const encodedShareText = encodeURIComponent(
-	`${title} | うすゆきブログ\n${url}\n#うすゆきブログ`,
-);
-const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedShareText}`;
-const hatenaUrl = `https://b.hatena.ne.jp/entry/s/${url.replace(/^https?:\/\//, "")}`;
+const twitterUrl = buildTwitterShareUrl(url, title);
+const hatenaUrl = buildHatenaBookmarkUrl(url);
 ---
 
 <div class="flex items-center my-6">
@@ -52,7 +54,7 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/s/${url.replace(/^https?:\/\//, 
 	</div>
 	<div class="flex-1 flex justify-end">
 		<button
-			id="back-to-top"
+			data-back-to-top
 			class="flex flex-col items-center gap-1 cursor-pointer"
 			aria-label="トップへ戻る"
 		>
@@ -67,7 +69,9 @@ const hatenaUrl = `https://b.hatena.ne.jp/entry/s/${url.replace(/^https?:\/\//, 
 </div>
 
 <script>
-	document.getElementById("back-to-top")?.addEventListener("click", () => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
-	});
+	document
+		.querySelector("[data-back-to-top]")
+		?.addEventListener("click", () => {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		});
 </script>
