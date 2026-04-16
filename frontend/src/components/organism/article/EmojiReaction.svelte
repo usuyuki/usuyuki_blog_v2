@@ -249,29 +249,29 @@
 					➕
 				</button>
 
-				{#if showPicker}
-					{#if pickerCentered}
-						<!-- 画面幅が狭い場合は中央固定ポップアップ -->
-						<div
-							class="fixed inset-0 z-20 flex items-center justify-center bg-black/20"
-							onclick={() => (showPicker = false)}
-							onkeydown={(e) => e.key === "Escape" && (showPicker = false)}
-							role="presentation"
-						>
-							<div
-								bind:this={pickerContainer}
-								onclick={(e) => e.stopPropagation()}
-							></div>
-						</div>
-					{:else}
-						<div
-							class="absolute bottom-full mb-2 z-10"
-							class:left-0={pickerOpenLeft}
-							class:right-0={!pickerOpenLeft}
-							bind:this={pickerContainer}
-						></div>
-					{/if}
+				{#if showPicker && pickerCentered}
+					<!-- 中央モード用オーバーレイ（タップで閉じる）。Pickerコンテナとは分離して軽量に保つ -->
+					<div
+						class="fixed inset-0 z-[19] bg-black/20"
+						onclick={() => (showPicker = false)}
+						onkeydown={(e) => e.key === "Escape" && (showPicker = false)}
+						role="presentation"
+					></div>
 				{/if}
+				<!-- ピッカーコンテナは常にDOMに保持し、表示切替はCSSで行う。
+				     {#if showPicker} で囲むと開くたびに Picker インスタンスが再生成され、
+				     絵文字データの再ロードが発生して表示が遅れる -->
+				<div
+					bind:this={pickerContainer}
+					class:hidden={!showPicker}
+					class:picker-centered={pickerCentered}
+					class:absolute={!pickerCentered}
+					class:bottom-full={!pickerCentered}
+					class:mb-2={!pickerCentered}
+					class:z-10={!pickerCentered}
+					class:left-0={!pickerCentered && pickerOpenLeft}
+					class:right-0={!pickerCentered && !pickerOpenLeft}
+				></div>
 			</div>
 		</div>
 	{:else}
@@ -294,6 +294,15 @@
 
 	.bounce {
 		animation: bounce 0.3s ease;
+	}
+
+	/* 画面幅が狭い場合はビューポート中央に固定表示 */
+	.picker-centered {
+		position: fixed;
+		left: 50%;
+		top: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 20;
 	}
 
 	:global(emoji-picker) {
