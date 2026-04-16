@@ -10,6 +10,12 @@ This is a blog application with two main components:
 - **Backend**: Ghost CMS (headless)
 - **Frontend**: Astro-based static site generator with server-side rendering
 
+> **IMPORTANT**: The frontend is built with **Astro**, NOT plain HTML/JS/React/Vue.
+> Astro has its own file format (`.astro`), its own routing conventions, and its own
+> build/SSR model. Do NOT suggest or write vanilla HTML, plain JS bundles, or
+> framework-specific patterns that don't apply to Astro. Always follow Astro idioms:
+> frontmatter script blocks, Astro components, content collections, and SSR endpoints.
+
 ## Architecture
 
 The project uses a Docker-based development and deployment setup:
