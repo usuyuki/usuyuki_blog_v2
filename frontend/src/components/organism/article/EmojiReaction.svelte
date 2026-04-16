@@ -201,13 +201,13 @@
 	{#if loaded}
 		{#if reactions.length > 0}
 			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
-			<!-- collapsed 時のみ overflow-hidden + max-h を付与し、通常時は制約なし。
-				 常時 overflow-hidden にすると scale(1.3) アニメーションがコンテナ端でクリップされる。
-				 py-1 は collapsed 時のアニメーション余白。max-h-28 = 2行(96px) + py-1(8px) + 余白 -->
+			<!-- 外側: collapsed 時のみ overflow-hidden + max-h で高さを制限するラッパー -->
+			<div class:overflow-hidden={collapsed} class:max-h-28={collapsed}>
+			<!-- 内側: アニメーション(scale 1.3)用に4辺 8px のバッファ確保。
+				 px-2/py-2 (8px) > scale(1.3) の視覚的はみ出し幅(~6.5px) なのでクリップされない。
+				 max-h-28(112px) = 2行(96px) + py-2(16px) で 2行をちょうど収める -->
 			<div
-				class="flex flex-wrap items-center gap-2 py-1"
-				class:overflow-hidden={collapsed}
-				class:max-h-28={collapsed}
+				class="flex flex-wrap items-center gap-2 py-2 px-2"
 				bind:this={reactionsContainer}
 			>
 				{#each reactions as reaction (reaction.emoji)}
@@ -226,6 +226,7 @@
 						<span class="font-numbers text-gray-600">{reaction.count}</span>
 					</button>
 				{/each}
+			</div>
 			</div>
 		{:else}
 			<p class="text-sm text-gray-400 py-1">絵文字で記事に反応できます</p>
