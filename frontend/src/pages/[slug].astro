@@ -9,6 +9,7 @@ import TagList from "~/components/atom/tag/TagList.astro";
 import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { addHeadingIds } from "~/libs/helper/addHeadingIds";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
@@ -59,8 +60,10 @@ const headMeta = {
 	ogImage: createProxyImageUrl(post.feature_image || ""),
 };
 
-const tocList: TOCType[] = generateTOC(post.html || "");
 const isWpArticle = judgeWpArticle(post.html || "");
+// WP記事は見出しにidがないため、テキストからidを生成して付与する
+const processedHtml = isWpArticle ? addHeadingIds(post.html || "") : (post.html || "");
+const tocList: TOCType[] = generateTOC(processedHtml);
 ---
 
 <ArticleLayout {...headMeta}>
@@ -122,11 +125,11 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		)
 	}
 	{}
-	<article class="blog-content" set:html={post.html} />
+	<article class="blog-content" set:html={processedHtml} />
 	{}
 	<!-- PC用スクロール追従サイドバー目次（xl以上で表示） -->
 	{
-		!isWpArticle && tocList.length > 0 && (
+		tocList.length > 0 && (
 			<div
 				id="toc-sidebar"
 				class="hidden xl:block fixed z-50 top-24 max-h-[calc(100vh-7rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
@@ -141,7 +144,7 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		const inlineToc = document.getElementById("toc-inline-wrapper");
 		const sidebarToc = document.getElementById("toc-sidebar");
 
-		if (inlineToc && sidebarToc) {
+		if (sidebarToc) {
 			const showSidebar = () => {
 				sidebarToc.classList.remove("opacity-0", "pointer-events-none");
 				sidebarToc.classList.add("opacity-100");
@@ -151,29 +154,33 @@ const isWpArticle = judgeWpArticle(post.html || "");
 				sidebarToc.classList.add("opacity-0", "pointer-events-none");
 			};
 
-			const tocObserver = new IntersectionObserver((entries) => {
-				for (const entry of entries) {
-					if (entry.isIntersecting) {
-						// インライン目次が画面内に見えている → サイドバーを隠す
-						hideSidebar();
-					} else {
-						// インライン目次が画面外へ
-						// top < 0 = スクロールで上に消えた → サイドバーを表示
-						// top > 0 = まだ画面下にある（未スクロール） → サイドバーを隠す
-						if (entry.boundingClientRect.top < 0) {
-							showSidebar();
-						} else {
+			// Ghost記事はインライン目次、WP記事は記事内toc_containerを基準点にする
+			const tocAnchor =
+				inlineToc ?? document.getElementById("toc_container");
+
+			if (tocAnchor) {
+				const tocObserver = new IntersectionObserver((entries) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
 							hideSidebar();
+						} else {
+							if (entry.boundingClientRect.top < 0) {
+								showSidebar();
+							} else {
+								hideSidebar();
+							}
 						}
 					}
-				}
-			});
+				});
+				tocObserver.observe(tocAnchor);
+			} else {
+				// 目次要素が一切ない場合は常時表示
+				showSidebar();
+			}
 
-			tocObserver.observe(inlineToc);
-
-			// 現在位置のハイライト
+			// 現在位置のハイライト（h1-h6のみ対象、spanなどは除外）
 			const articleHeadings = Array.from(
-				document.querySelectorAll("article.blog-content [id]"),
+				document.querySelectorAll("article.blog-content h1[id], article.blog-content h2[id], article.blog-content h3[id], article.blog-content h4[id], article.blog-content h5[id], article.blog-content h6[id]"),
 			);
 			const sidebarLinks = Array.from(
 				sidebarToc.querySelectorAll("a[href^='#']"),
