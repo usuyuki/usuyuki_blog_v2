@@ -97,6 +97,18 @@ describe("reactionClient", () => {
 			expect(validateEmoji("👨‍💻")).toBe(true);
 		});
 
+		it("accepts keycap number emoji", () => {
+			expect(validateEmoji("1️⃣")).toBe(true);
+			expect(validateEmoji("2️⃣")).toBe(true);
+			expect(validateEmoji("0️⃣")).toBe(true);
+			expect(validateEmoji("#️⃣")).toBe(true);
+		});
+
+		it("returns false for plain digits", () => {
+			expect(validateEmoji("1")).toBe(false);
+			expect(validateEmoji("9")).toBe(false);
+		});
+
 		describe("with REACTIONS_NSFW_BLOCKLIST env var", () => {
 			afterEach(() => {
 				delete process.env.REACTIONS_NSFW_BLOCKLIST;

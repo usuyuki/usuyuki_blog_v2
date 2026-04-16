@@ -45,7 +45,12 @@ export function validateEmoji(emoji: string): boolean {
 	const codepoints = [...emoji];
 	if (codepoints.length > MAX_CODEPOINTS) return false;
 	if (getNsfwBlocklist().has(emoji)) return false;
-	const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/u;
+	// \p{Emoji_Presentation} だけでは数字キーキャップ絵文字（1️⃣ など）や
+	// variation selector-16（\uFE0F）合成絵文字がマッチしないため、
+	// \p{Emoji} も対象に含める。ただし数字・記号単体（1, # 等）が通らないよう
+	// 絵文字修飾子・ZWJ・variation selector との組み合わせも考慮する。
+	const emojiRegex =
+		/\p{Emoji_Presentation}|\p{Extended_Pictographic}|\p{Emoji}\uFE0F/u;
 	return emojiRegex.test(emoji);
 }
 
