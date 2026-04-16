@@ -20,6 +20,9 @@ RUN pnpm build
 # Production stage
 FROM node:24-slim AS prod
 
+# Install OpenSSL for Prisma runtime
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user first
 RUN addgroup --gid 1001 --system nodejs \
     && adduser --system --uid 1001 astro
