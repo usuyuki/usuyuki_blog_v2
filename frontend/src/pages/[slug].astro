@@ -200,6 +200,20 @@ const isWpArticle = judgeWpArticle(post.html || "");
 
 			window.addEventListener("scroll", updateActive, { passive: true });
 			updateActive();
+
+			// サイドバーリンクをスムーズスクロールに
+			for (const link of sidebarLinks) {
+				link.addEventListener("click", (e) => {
+					e.preventDefault();
+					const href = link.getAttribute("href");
+					if (!href) return;
+					const id = href.slice(1);
+					const target =
+						document.getElementById(id) ||
+						document.getElementById(decodeURIComponent(id));
+					target?.scrollIntoView({ behavior: "smooth" });
+				});
+			}
 		}
 	</script>
 </ArticleLayout>
