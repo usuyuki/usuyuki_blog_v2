@@ -30,7 +30,7 @@
 
 	function handleOpenPicker() {
 		showPicker = !showPicker;
-		if (!showPicker || !pickerWrapper) return;
+		if (!showPicker || !pickerWrapper || !pickerContainer) return;
 		// 画面幅が狭い場合は中央固定ポップアップ、広い場合はボタン基準の相対配置
 		if (window.innerWidth < 600) {
 			pickerCentered = true;
@@ -39,8 +39,16 @@
 			const rect = pickerWrapper.getBoundingClientRect();
 			const maxPickerWidth = Math.min(340, window.innerWidth - 32);
 			pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
-			// ピッカーを上に開くと画面外に出る場合は下に開く（ピッカー高さ概算: 画面の半分）
-			pickerOpenDown = rect.top < window.innerHeight / 2;
+			// ピッカーの実際の高さを計測して上下どちらに開くか決める。
+			// visibility:hidden で一時的に表示して offsetHeight を取得することで、
+			// Svelte のリアクティブ更新を挟まずちらつきなく実寸を得られる。
+			// ピッカー未ロード時（height=0）は 450px をフォールバックとして使う。
+			pickerContainer.style.visibility = "hidden";
+			pickerContainer.classList.remove("hidden");
+			const pickerHeight = pickerContainer.offsetHeight || 450;
+			pickerContainer.classList.add("hidden");
+			pickerContainer.style.visibility = "";
+			pickerOpenDown = rect.top < pickerHeight;
 		}
 	}
 
