@@ -210,6 +210,25 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 			window.addEventListener("scroll", updateActive, { passive: true });
 			updateActive();
 
+			// Recent Articles エリアに入ったらフェードアウト、戻ったら復元
+			const articleEnd = document.getElementById("article-end");
+			if (articleEnd && tocAnchor) {
+				const endObserver = new IntersectionObserver((entries) => {
+					for (const entry of entries) {
+						if (entry.isIntersecting) {
+							hideSidebar();
+						} else {
+							// article-end が画面下に消えた（上スクロールで戻った）場合のみ復元
+							// top > 0 = 下方向にある = 上スクロールで戻ってきた
+							if (entry.boundingClientRect.top > 0 && tocAnchor.getBoundingClientRect().top < 0) {
+								showSidebar();
+							}
+						}
+					}
+				});
+				endObserver.observe(articleEnd);
+			}
+
 			// 目次リンクをスムーズスクロールに（インライン・サイドバー共通）
 			const smoothScrollTo = (href: string) => {
 				const id = href.slice(1);
