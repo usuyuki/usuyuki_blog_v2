@@ -12,7 +12,7 @@ export const addHeadingIds = (html: string): string => {
 			let slug = text
 				.toLowerCase()
 				.replace(/\s+/g, "-")
-				.replace(/[^\w\u3040-\u9fff\u30a0-\u30ff\u4e00-\u9fff-]/g, "")
+				.replace(/[^\w\u3040-\u9fff\u30a0-\u30ff-]/g, "")
 				.replace(/^-+|-+$/g, "");
 			if (!slug) slug = `heading-${level}`;
 
