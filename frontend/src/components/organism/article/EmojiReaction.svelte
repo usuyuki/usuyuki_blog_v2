@@ -22,6 +22,7 @@
 	let pickerContainer = $state<HTMLDivElement | null>(null);
 	let pickerWrapper = $state<HTMLDivElement | null>(null);
 	let pickerOpenLeft = $state(true);
+	let pickerOpenDown = $state(false);
 	let pickerCentered = $state(false);
 	let reactionsContainer = $state<HTMLDivElement | null>(null);
 	let collapsed = $state(true);
@@ -38,6 +39,8 @@
 			const rect = pickerWrapper.getBoundingClientRect();
 			const maxPickerWidth = Math.min(340, window.innerWidth - 32);
 			pickerOpenLeft = rect.left + maxPickerWidth <= window.innerWidth - 16;
+			// ピッカーを上に開くと画面外に出る場合は下に開く（概算高さ 450px）
+			pickerOpenDown = rect.top < 450;
 		}
 	}
 
@@ -275,8 +278,10 @@
 					class:hidden={!showPicker}
 					class:picker-centered={pickerCentered}
 					class:absolute={!pickerCentered}
-					class:bottom-full={!pickerCentered}
-					class:mb-2={!pickerCentered}
+					class:bottom-full={!pickerCentered && !pickerOpenDown}
+					class:top-full={!pickerCentered && pickerOpenDown}
+					class:mb-2={!pickerCentered && !pickerOpenDown}
+					class:mt-2={!pickerCentered && pickerOpenDown}
 					class:z-10={!pickerCentered}
 					class:left-0={!pickerCentered && pickerOpenLeft}
 					class:right-0={!pickerCentered && !pickerOpenLeft}
