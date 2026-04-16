@@ -40,9 +40,17 @@ services:
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       GHOST_FRONT_URL: ${GHOST_FRONT_URL}
       LOKI_URL: http://loki:3100
+      REACTIONS_DB_HOST: db
+      REACTIONS_DB_USER: root
+      REACTIONS_DB_PASSWORD: example
+      REACTIONS_DB_NAME: usuyuki_blog
+      REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
+      # MacのDocker DesktopはinotifyイベントがホストからVMに伝播しないためポーリングで代替
+      CHOKIDAR_USEPOLLING: "true"
     user: "1000:1000"
     depends_on:
       - loki
+      - db
     labels:
       - "logging=promtail"
     # デフォルトのlocalhostだとDockerがバインドしてくれなくてERR_EMPTY_RESPONSEになるので明示的に0.0.0.0を指定
@@ -51,6 +59,7 @@ services:
     image: mysql:8.4
     volumes:
       - db-store:/var/lib/mysql
+      - ./infra/db/reactions-init:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: example
 

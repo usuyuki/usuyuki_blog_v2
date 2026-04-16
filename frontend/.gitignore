@@ -24,3 +24,5 @@ pnpm-debug.log*
 
 .pnpm-store/
 playwright-report/
+
+public/emoji-data-ja.json

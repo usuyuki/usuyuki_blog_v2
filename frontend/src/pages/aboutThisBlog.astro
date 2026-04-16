@@ -43,4 +43,10 @@ const headMeta: HeadMetaType = {
 			本ブログでは、Googleによるアクセス解析ツール「GoogleAnalytics」を利用しています。このGoogleAnalyticsはトラフィックデータの収集のためにクッキー（Cookie）を使用しております。トラフィックデータは匿名で収集されており、個人を特定するものではありません。この機能はCookieを無効にすることで収集を拒否することが出来ますので、お使いのブラウザの設定をご確認ください。
 		</p>
 	</AboutThisBlogWrapper>
+	<AboutThisBlogWrapper title="絵文字リアクション">
+		<p>
+			本ブログでは、記事への絵文字リアクション機能を提供しています。初回アクセス時にサーバサイドで匿名のIDを生成し、<code>reaction_client_id</code>という名前のHttpOnly
+			Cookie（有効期限1年）として保存します。このCookieは同一ユーザによる重複リアクションを防ぐためにのみ使用され、個人を特定する情報は一切含みません。CookieはブラウザのCookie設定から削除できます。
+		</p>
+	</AboutThisBlogWrapper>
 </PageLayout>

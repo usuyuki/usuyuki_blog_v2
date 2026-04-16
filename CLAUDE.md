@@ -155,8 +155,7 @@ astroLogger.systemLog('System startup completed');
 
 ## Code Style Guidelines
 
-- IMPORTANT: DO NOT ADD ***ANY*** COMMENTS unless asked
-- Exception: When making changes to CLAUDE.md, add comments to explain the reason if the code change alone is unclear
+- Comments are allowed. Add them where they help clarify intent or non-obvious logic.
 
 ## Testing and Quality Assurance
 

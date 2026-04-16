@@ -6,6 +6,7 @@ import "~/styles/blog/blogCommon.css";
 import YMDMolecule from "~/components/atom/date/YMDMolecule.astro";
 import TOC from "~/components/atom/TOC.astro";
 import TagList from "~/components/atom/tag/TagList.astro";
+import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { generateTOC } from "~/libs/helper/generateTOC";
@@ -104,8 +105,11 @@ const isWpArticle = judgeWpArticle(post.html || "");
 		</div>
 		<div class="w-full md:w-1/5 hidden md:block pl-4"></div>
 	</div>
-	<div class="mb-8 mt-4 p-2 m-2">
+	<div class="mb-4 mt-4 p-2 m-2">
 		<TagList tags={post.tags?.map(tag => ({ name: tag.name || '', slug: tag.slug || '', visibility: tag.visibility || 'public' })) || []} />
+	</div>
+	<div class="px-4 mb-4 mx-auto" style="max-width: var(--article-max-width)">
+		<EmojiReaction slug={post.slug} client:load />
 	</div>
 	<!-- 基本的にWordPress記事では目次生成の正規表現でマッチしないが、WordPressから移行した記事を一度Ghostで保存すると目次生成が可能になってしまい、spanタグの付いたぶっ壊れ目次が生まれるので防ぐ -->
 	{
