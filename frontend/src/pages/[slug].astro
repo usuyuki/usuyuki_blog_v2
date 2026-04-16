@@ -153,7 +153,7 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 		class="hidden xl:block fixed z-50 top-20 opacity-0 pointer-events-none transition-opacity duration-300"
 		style="right: calc(50vw + var(--article-max-width, 800px) / 2 + 0.5rem); width: 14rem; background-color: var(--white)"
 	>
-		<EmojiReaction slug={post.slug} client:load />
+		<EmojiReaction slug={post.slug} scrollable={true} client:load />
 	</div>
 
 	<script src="../scripts/tocSidebar.ts"></script>

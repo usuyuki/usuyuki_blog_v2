@@ -3,6 +3,7 @@
 
 	interface Props {
 		slug: string;
+		scrollable?: boolean;
 	}
 
 	interface Reaction {
@@ -11,7 +12,7 @@
 		reacted: boolean;
 	}
 
-	let { slug }: Props = $props();
+	let { slug, scrollable = false }: Props = $props();
 
 	let reactions = $state<Reaction[]>([]);
 	let posting = $state<string | null>(null);
@@ -201,8 +202,15 @@
 	{#if loaded}
 		{#if reactions.length > 0}
 			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
-			<!-- 外側: collapsed 時のみ overflow-hidden + max-h で高さを制限するラッパー -->
-			<div class:overflow-hidden={collapsed} class:max-h-28={collapsed}>
+			<!-- collapsed 時は overflow-hidden で 2行分にクリップ。
+			     scrollable=true（PCサイドバー）かつ展開時のみ overflow-y-auto で 4行分を上限にスクロール。
+			     max-h-28(112px) = 2行(96px) + py-2(16px)、max-h-52(208px) ≈ 4行分 -->
+			<div
+				class:overflow-hidden={collapsed || !scrollable}
+				class:max-h-28={collapsed}
+				class:overflow-y-auto={!collapsed && scrollable}
+				class:max-h-52={!collapsed && scrollable}
+			>
 			<!-- 内側: アニメーション(scale 1.3)用に4辺 8px のバッファ確保。
 				 px-2/py-2 (8px) > scale(1.3) の視覚的はみ出し幅(~6.5px) なのでクリップされない。
 				 max-h-28(112px) = 2行(96px) + py-2(16px) で 2行をちょうど収める -->
@@ -229,7 +237,7 @@
 			</div>
 			</div>
 		{:else}
-			<p class="text-sm text-gray-400 py-1">絵文字で記事に反応できます</p>
+			<p class="text-sm text-gray-400 py-1 text-center">絵文字で記事に反応できます</p>
 		{/if}
 
 		<div class="flex items-center gap-2 mt-2">

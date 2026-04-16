@@ -67,7 +67,9 @@ document.addEventListener("astro:page-load", () => {
 		showAll();
 	}
 
-	// Recent Articles エリアに入ったらフェードアウト、戻ったら復元
+	// Recent Articles が画面の半分を占めたらフェードアウト、戻ったら復元
+	// rootMargin "0px 0px -50% 0px" により検出領域を画面上半分に限定する。
+	// article-end が上半分に入った = Recent Articles が下半分以上を占めている状態。
 	const articleEnd = document.getElementById("article-end");
 	if (articleEnd && tocAnchor) {
 		const endObserver = new IntersectionObserver((entries) => {
@@ -75,8 +77,7 @@ document.addEventListener("astro:page-load", () => {
 				if (entry.isIntersecting) {
 					hideAll();
 				} else {
-					// article-end が画面下に消えた（上スクロールで戻った）場合のみ復元
-					// top > 0 = 下方向にある = 上スクロールで戻ってきた
+					// article-end が上半分から外れた（画面下方向に戻った）場合のみ復元
 					if (
 						entry.boundingClientRect.top > 0 &&
 						tocAnchor.getBoundingClientRect().top < 0
@@ -85,7 +86,7 @@ document.addEventListener("astro:page-load", () => {
 					}
 				}
 			}
-		});
+		}, { rootMargin: "0px 0px -50% 0px" });
 		endObserver.observe(articleEnd);
 		observers.push(endObserver);
 	}
