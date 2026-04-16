@@ -1,0 +1,77 @@
+---
+import {
+	buildTwitterShareUrl,
+	buildHatenaBookmarkUrl,
+} from "~/libs/helper/shareUrl";
+
+interface Props {
+	url: string;
+	title: string;
+}
+const { url, title } = Astro.props;
+
+const twitterUrl = buildTwitterShareUrl(url, title);
+const hatenaUrl = buildHatenaBookmarkUrl(url);
+---
+
+<div class="flex items-center my-6">
+	<div class="flex-1"></div>
+	<div class="flex items-center gap-8">
+		<!-- 公式はてなブックマークボタン（ブックマーク数付き） -->
+		<a
+			href={hatenaUrl}
+			class="hatena-bookmark-button"
+			data-hatena-bookmark-layout="basic-label-counter"
+			data-hatena-bookmark-lang="ja"
+			title="このエントリーをはてなブックマークに追加"
+			target="_blank"
+			rel="noopener noreferrer"
+		>
+			<img
+				src="https://b.st-hatena.com/images/v4/public/entry-button/button-only@2x.png"
+				alt="このエントリーをはてなブックマークに追加"
+				width="20"
+				height="20"
+				style="border: none;"
+			/>
+		</a>
+		<script src="https://b.st-hatena.com/js/bookmark_button.js" async></script>
+		<a
+			href={twitterUrl}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="flex items-center gap-2 rounded-xl bg-black px-4 py-2 text-white hover:opacity-80 duration-300"
+		>
+			<img
+				src="/images/icon/x-logo.svg"
+				alt="X"
+				width="20"
+				height="20"
+				class="w-5 h-5 invert"
+			/>
+			<span>X でシェア</span>
+		</a>
+	</div>
+	<div class="flex-1 flex justify-end">
+		<button
+			data-back-to-top
+			class="flex flex-col items-center gap-1 cursor-pointer"
+			aria-label="トップへ戻る"
+		>
+			<span class="flex items-center justify-center rounded-full bg-green w-10 h-10 text-white hover:bg-blue duration-300">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+					<path fill-rule="evenodd" d="M11.47 2.47a.75.75 0 0 1 1.06 0l7.5 7.5a.75.75 0 1 1-1.06 1.06l-6.22-6.22V21a.75.75 0 0 1-1.5 0V4.81l-6.22 6.22a.75.75 0 1 1-1.06-1.06l7.5-7.5Z" clip-rule="evenodd" />
+				</svg>
+			</span>
+			<span class="text-xs">トップに戻る</span>
+		</button>
+	</div>
+</div>
+
+<script>
+	document
+		.querySelector("[data-back-to-top]")
+		?.addEventListener("click", () => {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		});
+</script>

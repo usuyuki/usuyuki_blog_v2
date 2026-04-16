@@ -7,6 +7,7 @@ import YMDMolecule from "~/components/atom/date/YMDMolecule.astro";
 import TOC from "~/components/atom/TOC.astro";
 import TagList from "~/components/atom/tag/TagList.astro";
 import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
+import ArticleShareButtons from "~/components/molecule/article/ArticleShareButtons.astro";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { addHeadingIds } from "~/libs/helper/addHeadingIds";
@@ -128,6 +129,9 @@ const tocList: TOCType[] = generateTOC(processedHtml);
 	}
 	{}
 	<article class="blog-content" set:html={processedHtml} />
+	<div class="px-4 mx-auto" style="max-width: var(--article-max-width)">
+		<ArticleShareButtons url={Astro.url.href} title={post.title || ""} />
+	</div>
 	{}
 	<!-- PC用スクロール追従サイドバー目次（xl以上で表示） -->
 	{
