@@ -105,9 +105,20 @@ document.addEventListener("astro:page-load", () => {
 			{ rootMargin: "-80px 0px 0px 0px", threshold: 0 },
 		);
 
+		// Observer登録前に現在のスクロール位置から初期位置を設定する
+		// これにより、ページ途中にアクセスした場合でも即座にハイライトが反映される
 		for (const heading of articleHeadings) {
+			const rect = heading.getBoundingClientRect();
+			if (rect.top < 0) {
+				headingPositions.set(heading, "above");
+			} else if (rect.top < window.innerHeight) {
+				headingPositions.set(heading, "in-view");
+			} else {
+				headingPositions.set(heading, "below");
+			}
 			headingObserver.observe(heading);
 		}
+		updateActiveFromPositions();
 		observers.push(headingObserver);
 
 		// Recent Articles エリアに入ったらフェードアウト、戻ったら復元
