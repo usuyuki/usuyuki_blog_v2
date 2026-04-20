@@ -50,38 +50,42 @@ const ranked = slugReactions
 		) : (
 			<ol class="space-y-4">
 				{ranked.map((item, index) => (
-					<li class="flex items-center gap-4 bg-white rounded-xl shadow p-4 hover:shadow-md transition-shadow duration-200">
-						<span class="text-2xl font-bold text-gray-300 w-8 text-center shrink-0">
-							{index + 1}
-						</span>
-						<a href={`/${item.slug}`} class="flex items-center gap-4 flex-1 min-w-0">
-							{(() => {
-								const date = item.post?.published_at ? iso8601TimeToDate(item.post.published_at as string) : null;
-								return (
-									<div class="flex justify-center items-center flex-col shrink-0">
-										{date && (
-											<CircleYMD year={date.year} month={date.month} day={date.day} slug={item.slug} />
-										)}
-										<div>
-											{item.post?.feature_image ? (
-												<Image
-													src={optimizeGhostImageUrl(item.post.feature_image, { width: 480, height: 480 })}
-													width={480}
-													height={480}
-													format="webp"
-													quality={80}
-													class="object-cover w-40 h-40 rounded-md"
-													alt="記事サムネイル"
-												/>
-											) : (
-												<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+					<li class="bg-white rounded-xl shadow p-4 hover:shadow-md transition-shadow duration-200">
+						<a href={`/${item.slug}`} class="flex flex-col sm:flex-row sm:items-center gap-4">
+							<!-- 順位 + 記事画像 -->
+							<div class="flex items-center gap-4 sm:gap-0">
+								<span class="text-2xl font-bold text-gray-300 w-8 text-center shrink-0">
+									{index + 1}
+								</span>
+								{(() => {
+									const date = item.post?.published_at ? iso8601TimeToDate(item.post.published_at as string) : null;
+									return (
+										<div class="flex justify-center items-center flex-col shrink-0 sm:ml-4">
+											{date && (
+												<CircleYMD year={date.year} month={date.month} day={date.day} slug={item.slug} />
 											)}
+											<div>
+												{item.post?.feature_image ? (
+													<Image
+														src={optimizeGhostImageUrl(item.post.feature_image, { width: 480, height: 480 })}
+														width={480}
+														height={480}
+														format="webp"
+														quality={80}
+														class="object-cover w-40 h-40 rounded-md"
+														alt="記事サムネイル"
+													/>
+												) : (
+													<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+												)}
+											</div>
 										</div>
-									</div>
-								);
-							})()}
+									);
+								})()}
+							</div>
+							<!-- タイトル + 絵文字 -->
 							<div class="flex-1 min-w-0">
-								<p class="font-semibold text-black truncate">{item.post?.title}</p>
+								<p class="font-semibold text-black">{item.post?.title}</p>
 								<div class="flex flex-wrap gap-1 mt-1">
 									{item.reactions.map((r) => (
 										<span class="text-sm bg-gray-100 rounded-full px-2 py-0.5">
@@ -90,11 +94,12 @@ const ranked = slugReactions
 									))}
 								</div>
 							</div>
+							<!-- 合計数 -->
+							<div class="flex flex-col items-center shrink-0">
+								<span class="text-lg font-bold text-blue-500">{item.total}</span>
+								<span class="text-xs text-gray-400">reactions</span>
+							</div>
 						</a>
-						<div class="flex flex-col items-center shrink-0">
-							<span class="text-lg font-bold text-blue-500">{item.total}</span>
-							<span class="text-xs text-gray-400">reactions</span>
-						</div>
 					</li>
 				))}
 			</ol>
