@@ -1,0 +1,103 @@
+---
+import { Image } from "astro:assets";
+import CircleYMD from "~/components/atom/date/CircleYMD.astro";
+import { SITE_URL } from "~/consts";
+import PageLayout from "~/layouts/extends/PageLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
+import { getAllSlugReactions } from "~/libs/reactionClient";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
+const headMeta: HeadMetaType = {
+	title: "リアクションランキング",
+	slug: "/reactions",
+	description: "リアクション数の多い記事のランキングです。",
+	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+};
+
+const slugReactions = await getAllSlugReactions();
+
+// Ghost から記事情報をまとめて取得
+const slugs = slugReactions.map((r) => r.slug);
+const posts =
+	slugs.length > 0
+		? ((await ghostApiWithRetry.posts.browse(
+				{
+					filter: `slug:[${slugs.join(",")}]`,
+					fields: "slug,title,feature_image,published_at",
+					limit: slugs.length,
+				},
+				3,
+				Astro.request,
+			)) ?? [])
+		: [];
+
+const postMap = new Map(posts.map((p) => [p.slug, p]));
+
+const ranked = slugReactions
+	.map((sr) => ({ ...sr, post: postMap.get(sr.slug) ?? null }))
+	.filter((sr) => sr.post !== null);
+---
+
+<PageLayout {...headMeta}>
+	<div class="container mx-auto px-4 py-8 max-w-3xl">
+		<h1 class="text-3xl font-bold text-center mb-2">リアクションランキング</h1>
+		<p class="text-center text-gray-500 mb-8">リアクション数が多い順に並んでいます</p>
+
+		{ranked.length === 0 ? (
+			<p class="text-center text-gray-400 mt-16">まだリアクションがありません</p>
+		) : (
+			<ol class="space-y-4">
+				{ranked.map((item, index) => (
+					<li class="flex items-center gap-4 bg-white rounded-xl shadow p-4 hover:shadow-md transition-shadow duration-200">
+						<span class="text-2xl font-bold text-gray-300 w-8 text-center shrink-0">
+							{index + 1}
+						</span>
+						<a href={`/${item.slug}`} class="flex items-center gap-4 flex-1 min-w-0">
+							{(() => {
+								const date = item.post?.published_at ? iso8601TimeToDate(item.post.published_at as string) : null;
+								return (
+									<div class="flex justify-center items-center flex-col shrink-0">
+										{date && (
+											<CircleYMD year={date.year} month={date.month} day={date.day} slug={item.slug} />
+										)}
+										<div>
+											{item.post?.feature_image ? (
+												<Image
+													src={optimizeGhostImageUrl(item.post.feature_image, { width: 480, height: 480 })}
+													width={480}
+													height={480}
+													format="webp"
+													quality={80}
+													class="object-cover w-40 h-40 rounded-md"
+													alt="記事サムネイル"
+												/>
+											) : (
+												<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+											)}
+										</div>
+									</div>
+								);
+							})()}
+							<div class="flex-1 min-w-0">
+								<p class="font-semibold text-black truncate">{item.post?.title}</p>
+								<div class="flex flex-wrap gap-1 mt-1">
+									{item.reactions.map((r) => (
+										<span class="text-sm bg-gray-100 rounded-full px-2 py-0.5">
+											{r.emoji} <span class="text-gray-500">{r.count}</span>
+										</span>
+									))}
+								</div>
+							</div>
+						</a>
+						<div class="flex flex-col items-center shrink-0">
+							<span class="text-lg font-bold text-blue-500">{item.total}</span>
+							<span class="text-xs text-gray-400">reactions</span>
+						</div>
+					</li>
+				))}
+			</ol>
+		)}
+	</div>
+</PageLayout>

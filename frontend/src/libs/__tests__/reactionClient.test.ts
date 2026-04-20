@@ -77,10 +77,10 @@ describe("reactionClient", () => {
       expect(validateEmoji("")).toBe(false);
     });
 
-    it("returns false for default NSFW blocklisted emoji", () => {
-      expect(validateEmoji("🍆")).toBe(false);
-      expect(validateEmoji("🍑")).toBe(false);
-      expect(validateEmoji("🖕")).toBe(false);
+    it("returns true for NSFW emoji when no blocklist is configured", () => {
+      expect(validateEmoji("🍆")).toBe(true);
+      expect(validateEmoji("🍑")).toBe(true);
+      expect(validateEmoji("🖕")).toBe(true);
     });
 
     it("returns false when codepoint count exceeds 8", () => {
@@ -122,7 +122,7 @@ describe("reactionClient", () => {
         expect(fn("🔥")).toBe(false);
       });
 
-      it("allows default NSFW emoji when env var overrides the list", async () => {
+      it("allows emoji not in the env var blocklist", async () => {
         process.env.REACTIONS_NSFW_BLOCKLIST = "🚀";
         vi.resetModules();
         const { validateEmoji: fn } = await import("../reactionClient");
@@ -177,6 +177,7 @@ describe("getReactions", () => {
   });
 
   it("filters out NSFW emoji from results", async () => {
+    process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
     mockEmojiReaction.groupBy.mockResolvedValue([
       { emoji: "👍", _count: { emoji: 1 }, _min: { createdAt: new Date() } },
       { emoji: "🍆", _count: { emoji: 5 }, _min: { createdAt: new Date() } },
@@ -186,6 +187,7 @@ describe("getReactions", () => {
     const result = await getReactions("my-slug", "client-xyz");
     expect(result).toHaveLength(1);
     expect((result as Array<{ emoji: string }>)[0].emoji).toBe("👍");
+    delete process.env.REACTIONS_NSFW_BLOCKLIST;
   });
 });
 
