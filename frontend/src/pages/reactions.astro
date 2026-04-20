@@ -8,59 +8,76 @@ import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import { getAllSlugReactions } from "~/libs/reactionClient";
 import type { HeadMetaType } from "~/types/HeadMetaType";
+import type { ArticleArchiveType, DateType } from "~/types/ArticleArchiveType";
+import astroLogger from "~/libs/astroLogger";
 
 const headMeta: HeadMetaType = {
-  title: "リアクションランキング",
+  title: "リアクションが多い記事",
   slug: "/reactions",
   description: "リアクション数の多い記事のランキングです。",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 
-const slugReactions = await getAllSlugReactions();
+let ranked: {
+  slug: string;
+  total: number;
+  reactions: { emoji: string; count: number }[];
+  post: ArticleArchiveType | null;
+  date: DateType | null;
+}[] = [];
 
-// Ghost から記事情報をまとめて取得
-const slugs = slugReactions.map((r) => r.slug);
-const posts =
-  slugs.length > 0
-    ? ((await ghostApiWithRetry.posts.browse(
-        {
-          filter: `slug:[${slugs.join(",")}]`,
-          fields: "slug,title,feature_image,published_at",
-          limit: slugs.length,
-        },
-        3,
-        Astro.request,
-      )) ?? [])
-    : [];
+try {
+  const slugReactions = await getAllSlugReactions();
 
-const postMap = new Map(posts.map((p) => [p.slug, p]));
+  // Ghost から記事情報をまとめて取得
+  const slugs = slugReactions.map((r) => r.slug);
+  const posts =
+    slugs.length > 0
+      ? ((await ghostApiWithRetry.posts.browse(
+          {
+            filter: `slug:[${slugs.join(",")}]`,
+            fields: "slug,title,feature_image,published_at",
+            limit: slugs.length,
+          },
+          3,
+          Astro.request,
+        )) ?? [])
+      : [];
 
-const ranked = slugReactions
-  .map((sr) => {
-    const post = postMap.get(sr.slug) ?? null;
-    const date = post?.published_at
-      ? iso8601TimeToDate(post.published_at as string)
-      : null;
-    return { ...sr, post, date };
-  })
-  .filter((sr) => sr.post !== null);
+  const postMap = new Map(posts.map((p) => [p.slug, p]));
+
+  ranked = slugReactions
+    .map((sr) => {
+      const post = postMap.get(sr.slug) ?? null;
+      const date = post?.published_at
+        ? iso8601TimeToDate(post.published_at as string)
+        : null;
+      return { ...sr, post, date };
+    })
+    .filter((sr) => sr.post !== null);
+} catch (e) {
+  astroLogger.componentError(
+    "reactions",
+    e instanceof Error ? e : new Error(String(e)),
+  );
+}
 ---
 
 <PageLayout {...headMeta}>
 	<div class="container mx-auto px-4 py-8 max-w-3xl">
-		<h1 class="text-3xl font-bold text-center mb-2">リアクションランキング</h1>
+		<h1 class="text-3xl font-bold text-center mb-2">リアクションが多い記事<span class="text-base font-normal text-gray-400 ml-2">(ちょっとラグあり)</span></h1>
 		<p class="text-center text-gray-500 mb-8">リアクション数が多い順に並んでいます</p>
 
 		{ranked.length === 0 ? (
 			<p class="text-center text-gray-400 mt-16">まだリアクションがありません</p>
 		) : (
-			<ol class="space-y-4">
+			<ol class="space-y-8">
 				{ranked.map((item, index) => (
 					<li class="bg-white rounded-xl shadow p-4 hover:shadow-md transition-shadow duration-200">
 						<a href={`/${item.slug}`} class="flex flex-col sm:flex-row sm:items-center gap-4">
 							<!-- 順位 + 記事画像 -->
-							<div class="flex items-center gap-4 sm:gap-0">
-								<span class="text-2xl font-bold text-gray-300 w-8 text-center shrink-0">
+							<div class="flex flex-col items-center sm:flex-row sm:items-center gap-2 sm:gap-0">
+								<span class="text-2xl font-bold w-8 text-center shrink-0" style="color: var(--blue)">
 									{index + 1}
 								</span>
 								<div class="flex justify-center items-center flex-col shrink-0 sm:ml-4">
@@ -85,9 +102,9 @@ const ranked = slugReactions
 								</div>
 							</div>
 							<!-- タイトル + 絵文字 -->
-							<div class="flex-1 min-w-0">
+							<div class="flex-1 min-w-0 text-center sm:text-left">
 								<p class="font-semibold text-black">{item.post?.title}</p>
-								<div class="flex flex-wrap gap-1 mt-1">
+								<div class="flex flex-wrap justify-center sm:justify-start gap-1 mt-1">
 									{item.reactions.map((r) => (
 										<span class="text-sm bg-gray-100 rounded-full px-2 py-0.5">
 											{r.emoji} <span class="text-gray-500">{r.count}</span>

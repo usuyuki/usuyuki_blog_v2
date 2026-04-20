@@ -126,6 +126,8 @@ export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
     _count: { emoji: true },
     _min: { createdAt: true },
     orderBy: [{ slug: "asc" }, { _min: { createdAt: "asc" } }],
+    // スラグ上限×絵文字種類数の上限でDBスキャン量を抑える
+    take: REACTIONS_RANKING_LIMIT * 20,
   });
 
   const slugMap = new Map<string, { emoji: string; count: number }[]>();
