@@ -104,37 +104,39 @@ export async function getReactions(
 }
 
 export interface SlugReactionSummary {
-	slug: string;
-	total: number;
-	reactions: { emoji: string; count: number }[];
+  slug: string;
+  total: number;
+  reactions: { emoji: string; count: number }[];
 }
 
+const REACTIONS_RANKING_LIMIT = 50;
+
 export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
-	const client = getClient();
-	const blocklist = getNsfwBlocklist();
+  const client = getClient();
+  const blocklist = getNsfwBlocklist();
 
-	const grouped = await client.emojiReaction.groupBy({
-		by: ["slug", "emoji"],
-		_count: { emoji: true },
-		_min: { createdAt: true },
-		orderBy: [{ slug: "asc" }, { _min: { createdAt: "asc" } }],
-	});
+  const grouped = await client.emojiReaction.groupBy({
+    by: ["slug", "emoji"],
+    _count: { emoji: true },
+    _min: { createdAt: true },
+    orderBy: [{ slug: "asc" }, { _min: { createdAt: "asc" } }],
+  });
 
-	const slugMap = new Map<string, { emoji: string; count: number }[]>();
-	for (const row of grouped) {
-		if (blocklist.has(row.emoji)) continue;
-		if (!slugMap.has(row.slug)) slugMap.set(row.slug, []);
-		slugMap.get(row.slug)?.push({ emoji: row.emoji, count: row._count.emoji });
-	}
+  const slugMap = new Map<string, { emoji: string; count: number }[]>();
+  for (const row of grouped) {
+    if (blocklist.has(row.emoji)) continue;
+    if (!slugMap.has(row.slug)) slugMap.set(row.slug, []);
+    slugMap.get(row.slug)?.push({ emoji: row.emoji, count: row._count.emoji });
+  }
 
-	const result: SlugReactionSummary[] = [];
-	for (const [slug, reactions] of slugMap) {
-		const total = reactions.reduce((sum, r) => sum + r.count, 0);
-		result.push({ slug, total, reactions });
-	}
+  const result: SlugReactionSummary[] = [];
+  for (const [slug, reactions] of slugMap) {
+    const total = reactions.reduce((sum, r) => sum + r.count, 0);
+    result.push({ slug, total, reactions });
+  }
 
-	result.sort((a, b) => b.total - a.total);
-	return result;
+  result.sort((a, b) => b.total - a.total);
+  return result.slice(0, REACTIONS_RANKING_LIMIT);
 }
 
 export async function toggleReaction(

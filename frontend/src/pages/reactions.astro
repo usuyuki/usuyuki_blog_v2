@@ -10,10 +10,10 @@ import { getAllSlugReactions } from "~/libs/reactionClient";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
 const headMeta: HeadMetaType = {
-	title: "リアクションランキング",
-	slug: "/reactions",
-	description: "リアクション数の多い記事のランキングです。",
-	ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  title: "リアクションランキング",
+  slug: "/reactions",
+  description: "リアクション数の多い記事のランキングです。",
+  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
 
 const slugReactions = await getAllSlugReactions();
@@ -21,23 +21,29 @@ const slugReactions = await getAllSlugReactions();
 // Ghost から記事情報をまとめて取得
 const slugs = slugReactions.map((r) => r.slug);
 const posts =
-	slugs.length > 0
-		? ((await ghostApiWithRetry.posts.browse(
-				{
-					filter: `slug:[${slugs.join(",")}]`,
-					fields: "slug,title,feature_image,published_at",
-					limit: slugs.length,
-				},
-				3,
-				Astro.request,
-			)) ?? [])
-		: [];
+  slugs.length > 0
+    ? ((await ghostApiWithRetry.posts.browse(
+        {
+          filter: `slug:[${slugs.join(",")}]`,
+          fields: "slug,title,feature_image,published_at",
+          limit: slugs.length,
+        },
+        3,
+        Astro.request,
+      )) ?? [])
+    : [];
 
 const postMap = new Map(posts.map((p) => [p.slug, p]));
 
 const ranked = slugReactions
-	.map((sr) => ({ ...sr, post: postMap.get(sr.slug) ?? null }))
-	.filter((sr) => sr.post !== null);
+  .map((sr) => {
+    const post = postMap.get(sr.slug) ?? null;
+    const date = post?.published_at
+      ? iso8601TimeToDate(post.published_at as string)
+      : null;
+    return { ...sr, post, date };
+  })
+  .filter((sr) => sr.post !== null);
 ---
 
 <PageLayout {...headMeta}>
@@ -57,31 +63,26 @@ const ranked = slugReactions
 								<span class="text-2xl font-bold text-gray-300 w-8 text-center shrink-0">
 									{index + 1}
 								</span>
-								{(() => {
-									const date = item.post?.published_at ? iso8601TimeToDate(item.post.published_at as string) : null;
-									return (
-										<div class="flex justify-center items-center flex-col shrink-0 sm:ml-4">
-											{date && (
-												<CircleYMD year={date.year} month={date.month} day={date.day} slug={item.slug} />
-											)}
-											<div>
-												{item.post?.feature_image ? (
-													<Image
-														src={optimizeGhostImageUrl(item.post.feature_image, { width: 480, height: 480 })}
-														width={480}
-														height={480}
-														format="webp"
-														quality={80}
-														class="object-cover w-40 h-40 rounded-md"
-														alt="記事サムネイル"
-													/>
-												) : (
-													<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
-												)}
-											</div>
-										</div>
-									);
-								})()}
+								<div class="flex justify-center items-center flex-col shrink-0 sm:ml-4">
+									{item.date && (
+										<CircleYMD year={item.date.year} month={item.date.month} day={item.date.day} slug={item.slug} />
+									)}
+									<div>
+										{item.post?.feature_image ? (
+											<Image
+												src={optimizeGhostImageUrl(item.post.feature_image, { width: 480, height: 480 })}
+												width={480}
+												height={480}
+												format="webp"
+												quality={80}
+												class="object-cover w-40 h-40 rounded-md"
+												alt="記事サムネイル"
+											/>
+										) : (
+											<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
+										)}
+									</div>
+								</div>
 							</div>
 							<!-- タイトル + 絵文字 -->
 							<div class="flex-1 min-w-0">

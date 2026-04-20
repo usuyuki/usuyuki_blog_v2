@@ -191,6 +191,144 @@ describe("getReactions", () => {
   });
 });
 
+describe("getAllSlugReactions", () => {
+  let getAllSlugReactions: () => Promise<unknown>;
+  let savedNsfwList: string | undefined;
+
+  beforeAll(async () => {
+    vi.resetModules();
+    const mod = await import("../reactionClient");
+    getAllSlugReactions = mod.getAllSlugReactions;
+  });
+
+  beforeEach(() => {
+    savedNsfwList = process.env.REACTIONS_NSFW_BLOCKLIST;
+    delete process.env.REACTIONS_NSFW_BLOCKLIST;
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    if (savedNsfwList !== undefined) {
+      process.env.REACTIONS_NSFW_BLOCKLIST = savedNsfwList;
+    } else {
+      delete process.env.REACTIONS_NSFW_BLOCKLIST;
+    }
+  });
+
+  it("returns slugs sorted by total reaction count descending", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 2 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-b",
+        emoji: "❤️",
+        _count: { emoji: 10 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🎉",
+        _count: { emoji: 1 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed[0].slug).toBe("post-b");
+    expect(typed[0].total).toBe(10);
+    expect(typed[1].slug).toBe("post-a");
+    expect(typed[1].total).toBe(3);
+  });
+
+  it("aggregates multiple emoji per slug correctly", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 5 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🎉",
+        _count: { emoji: 3 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed).toHaveLength(1);
+    expect(typed[0].total).toBe(8);
+    expect(typed[0].reactions).toEqual(
+      expect.arrayContaining([
+        { emoji: "👍", count: 5 },
+        { emoji: "🎉", count: 3 },
+      ]),
+    );
+  });
+
+  it("filters out blocklisted emoji", async () => {
+    process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 3 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🍆",
+        _count: { emoji: 99 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed[0].total).toBe(3);
+    expect(typed[0].reactions.every((r) => r.emoji !== "🍆")).toBe(true);
+  });
+
+  it("returns empty array when there are no reactions", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([]);
+
+    const result = await getAllSlugReactions();
+    expect(result).toEqual([]);
+  });
+
+  it("limits results to 50 entries", async () => {
+    const rows = Array.from({ length: 60 }, (_, i) => ({
+      slug: `post-${i}`,
+      emoji: "👍",
+      _count: { emoji: 60 - i },
+      _min: { createdAt: new Date() },
+    }));
+    mockEmojiReaction.groupBy.mockResolvedValue(rows);
+
+    const result = await getAllSlugReactions();
+    expect((result as unknown[]).length).toBe(50);
+  });
+});
+
 describe("toggleReaction", () => {
   let toggleReaction: (
     slug: string,
