@@ -327,6 +327,41 @@ describe("getAllSlugReactions", () => {
     const result = await getAllSlugReactions();
     expect((result as unknown[]).length).toBe(50);
   });
+
+  it("returns cached result without hitting DB", async () => {
+    const { cache: mockCache } = await import("../cache");
+    const cachedData = [
+      {
+        slug: "cached-post",
+        total: 99,
+        reactions: [{ emoji: "🔥", count: 99 }],
+      },
+    ];
+    vi.mocked(mockCache.get).mockReturnValueOnce(cachedData);
+
+    const result = await getAllSlugReactions();
+    expect(result).toEqual(cachedData);
+    expect(mockEmojiReaction.groupBy).not.toHaveBeenCalled();
+  });
+
+  it("stores result in cache after DB query", async () => {
+    const { cache: mockCache } = await import("../cache");
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 5 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    await getAllSlugReactions();
+    expect(mockCache.set).toHaveBeenCalledWith(
+      "reactions:all-slugs-ranking",
+      expect.any(Array),
+      5 * 60_000,
+    );
+  });
 });
 
 describe("toggleReaction", () => {

@@ -110,8 +110,14 @@ export interface SlugReactionSummary {
 }
 
 const REACTIONS_RANKING_LIMIT = 50;
+// ランキングはtoggle時に個別スラグキャッシュを破棄できないため、短めのTTLで整合を保つ。
+const REACTIONS_RANKING_CACHE_TTL_MS = 5 * 60_000; // 5分
+const REACTIONS_RANKING_CACHE_KEY = "reactions:all-slugs-ranking";
 
 export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
+  const cached = cache.get<SlugReactionSummary[]>(REACTIONS_RANKING_CACHE_KEY);
+  if (cached) return cached;
+
   const client = getClient();
   const blocklist = getNsfwBlocklist();
 
@@ -136,7 +142,13 @@ export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
   }
 
   result.sort((a, b) => b.total - a.total);
-  return result.slice(0, REACTIONS_RANKING_LIMIT);
+  const ranking = result.slice(0, REACTIONS_RANKING_LIMIT);
+  cache.set(
+    REACTIONS_RANKING_CACHE_KEY,
+    ranking,
+    REACTIONS_RANKING_CACHE_TTL_MS,
+  );
+  return ranking;
 }
 
 export async function toggleReaction(
