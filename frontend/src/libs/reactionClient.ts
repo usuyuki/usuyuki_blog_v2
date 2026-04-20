@@ -103,6 +103,56 @@ export async function getReactions(
     }));
 }
 
+export interface SlugReactionSummary {
+  slug: string;
+  total: number;
+  reactions: { emoji: string; count: number }[];
+}
+
+const REACTIONS_RANKING_LIMIT = 50;
+// ランキングはtoggle時に個別スラグキャッシュを破棄できないため、短めのTTLで整合を保つ。
+const REACTIONS_RANKING_CACHE_TTL_MS = 5 * 60_000; // 5分
+const REACTIONS_RANKING_CACHE_KEY = "reactions:all-slugs-ranking";
+
+export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
+  const cached = cache.get<SlugReactionSummary[]>(REACTIONS_RANKING_CACHE_KEY);
+  if (cached) return cached;
+
+  const client = getClient();
+  const blocklist = getNsfwBlocklist();
+
+  const grouped = await client.emojiReaction.groupBy({
+    by: ["slug", "emoji"],
+    _count: { emoji: true },
+    _min: { createdAt: true },
+    orderBy: [{ slug: "asc" }, { _min: { createdAt: "asc" } }],
+    // スラグ上限×絵文字種類数の上限でDBスキャン量を抑える
+    take: REACTIONS_RANKING_LIMIT * 20,
+  });
+
+  const slugMap = new Map<string, { emoji: string; count: number }[]>();
+  for (const row of grouped) {
+    if (blocklist.has(row.emoji)) continue;
+    if (!slugMap.has(row.slug)) slugMap.set(row.slug, []);
+    slugMap.get(row.slug)?.push({ emoji: row.emoji, count: row._count.emoji });
+  }
+
+  const result: SlugReactionSummary[] = [];
+  for (const [slug, reactions] of slugMap) {
+    const total = reactions.reduce((sum, r) => sum + r.count, 0);
+    result.push({ slug, total, reactions });
+  }
+
+  result.sort((a, b) => b.total - a.total);
+  const ranking = result.slice(0, REACTIONS_RANKING_LIMIT);
+  cache.set(
+    REACTIONS_RANKING_CACHE_KEY,
+    ranking,
+    REACTIONS_RANKING_CACHE_TTL_MS,
+  );
+  return ranking;
+}
+
 export async function toggleReaction(
   slug: string,
   emoji: string,

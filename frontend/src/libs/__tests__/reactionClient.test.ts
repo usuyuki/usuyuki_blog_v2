@@ -77,10 +77,10 @@ describe("reactionClient", () => {
       expect(validateEmoji("")).toBe(false);
     });
 
-    it("returns false for default NSFW blocklisted emoji", () => {
-      expect(validateEmoji("🍆")).toBe(false);
-      expect(validateEmoji("🍑")).toBe(false);
-      expect(validateEmoji("🖕")).toBe(false);
+    it("returns true for NSFW emoji when no blocklist is configured", () => {
+      expect(validateEmoji("🍆")).toBe(true);
+      expect(validateEmoji("🍑")).toBe(true);
+      expect(validateEmoji("🖕")).toBe(true);
     });
 
     it("returns false when codepoint count exceeds 8", () => {
@@ -122,7 +122,7 @@ describe("reactionClient", () => {
         expect(fn("🔥")).toBe(false);
       });
 
-      it("allows default NSFW emoji when env var overrides the list", async () => {
+      it("allows emoji not in the env var blocklist", async () => {
         process.env.REACTIONS_NSFW_BLOCKLIST = "🚀";
         vi.resetModules();
         const { validateEmoji: fn } = await import("../reactionClient");
@@ -177,6 +177,7 @@ describe("getReactions", () => {
   });
 
   it("filters out NSFW emoji from results", async () => {
+    process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
     mockEmojiReaction.groupBy.mockResolvedValue([
       { emoji: "👍", _count: { emoji: 1 }, _min: { createdAt: new Date() } },
       { emoji: "🍆", _count: { emoji: 5 }, _min: { createdAt: new Date() } },
@@ -186,6 +187,180 @@ describe("getReactions", () => {
     const result = await getReactions("my-slug", "client-xyz");
     expect(result).toHaveLength(1);
     expect((result as Array<{ emoji: string }>)[0].emoji).toBe("👍");
+    delete process.env.REACTIONS_NSFW_BLOCKLIST;
+  });
+});
+
+describe("getAllSlugReactions", () => {
+  let getAllSlugReactions: () => Promise<unknown>;
+  let savedNsfwList: string | undefined;
+
+  beforeAll(async () => {
+    vi.resetModules();
+    const mod = await import("../reactionClient");
+    getAllSlugReactions = mod.getAllSlugReactions;
+  });
+
+  beforeEach(() => {
+    savedNsfwList = process.env.REACTIONS_NSFW_BLOCKLIST;
+    delete process.env.REACTIONS_NSFW_BLOCKLIST;
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    if (savedNsfwList !== undefined) {
+      process.env.REACTIONS_NSFW_BLOCKLIST = savedNsfwList;
+    } else {
+      delete process.env.REACTIONS_NSFW_BLOCKLIST;
+    }
+  });
+
+  it("returns slugs sorted by total reaction count descending", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 2 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-b",
+        emoji: "❤️",
+        _count: { emoji: 10 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🎉",
+        _count: { emoji: 1 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed[0].slug).toBe("post-b");
+    expect(typed[0].total).toBe(10);
+    expect(typed[1].slug).toBe("post-a");
+    expect(typed[1].total).toBe(3);
+  });
+
+  it("aggregates multiple emoji per slug correctly", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 5 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🎉",
+        _count: { emoji: 3 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed).toHaveLength(1);
+    expect(typed[0].total).toBe(8);
+    expect(typed[0].reactions).toEqual(
+      expect.arrayContaining([
+        { emoji: "👍", count: 5 },
+        { emoji: "🎉", count: 3 },
+      ]),
+    );
+  });
+
+  it("filters out blocklisted emoji", async () => {
+    process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 3 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "post-a",
+        emoji: "🍆",
+        _count: { emoji: 99 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{
+      slug: string;
+      total: number;
+      reactions: { emoji: string; count: number }[];
+    }>;
+    expect(typed[0].total).toBe(3);
+    expect(typed[0].reactions.every((r) => r.emoji !== "🍆")).toBe(true);
+  });
+
+  it("returns empty array when there are no reactions", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([]);
+
+    const result = await getAllSlugReactions();
+    expect(result).toEqual([]);
+  });
+
+  it("limits results to 50 entries", async () => {
+    const rows = Array.from({ length: 60 }, (_, i) => ({
+      slug: `post-${i}`,
+      emoji: "👍",
+      _count: { emoji: 60 - i },
+      _min: { createdAt: new Date() },
+    }));
+    mockEmojiReaction.groupBy.mockResolvedValue(rows);
+
+    const result = await getAllSlugReactions();
+    expect((result as unknown[]).length).toBe(50);
+  });
+
+  it("returns cached result without hitting DB", async () => {
+    const { cache: mockCache } = await import("../cache");
+    const cachedData = [
+      {
+        slug: "cached-post",
+        total: 99,
+        reactions: [{ emoji: "🔥", count: 99 }],
+      },
+    ];
+    vi.mocked(mockCache.get).mockReturnValueOnce(cachedData);
+
+    const result = await getAllSlugReactions();
+    expect(result).toEqual(cachedData);
+    expect(mockEmojiReaction.groupBy).not.toHaveBeenCalled();
+  });
+
+  it("stores result in cache after DB query", async () => {
+    const { cache: mockCache } = await import("../cache");
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "post-a",
+        emoji: "👍",
+        _count: { emoji: 5 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    await getAllSlugReactions();
+    expect(mockCache.set).toHaveBeenCalledWith(
+      "reactions:all-slugs-ranking",
+      expect.any(Array),
+      5 * 60_000,
+    );
   });
 });
 

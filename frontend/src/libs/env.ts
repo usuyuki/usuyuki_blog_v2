@@ -53,13 +53,11 @@ export function getGhostFrontUrl(): string {
   return url;
 }
 
-const DEFAULT_NSFW_BLOCKLIST = ["🍆", "🍑", "💦", "🖕", "🍌", "🫦"];
-
 export function getNsfwBlocklist(): Set<string> {
   const raw = isServer()
     ? process.env.REACTIONS_NSFW_BLOCKLIST
     : import.meta.env.REACTIONS_NSFW_BLOCKLIST;
-  if (!raw) return new Set(DEFAULT_NSFW_BLOCKLIST);
+  if (!raw) return new Set();
   return new Set(
     raw
       .split(",")
