@@ -25,7 +25,7 @@
     "@tailwindcss/vite": "^4.2.2",
     "@tryghost/content-api": "^1.12.6",
     "@tryghost/helpers": "^1.1.103",
-    "astro": "^5.18.1",
+    "astro": "^6.1.6",
     "emoji-picker-element": "^1.29.1",
     "emoji-picker-element-data": "^1.8.0",
     "image-size": "^2.0.2",
