@@ -31,9 +31,7 @@ const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
 );
 
 vi.mock("@prisma/client", () => ({
-  PrismaClient: vi.fn(function () {
-    return { emojiReaction: mockEmojiReaction };
-  }),
+  PrismaClient: vi.fn(() => ({ emojiReaction: mockEmojiReaction })),
   Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
 }));
 
