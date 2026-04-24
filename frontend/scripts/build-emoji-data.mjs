@@ -1,10 +1,11 @@
 import { writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 
-const require = createRequire(import.meta.url);
+// createRequire is needed to load JSON files in ESM context
+const _require = createRequire(import.meta.url);
 
-const en = require("emoji-picker-element-data/en/cldr/data.json");
-const ja = require("emoji-picker-element-data/ja/cldr/data.json");
+const en = _require("emoji-picker-element-data/en/cldr/data.json");
+const ja = _require("emoji-picker-element-data/ja/cldr/data.json");
 
 const enByEmoji = new Map(en.map((e) => [e.emoji, e]));
 
