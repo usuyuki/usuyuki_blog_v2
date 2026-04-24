@@ -8,7 +8,7 @@
     "start": "astro dev",
     "build": "prisma generate && node scripts/build-emoji-data.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check": "NODE_OPTIONS='--max-old-space-size=4096' astro check",
     "astro": "astro",
     "lint": "biome lint .",
     "format": "biome format --write .",
