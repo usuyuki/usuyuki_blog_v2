@@ -35,7 +35,10 @@ function buildDatasourceUrl(): string {
 
 function getClient(): PrismaClient {
   if (!prisma) {
-    prisma = new PrismaClient({ datasourceUrl: buildDatasourceUrl() });
+    // Prisma 7 removed the datasourceUrl constructor option.
+    // Set DATABASE_URL env var so Prisma reads it via prisma.config.ts.
+    process.env.DATABASE_URL = buildDatasourceUrl();
+    prisma = new PrismaClient();
   }
   return prisma;
 }

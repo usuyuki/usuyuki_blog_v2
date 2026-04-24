@@ -150,7 +150,11 @@
         if (!shadowInput) return;
         const val = (shadowInput as HTMLInputElement).value;
         if (val.length === 1 && /[\u3040-\u9fff\uf900-\ufaff]/.test(val)) {
-          (p as unknown as { _cmp?: { $set: (props: { rawSearchText: string }) => void } })._cmp?.$set({ rawSearchText: val + val });
+          (
+            p as unknown as {
+              _cmp?: { $set: (props: { rawSearchText: string }) => void };
+            }
+          )._cmp?.$set({ rawSearchText: val + val });
         }
       });
     });

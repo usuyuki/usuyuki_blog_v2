@@ -31,7 +31,10 @@ const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
 );
 
 vi.mock("@prisma/client", () => ({
-  PrismaClient: vi.fn(() => ({ emojiReaction: mockEmojiReaction })),
+  // biome-ignore lint/complexity/useArrowFunction: arrow functions cannot be used as constructors (required by Vitest 4.1.5+)
+  PrismaClient: vi.fn(function () {
+    return { emojiReaction: mockEmojiReaction };
+  }),
   Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
 }));
 
