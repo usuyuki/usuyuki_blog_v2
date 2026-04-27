@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "1": "pnpm format && pnpm lint && pnpm check && pnpm test:run && pnpm build",
-    "dev": "astro dev",
+    "dev": "prisma generate && astro dev",
     "start": "astro dev",
     "build": "prisma generate && node scripts/build-emoji-data.mjs && astro build",
     "preview": "astro preview",
@@ -59,7 +59,8 @@
       "@prisma/engines",
       "prisma",
       "@prisma/client",
-      "sharp"
+      "sharp",
+      "esbuild"
     ]
   }
 }

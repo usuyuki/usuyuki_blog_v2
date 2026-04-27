@@ -28,6 +28,8 @@ services:
       dockerfile: ../infra/dev/astro/Dockerfile
     volumes:
       - ./frontend:/frontend
+      # node_modulesをnamed volumeに分離してmacOS bind mountの低速I/Oを回避
+      - frontend_node_modules:/frontend/node_modules
     ports:
       - "1000:1000"
     stdin_open: true
@@ -104,3 +106,4 @@ volumes:
   db-store:
   loki-data:
   grafana-storage:
+  frontend_node_modules:
