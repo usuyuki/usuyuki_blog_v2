@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
-    "@astrojs/partytown": "^2.1.6",
+    "@astrojs/partytown": "^2.1.7",
     "@astrojs/rss": "^4.0.18",
     "@astrojs/svelte": "^7.2.5",
     "@prisma/client": "^5.22.0",
@@ -36,7 +36,7 @@
     "winston": "^3.19.0"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.8",
+    "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "^2.4.11",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@testing-library/jest-dom": "^6.9.1",
