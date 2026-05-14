@@ -17,15 +17,15 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@astrojs/node": "^9.5.5",
+    "@astrojs/node": "^10.1.1",
     "@astrojs/partytown": "^2.1.7",
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/svelte": "^7.2.5",
+    "@astrojs/svelte": "^8.1.1",
     "@prisma/client": "^5.22.0",
     "@tailwindcss/vite": "^4.2.2",
     "@tryghost/content-api": "^1.12.6",
     "@tryghost/helpers": "^1.1.103",
-    "astro": "^5.18.1",
+    "astro": "^6.3.3",
     "emoji-picker-element": "^1.29.1",
     "emoji-picker-element-data": "^1.8.0",
     "image-size": "^2.0.2",
@@ -38,7 +38,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@biomejs/biome": "^2.4.11",
-    "@sveltejs/vite-plugin-svelte": "^6.2.4",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/svelte": "^5.3.1",
     "@types/jsdom": "^28.0.1",
@@ -47,7 +47,7 @@
     "postcss-html": "^1.8.1",
     "prisma": "^5.22.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.2",
+    "vite": "^8.0.13",
     "vitest": "^4.1.4"
   },
   "packageManager": "pnpm@10.33.0",
