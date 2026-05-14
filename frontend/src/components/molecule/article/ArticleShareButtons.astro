@@ -98,9 +98,12 @@ const misskeyUrl = buildMisskeyShareUrl(url, title);
 </div>
 
 <script>
-	document
-		.querySelector("[data-back-to-top]")
-		?.addEventListener("click", () => {
-			window.scrollTo({ top: 0, behavior: "smooth" });
-		});
+	// ClientRouter (View Transitions) でページ遷移後も再登録されるよう astro:page-load を使う
+	document.addEventListener("astro:page-load", () => {
+		document
+			.querySelector("[data-back-to-top]")
+			?.addEventListener("click", () => {
+				window.scrollTo({ top: 0, behavior: "smooth" });
+			});
+	});
 </script>
