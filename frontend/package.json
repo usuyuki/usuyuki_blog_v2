@@ -31,7 +31,7 @@
     "image-size": "^2.0.2",
     "jsdom": "^28.1.0",
     "sharp": "^0.34.5",
-    "svelte": "^5.55.3",
+    "svelte": "^5.55.7",
     "tailwindcss": "^4.2.2",
     "winston": "^3.19.0"
   },
