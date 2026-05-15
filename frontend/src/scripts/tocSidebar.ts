@@ -114,57 +114,29 @@ document.addEventListener("astro:page-load", () => {
       }
     };
 
-    // スクロールイベントの代わりに IntersectionObserver でアクティブ見出しを検出する。
-    // rootMargin で上端 80px を除外し、見出しが「上に消えた」か「画面内にある」かを追跡する。
-    const headingPositions = new Map<Element, "above" | "in-view" | "below">();
+    // スクロール位置から直接アクティブ見出しを計算する。
+    // IntersectionObserver はデッドゾーン（0〜80px）で再発火しないため
+    // ステートが古いまま残るケースがあり、スクロールベースの計算に切り替える。
+    const HEADER_HEIGHT = 80;
 
-    const updateActiveFromPositions = () => {
-      // 「above」な見出しの最後、または最初の「in-view」な見出しをアクティブにする
+    const updateActiveHeading = () => {
       let activeId = "";
       for (const heading of articleHeadings) {
-        const pos = headingPositions.get(heading);
-        if (pos === "above") {
+        // 固定ヘッダー(80px)以内に入った見出しをアクティブとみなす
+        if (heading.getBoundingClientRect().top <= HEADER_HEIGHT) {
           activeId = heading.id;
-        } else if (pos === "in-view") {
-          activeId = heading.id;
+        } else {
           break;
         }
       }
       setActive(activeId);
     };
 
-    const headingObserver = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            headingPositions.set(entry.target, "in-view");
-          } else if (entry.boundingClientRect.top < 0) {
-            headingPositions.set(entry.target, "above");
-          } else {
-            headingPositions.set(entry.target, "below");
-          }
-        }
-        updateActiveFromPositions();
-      },
-      // 上端 80px（固定ヘッダー分）を除外してから判定する
-      { rootMargin: "-80px 0px 0px 0px", threshold: 0 },
-    );
-
-    // Observer登録前に現在のスクロール位置から初期位置を設定する
-    // これにより、ページ途中にアクセスした場合でも即座にハイライトが反映される
-    for (const heading of articleHeadings) {
-      const rect = heading.getBoundingClientRect();
-      if (rect.top < 0) {
-        headingPositions.set(heading, "above");
-      } else if (rect.top < window.innerHeight) {
-        headingPositions.set(heading, "in-view");
-      } else {
-        headingPositions.set(heading, "below");
-      }
-      headingObserver.observe(heading);
-    }
-    updateActiveFromPositions();
-    observers.push(headingObserver);
+    window.addEventListener("scroll", updateActiveHeading, {
+      signal,
+      passive: true,
+    });
+    updateActiveHeading();
 
     // 目次リンクをスムーズスクロールに（インライン・サイドバー共通）
     const smoothScrollTo = (href: string) => {
