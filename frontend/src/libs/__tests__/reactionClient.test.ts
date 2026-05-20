@@ -30,11 +30,17 @@ const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
   },
 );
 
-vi.mock("@prisma/client", () => ({
+vi.mock("~/generated/prisma/client", () => ({
   PrismaClient: vi.fn(function () {
     return { emojiReaction: mockEmojiReaction };
   }),
   Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
+}));
+
+vi.mock("@prisma/adapter-mariadb", () => ({
+  PrismaMariaDb: vi.fn(function () {
+    return {};
+  }),
 }));
 
 // キャッシュをモックしてテスト間の状態汚染を防ぐ

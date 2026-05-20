@@ -1,4 +1,5 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaClient, Prisma } from "~/generated/prisma/client";
 import { cache } from "./cache";
 import { getNsfwBlocklist } from "./env";
 
@@ -35,7 +36,8 @@ function buildDatasourceUrl(): string {
 
 function getClient(): PrismaClient {
   if (!prisma) {
-    prisma = new PrismaClient({ datasourceUrl: buildDatasourceUrl() });
+    const adapter = new PrismaMariaDb(buildDatasourceUrl());
+    prisma = new PrismaClient({ adapter });
   }
   return prisma;
 }
