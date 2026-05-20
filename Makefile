@@ -4,6 +4,8 @@ sh:
 	docker compose exec astro pnpm 1
 test:
 	docker compose exec astro pnpm test:run
+prisma:
+	docker compose exec astro pnpm exec prisma generate
 log:
 	docker compose logs astro
 db:

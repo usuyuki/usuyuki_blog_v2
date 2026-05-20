@@ -49,6 +49,11 @@ docker compose exec astro pnpm check      # Astro type checking
 docker compose exec astro pnpm lint       # Biome linting and checking
 docker compose exec astro pnpm format     # Biome formatting
 
+# Regenerate Prisma Client (run after changing prisma/schema.prisma)
+make prisma
+# or
+docker compose exec astro pnpm exec prisma generate
+
 # Access shell in container
 make sh
 # or
