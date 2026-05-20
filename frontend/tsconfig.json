@@ -3,10 +3,9 @@
   "compilerOptions": {
     "strictNullChecks": true,
     "types": ["@astrojs/image/client"],
-    "baseUrl": ".",
     "paths": {
       // astro.config.mjsにも定義
-      "~/*": ["src/*"]
+      "~/*": ["./src/*"]
     }
   }
 }
