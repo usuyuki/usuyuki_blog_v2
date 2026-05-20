@@ -167,6 +167,7 @@ astroLogger.systemLog('System startup completed');
 ## Code Style Guidelines
 
 - Comments are allowed. Add them where they help clarify intent or non-obvious logic.
+- **MUST add tests**: Every new code change (components, libraries, API routes, types) requires corresponding tests. Do NOT consider any task complete without tests.
 
 ## Testing and Quality Assurance
 
