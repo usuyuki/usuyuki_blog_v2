@@ -29,7 +29,7 @@
     "emoji-picker-element": "^1.29.1",
     "emoji-picker-element-data": "^1.8.0",
     "image-size": "^2.0.2",
-    "jsdom": "^28.1.0",
+    "jsdom": "^29.1.1",
     "sharp": "^0.34.5",
     "svelte": "^5.55.9",
     "tailwindcss": "^4.2.2",
