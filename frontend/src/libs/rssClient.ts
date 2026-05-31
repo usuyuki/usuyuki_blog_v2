@@ -4,6 +4,8 @@ import { JSDOM } from "jsdom";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 
+const SLOW_RSS_THRESHOLD_MS = 3000;
+
 const { DOMParser } = new JSDOM().window;
 
 function parseXML(xmlText: string): Document {
@@ -152,11 +154,24 @@ export async function fetchRSS(
   }
 
   try {
+    const fetchStart = Date.now();
     const response = await fetch(rssUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; RSS Reader)",
       },
     });
+    const fetchDuration = Date.now() - fetchStart;
+    if (fetchDuration > SLOW_RSS_THRESHOLD_MS) {
+      astroLogger.warn(
+        `Slow RSS fetch: ${config.name} took ${fetchDuration}ms`,
+        {
+          blogName: config.name,
+          rssUrl,
+          duration: fetchDuration,
+          type: "slow_rss_fetch",
+        },
+      );
+    }
 
     if (!response.ok) {
       errorHandler.handleNetworkError(

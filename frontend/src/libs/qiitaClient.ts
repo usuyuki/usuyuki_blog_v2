@@ -3,6 +3,8 @@ import { cache, ONE_HOUR_MS } from "~/libs/cache";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 
+const SLOW_QIITA_THRESHOLD_MS = 2000;
+
 type QiitaApiItem = {
   title: string;
   url: string;
@@ -34,9 +36,23 @@ export async function fetchQiitaItems(
         page,
       });
 
+      const fetchStart = Date.now();
       const response = await fetch(url, {
         headers: { "User-Agent": "Mozilla/5.0 (compatible; Blog Reader)" },
       });
+      const fetchDuration = Date.now() - fetchStart;
+      if (fetchDuration > SLOW_QIITA_THRESHOLD_MS) {
+        astroLogger.warn(
+          `Slow Qiita API: page ${page} took ${fetchDuration}ms`,
+          {
+            service: "qiita-client",
+            userId: config.qiitaUserId,
+            page,
+            duration: fetchDuration,
+            type: "slow_qiita_fetch",
+          },
+        );
+      }
 
       if (!response.ok) {
         errorHandler.handleNetworkError(

@@ -1,5 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ExternalBlogConfig } from "~/types/RSSType";
+
+vi.mock("~/libs/astroLogger", () => ({
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    cacheLog: vi.fn(),
+  },
+}));
 
 vi.mock("~/libs/cache", () => ({
   cache: {
@@ -16,6 +26,7 @@ global.fetch = vi.fn();
 
 import { fetchQiitaItems } from "../qiitaClient";
 import { cache } from "../cache";
+import astroLogger from "~/libs/astroLogger";
 
 const mockConfig: ExternalBlogConfig & { qiitaUserId: string } = {
   name: "Qiita",
@@ -40,6 +51,44 @@ describe("qiitaClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(cache.get).mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("slow fetch warning", () => {
+    it("should warn when Qiita API fetch exceeds threshold", async () => {
+      vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(3000);
+
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        json: async () => mockApiResponse,
+      } as Response);
+
+      await fetchQiitaItems(mockConfig);
+
+      expect(vi.mocked(astroLogger.warn)).toHaveBeenCalledWith(
+        expect.stringContaining("Slow Qiita API"),
+        expect.objectContaining({ duration: 3000 }),
+      );
+    });
+
+    it("should not warn when Qiita API fetch is within threshold", async () => {
+      vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(500);
+
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        json: async () => mockApiResponse,
+      } as Response);
+
+      await fetchQiitaItems(mockConfig);
+
+      expect(vi.mocked(astroLogger.warn)).not.toHaveBeenCalledWith(
+        expect.stringContaining("Slow Qiita API"),
+        expect.any(Object),
+      );
+    });
   });
 
   describe("fetchQiitaItems", () => {
