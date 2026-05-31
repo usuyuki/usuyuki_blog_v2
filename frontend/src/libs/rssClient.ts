@@ -134,7 +134,16 @@ function parseAtomFeed(xmlDoc: Document, sourceName: string): RSSFeed {
 export async function fetchRSS(
   config: ExternalBlogConfig,
 ): Promise<RSSFeed | null> {
-  const cacheKey = `rss:${config.rssUrl}`;
+  if (!config.rssUrl) {
+    astroLogger.warn(`No rssUrl configured for ${config.name}`, {
+      blogName: config.name,
+      type: "config_missing_rssUrl",
+    });
+    return null;
+  }
+
+  const { rssUrl } = config;
+  const cacheKey = `rss:${rssUrl}`;
 
   // キャッシュから取得を試行
   const cachedFeed = cache.get<RSSFeed>(cacheKey);
@@ -143,7 +152,7 @@ export async function fetchRSS(
   }
 
   try {
-    const response = await fetch(config.rssUrl, {
+    const response = await fetch(rssUrl, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; RSS Reader)",
       },
@@ -151,7 +160,7 @@ export async function fetchRSS(
 
     if (!response.ok) {
       errorHandler.handleNetworkError(
-        config.rssUrl,
+        rssUrl,
         new Error(
           `RSS fetch failed: ${response.status} ${response.statusText}`,
         ),
@@ -214,7 +223,7 @@ export async function fetchRSS(
   } catch (error) {
     errorHandler.handleError(error as Error, {
       blogName: config.name,
-      rssUrl: config.rssUrl,
+      rssUrl,
       type: "rss_fetch_error",
     });
     return null;
@@ -235,7 +244,7 @@ export async function fetchMultipleRSS(
     } else {
       astroLogger.warn(`Failed to fetch RSS for ${configs[index].name}`, {
         blogName: configs[index].name,
-        rssUrl: configs[index].rssUrl,
+        rssUrl: configs[index].rssUrl ?? "(none)",
       });
     }
   });

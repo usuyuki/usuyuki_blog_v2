@@ -109,7 +109,7 @@ describe("RSSType Type Definitions", () => {
   });
 
   describe("ExternalBlogConfig", () => {
-    it("should have required fields", () => {
+    it("should work with rssUrl", () => {
       const config: ExternalBlogConfig = {
         name: "Test Blog",
         rssUrl: "https://example.com/feed.xml",
@@ -117,16 +117,30 @@ describe("RSSType Type Definitions", () => {
 
       expect(config.name).toBe("Test Blog");
       expect(config.rssUrl).toBe("https://example.com/feed.xml");
+      expect(config.qiitaUserId).toBeUndefined();
     });
 
-    it("should validate string types", () => {
+    it("should work with qiitaUserId", () => {
       const config: ExternalBlogConfig = {
-        name: "Test Blog",
-        rssUrl: "https://example.com/feed.xml",
+        name: "Qiita",
+        qiitaUserId: "myuser",
+        color: "#55c500",
       };
 
-      expect(typeof config.name).toBe("string");
-      expect(typeof config.rssUrl).toBe("string");
+      expect(config.name).toBe("Qiita");
+      expect(config.qiitaUserId).toBe("myuser");
+      expect(config.rssUrl).toBeUndefined();
+    });
+
+    it("should work with both rssUrl and qiitaUserId", () => {
+      const config: ExternalBlogConfig = {
+        name: "Qiita",
+        rssUrl: "https://qiita.com/myuser/feed",
+        qiitaUserId: "myuser",
+      };
+
+      expect(config.rssUrl).toBe("https://qiita.com/myuser/feed");
+      expect(config.qiitaUserId).toBe("myuser");
     });
 
     it("should work with different blog configurations", () => {
@@ -136,14 +150,17 @@ describe("RSSType Type Definitions", () => {
           rssUrl: "https://techblog.com/feed.xml",
         },
         {
-          name: "Personal Blog",
-          rssUrl: "https://personal.blog/rss",
+          name: "Qiita",
+          qiitaUserId: "myuser",
+          color: "#55c500",
         },
       ];
 
       expect(configs).toHaveLength(2);
       expect(configs[0].name).toBe("Tech Blog");
-      expect(configs[1].name).toBe("Personal Blog");
+      expect(configs[0].rssUrl).toBe("https://techblog.com/feed.xml");
+      expect(configs[1].name).toBe("Qiita");
+      expect(configs[1].qiitaUserId).toBe("myuser");
     });
   });
 
