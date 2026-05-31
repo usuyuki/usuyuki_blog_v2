@@ -55,3 +55,14 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <meta name="twitter:image" content={ogImage} />
 
 <ClientRouter />
+
+<script>
+  // ClientRouter (View Transitions) でページ遷移後もTwitterウィジェットを再初期化する
+  document.addEventListener("astro:page-load", () => {
+    // twttrはTwitterウィジェットがグローバルに登録する外部APIなので型定義がない
+    const twttr = (window as unknown as { twttr?: { widgets?: { load: () => void } } }).twttr;
+    if (twttr?.widgets) {
+      twttr.widgets.load();
+    }
+  });
+</script>
