@@ -24,7 +24,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 		posts?.map((post: ArticleArchiveType, index: number) => (
 			<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
 				<a
-					class="hover:shadow-xl p-2 block rounded-xl h-full duration-300  "
+					class="hover:shadow-xl hover:-translate-y-1 p-2 block rounded-xl h-full duration-300"
 					href={`/${post.slug}`}
 				>
 					<div class="flex justify-center items-center flex-col">
@@ -34,7 +34,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 							day={typeof post.published_at === 'string' ? 0 : post.published_at.day}
 							slug={contextPrefix + post.slug}
 						/>
-						<div>
+						<div class="overflow-hidden rounded-md">
 							{post.feature_image ? (
 								<Image
 									src={optimizeGhostImageUrl(post.feature_image, { width: 480, height: 480 })}
@@ -42,7 +42,7 @@ posts?.forEach((post: ArticleArchiveType) => {
 									height={480}
 									format="webp"
 									quality={80}
-									class="object-cover w-40 h-40 rounded-md"
+									class="object-cover w-40 h-40 rounded-md transition-transform duration-300 hover:scale-105"
 									alt="記事サムネイル"
 									transition:name={'image-' + contextPrefix + post.slug}
 									loading={index === 0 ? "eager" : "lazy"}
