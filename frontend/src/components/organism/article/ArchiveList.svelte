@@ -39,7 +39,16 @@
         if (!year || !month) return null;
 
         const monthName = `${year}年${parseInt(month, 10)}月`;
-        const monthPosts = posts[monthKey] || [];
+        // 月内の記事を古い順（日付昇順）にソート
+        const monthPosts = (posts[monthKey] || []).slice().sort((a, b) => {
+          const toTime = (p: (typeof a)) => {
+            if (typeof p.published_at === "string") return new Date(p.published_at).getTime();
+            return new Date(
+              `${p.published_at.year}-${String(p.published_at.month).padStart(2, "0")}-${String(p.published_at.day).padStart(2, "0")}`,
+            ).getTime();
+          };
+          return toTime(a) - toTime(b);
+        });
 
         return {
           monthKey,
