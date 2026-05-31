@@ -2,9 +2,18 @@ import { describe, it, expect } from "vitest";
 import { isSlug } from "../isSlug";
 
 describe("isSlug", () => {
-  it("should respect 100 character limit", () => {
-    expect(isSlug("a".repeat(100))).toBe(true);
-    expect(isSlug("a".repeat(101))).toBe(false);
+  it("should respect 191 character limit", () => {
+    expect(isSlug("a".repeat(191))).toBe(true);
+    expect(isSlug("a".repeat(192))).toBe(false);
+  });
+
+  it("should accept long Japanese-encoded slugs", () => {
+    // Ghost CMS が日本語タイトルを UTF-8 hex に変換した例（141文字）
+    expect(
+      isSlug(
+        "vtuber-e3-82-92-e8-a6-8b-e3-81-a6-e4-ba-ba-e7-94-9f-e3-81-ab-e5-bd-a9-e3-82-8a-e3-81-8c-e7-94-9f-e3-81-be-e3-82-8c-e3-81-be-e3-81-97-e3-81-9f",
+      ),
+    ).toBe(true);
   });
 
   it("should accept valid slugs", () => {
