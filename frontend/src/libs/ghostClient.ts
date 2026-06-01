@@ -297,7 +297,7 @@ export const ghostApiWithRetry = {
 
             const browseResult = await timedGhostCall(
               () => ghostClient.posts.browse(finalBrowseOptions),
-              "posts.read",
+              "posts.browse-by-slug",
             );
             const result = browseResult?.[0] || null;
 
@@ -511,7 +511,7 @@ export const ghostApiWithRetry = {
 
             const browseResult = await timedGhostCall(
               () => ghostClient.tags.browse(finalBrowseOptions),
-              "tags.read",
+              "tags.browse-by-slug",
             );
             const result = browseResult?.[0] || null;
             return result;

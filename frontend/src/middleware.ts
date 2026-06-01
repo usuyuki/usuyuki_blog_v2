@@ -2,15 +2,23 @@ import type { MiddlewareHandler } from "astro";
 import astroLogger from "./libs/astroLogger.js";
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
+  // Cloudflare tunnel経由でアクセスされる場合、ChromeがoriginをLocal address spaceと
+  // 分類することがある。Twitter widgets.jsなど外部スクリプトのPNA (Private Network Access)
+  // エラーを防ぐため、PNA仕様に従いOPTIONSプリフライトで許可ヘッダーを返す
+  if (context.request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: { "Access-Control-Allow-Private-Network": "true" },
+    });
+  }
+
   const startTime = Date.now();
 
   try {
     const response = await next();
     const duration = Date.now() - startTime;
 
-    // Cloudflare tunnel経由でアクセスされる場合、ChromeがoriginをLocal address spaceと
-    // 分類することがある。Twitter widgets.jsなど外部スクリプトのPNA (Private Network Access)
-    // エラーを防ぐため、このサーバーへのPrivate Network Accessを許可するヘッダーを付与する
+    // 通常レスポンスにもPNAヘッダーを付与（プリフライトが不要なシンプルリクエスト対応）
     response.headers.set("Access-Control-Allow-Private-Network", "true");
 
     if (context.url.pathname.startsWith("/_image") && response.status >= 400) {

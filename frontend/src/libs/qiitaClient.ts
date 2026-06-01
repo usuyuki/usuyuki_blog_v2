@@ -4,6 +4,7 @@ import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 
 const SLOW_QIITA_THRESHOLD_MS = 2000;
+const MAX_PAGES = 100; // 最大10,000件（1ページ100件 × 100ページ）
 
 type QiitaApiItem = {
   title: string;
@@ -27,7 +28,7 @@ export async function fetchQiitaItems(
   const perPage = 100;
 
   try {
-    while (true) {
+    while (page <= MAX_PAGES) {
       const url = `https://qiita.com/api/v2/users/${config.qiitaUserId}/items?page=${page}&per_page=${perPage}`;
 
       astroLogger.info(`Fetching Qiita items page ${page}`, {

@@ -10,8 +10,8 @@ export const GET: APIRoute = async ({ url, request }) => {
   const limit = parseInt(url.searchParams.get("limit") || "12", 10);
 
   try {
-    // キャッシュキーにEXTERNAL_BLOGSの設定を反映させることで、設定変更時に自動無効化
-    const cacheKey = `archive:all-articles:${JSON.stringify(CONFIG.externalBlogs).length}`;
+    // キャッシュキーにEXTERNAL_BLOGSの設定内容を反映させることで、設定変更時に自動無効化
+    const cacheKey = `archive:all-articles:${JSON.stringify(CONFIG.externalBlogs)}`;
 
     // キャッシュから全記事を取得を試行
     let allArticles = cache.get<ArticleArchiveType[]>(cacheKey);
