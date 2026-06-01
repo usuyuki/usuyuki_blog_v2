@@ -8,8 +8,8 @@ import {
   afterEach,
 } from "vitest";
 
-const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
-  () => {
+const { mockEmojiReaction, MockPrismaClientKnownRequestError, mockPrismaOn } =
+  vi.hoisted(() => {
     class MockPrismaClientKnownRequestError extends Error {
       code: string;
       constructor(message: string, { code }: { code: string }) {
@@ -26,15 +26,25 @@ const { mockEmojiReaction, MockPrismaClientKnownRequestError } = vi.hoisted(
         delete: vi.fn(),
       },
       MockPrismaClientKnownRequestError,
+      mockPrismaOn: vi.fn(),
     };
-  },
-);
+  });
 
 vi.mock("~/generated/prisma/client", () => ({
   PrismaClient: vi.fn(function () {
-    return { emojiReaction: mockEmojiReaction };
+    return { emojiReaction: mockEmojiReaction, $on: mockPrismaOn };
   }),
   Prisma: { PrismaClientKnownRequestError: MockPrismaClientKnownRequestError },
+}));
+
+vi.mock("~/libs/astroLogger", () => ({
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    cacheLog: vi.fn(),
+  },
 }));
 
 vi.mock("@prisma/adapter-mariadb", () => ({
@@ -42,6 +52,8 @@ vi.mock("@prisma/adapter-mariadb", () => ({
     return {};
   }),
 }));
+
+import astroLogger from "~/libs/astroLogger";
 
 // キャッシュをモックしてテスト間の状態汚染を防ぐ
 vi.mock("../cache", () => ({
@@ -414,5 +426,65 @@ describe("toggleReaction", () => {
 
     const result = await toggleReaction("my-slug", "👍", "client-xyz");
     expect(result).toBe("added");
+  });
+});
+
+describe("slow query warning", () => {
+  type QueryEventLike = {
+    duration: number;
+    query: string;
+    params: string;
+    timestamp: Date;
+    target: string;
+  };
+  let queryHandler: ((e: QueryEventLike) => void) | undefined;
+
+  beforeAll(async () => {
+    vi.resetModules();
+    vi.clearAllMocks();
+    const mod = await import("../reactionClient");
+    mockEmojiReaction.groupBy.mockResolvedValue([]);
+    mockEmojiReaction.findMany.mockResolvedValue([]);
+    await mod.getReactions("test-slug", "test-client");
+
+    // getClient() が $on("query", handler) を呼んでいることを確認し handler を取得
+    const queryCall = (mockPrismaOn.mock.calls as [string, unknown][]).find(
+      ([event]) => event === "query",
+    );
+    queryHandler = queryCall?.[1] as typeof queryHandler;
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should warn when SQL query exceeds threshold", () => {
+    queryHandler?.({
+      duration: 500,
+      query: "SELECT * FROM emoji_reactions",
+      params: "{}",
+      timestamp: new Date(),
+      target: "test",
+    });
+
+    expect(vi.mocked(astroLogger.warn)).toHaveBeenCalledWith(
+      expect.stringContaining("Slow SQL query"),
+      expect.objectContaining({ duration: 500 }),
+    );
+  });
+
+  it("should not warn when SQL query is within threshold", () => {
+    queryHandler?.({
+      duration: 100,
+      query: "SELECT 1",
+      params: "{}",
+      timestamp: new Date(),
+      target: "test",
+    });
+
+    expect(vi.mocked(astroLogger.warn)).not.toHaveBeenCalledWith(
+      expect.stringContaining("Slow SQL query"),
+      expect.any(Object),
+    );
   });
 });
