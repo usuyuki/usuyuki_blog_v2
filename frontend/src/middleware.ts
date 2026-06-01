@@ -8,6 +8,11 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     const response = await next();
     const duration = Date.now() - startTime;
 
+    // Cloudflare tunnel経由でアクセスされる場合、ChromeがoriginをLocal address spaceと
+    // 分類することがある。Twitter widgets.jsなど外部スクリプトのPNA (Private Network Access)
+    // エラーを防ぐため、このサーバーへのPrivate Network Accessを許可するヘッダーを付与する
+    response.headers.set("Access-Control-Allow-Private-Network", "true");
+
     if (context.url.pathname.startsWith("/_image") && response.status >= 400) {
       await astroLogger.error(
         `Image processing failed: ${context.url.pathname}`,
