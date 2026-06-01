@@ -41,8 +41,8 @@
 </script>
 
 <div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
-  <a 
-    class="hover:shadow-xl p-2 block rounded-xl h-full duration-300" 
+  <a
+    class="hover:shadow-xl hover:-translate-y-1 p-2 block rounded-xl h-full duration-300"
     href={safePost.isExternal ? safePost.externalUrl : `/${safePost.slug}`}
     target={safePost.isExternal ? "_blank" : "_self"}
     rel={safePost.isExternal ? "noopener noreferrer" : undefined}
@@ -71,14 +71,14 @@
           </div>
         </div>
       </div>
-      <div>
+      <div class="overflow-hidden rounded-md">
         {#if safePost.feature_image && !imageError}
-          <img 
-            src={safePost.feature_image} 
-            width="500" 
-            height="500" 
-            class="object-cover w-40 h-40 rounded-md" 
-            alt="記事サムネイル" 
+          <img
+            src={safePost.feature_image}
+            width="500"
+            height="500"
+            class="object-cover w-40 h-40 rounded-md transition-transform duration-300 hover:scale-105"
+            alt="記事サムネイル"
             loading="lazy"
             style="view-transition-name: image-{safePost.slug};"
             onerror={handleImageError}

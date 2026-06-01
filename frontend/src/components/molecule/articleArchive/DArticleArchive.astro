@@ -1,8 +1,7 @@
 ---
-import { Image } from "astro:assets";
 import SquareDay from "~/components/atom/date/SquareDay.astro";
+import ArticleCardItem from "~/components/molecule/articleArchive/ArticleCardItem.astro";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
-import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 interface Props {
@@ -22,41 +21,13 @@ posts.forEach((post: ArticleArchiveType) => {
 
 <div class="flex flex-wrap items-stretch">
 	{
-		posts.map((post: ArticleArchiveType) => (
-			<div class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-12">
-				<a
-					class="hover:shadow-xl p-2 block rounded-xl h-full duration-300  "
-					href={`/${post.slug}`}
-				>
-					<div class="flex justify-center items-center flex-col">
-						<SquareDay day={typeof post.published_at === 'string' ? 0 : post.published_at.day} slug={post.slug} />
-						<div>
-							{post.feature_image ? (
-								<Image
-									src={optimizeGhostImageUrl(post.feature_image, { width: 480, height: 480 })}
-									width={480}
-									height={480}
-									format="webp"
-									quality={80}
-									class="object-cover w-40 h-40 rounded-md"
-									alt="記事サムネイル"
-									transition:name={'image-' + post.slug}
-									loading="lazy"
-									sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-								/>
-							) : (
-								<div class="aspect-square h-40 object-cover bg-gray-200 rounded-md" />
-							)}
-						</div>
-						<h3
-							class="text-xl text-black pt-2 text-wrap-balance text-center auto-phrase"
-							transition:name={'title-' + post.slug}
-						>
-							{post.title}
-						</h3>
-					</div>
-				</a>
-			</div>
+		posts.map((post: ArticleArchiveType, index: number) => (
+			<ArticleCardItem post={post} index={index}>
+				<SquareDay
+					day={typeof post.published_at === 'string' ? 0 : post.published_at.day}
+					slug={post.slug}
+				/>
+			</ArticleCardItem>
 		))
 	}
 </div>
