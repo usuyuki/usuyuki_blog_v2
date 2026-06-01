@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import { createRequire } from "module";
 
 const require = createRequire(import.meta.url);

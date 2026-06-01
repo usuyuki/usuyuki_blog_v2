@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import { getLatestArticles } from "~/libs/articleAggregator";
 import { cache, ONE_HOUR_MS } from "~/libs/cache";
+import { CONFIG } from "~/libs/config";
 import errorHandler from "~/libs/errorHandler";
 
 export const GET: APIRoute = async ({ url, request }) => {
@@ -9,7 +10,8 @@ export const GET: APIRoute = async ({ url, request }) => {
   const limit = parseInt(url.searchParams.get("limit") || "12", 10);
 
   try {
-    const cacheKey = "archive:all-articles";
+    // キャッシュキーにEXTERNAL_BLOGSの設定内容を反映させることで、設定変更時に自動無効化
+    const cacheKey = `archive:all-articles:${JSON.stringify(CONFIG.externalBlogs)}`;
 
     // キャッシュから全記事を取得を試行
     let allArticles = cache.get<ArticleArchiveType[]>(cacheKey);

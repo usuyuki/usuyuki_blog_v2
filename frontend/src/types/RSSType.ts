@@ -14,8 +14,11 @@ export type RSSFeed = {
   items: RSSItem[];
 };
 
+// rssUrl と qiitaUserId のどちらか一方（または両方）が必須
 export type ExternalBlogConfig = {
   name: string;
-  rssUrl: string;
   color?: string; // Tailwind色クラス（例: "bg-green-500"）または16進数カラー（例: "#ffffff"）
-};
+} & (
+  | { rssUrl: string; qiitaUserId?: string }
+  | { qiitaUserId: string; rssUrl?: string }
+);

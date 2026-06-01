@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Current Status (feat/v6-api branch)**: Project upgraded to Ghost v6 API with enhanced article aggregation system that combines internal Ghost CMS content with external RSS feeds (Qiita, Zenn). Ghost v6 API now has a maximum limit of 100 posts per request, requiring pagination for larger datasets.
+**Current Status**: Project runs on Ghost v6 API with an article aggregation system that combines internal Ghost CMS content with external sources (Qiita API, Zenn RSS, etc.). Ghost v6 API has a maximum limit of 100 posts per request, requiring pagination for larger datasets. Qiita articles are fetched via Qiita API v2 (full history, paginated) instead of RSS.
 
 ## Project Overview
 
@@ -91,8 +91,9 @@ The frontend follows Atomic Design principles:
 - `frontend/src/consts.ts` - Site configuration constants
 - `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
-- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost and RSS feeds
-- `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API
+- `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
+- `frontend/src/libs/qiitaClient.ts` - Qiita API v2 client with pagination and caching (full article history)
 - `frontend/src/libs/config.ts` - Configuration management for external integrations
 - `frontend/src/libs/errorHandler.ts` - Centralized error handling and logging
 - `frontend/src/libs/cache.ts` - In-memory caching system for API responses
@@ -149,11 +150,14 @@ astroLogger.systemLog('System startup completed');
 
 ### Optional Variables
 - `TUNNEL_TOKEN` - Cloudflare tunnel token for production deployment
-- `EXTERNAL_BLOGS` - JSON array of external blog RSS feeds for article aggregation
+- `EXTERNAL_BLOGS` - JSON array of external blog sources for article aggregation
+  - `qiitaUserId` を指定するとQiita API v2で全記事取得（RSSより優先）
+  - `rssUrl` を指定するとRSSフィードで取得（Zenn、noteなど）
   ```json
   [
-    {"name": "Qiita", "rssUrl": "https://qiita.com/username/feed", "color": "#55c500"},
-    {"name": "Zenn", "rssUrl": "https://zenn.dev/username/feed", "color": "#3ea8ff"}
+    {"name": "Qiita", "qiitaUserId": "username", "color": "#55c500"},
+    {"name": "Zenn", "rssUrl": "https://zenn.dev/username/feed", "color": "#3ea8ff"},
+    {"name": "note", "rssUrl": "https://note.com/username/rss", "color": "#41c9b4"}
   ]
   ```
 - `LOKI_URL` - Loki log aggregation endpoint (default: http://loki:3100)
@@ -168,6 +172,8 @@ astroLogger.systemLog('System startup completed');
 
 - Comments are allowed. Add them where they help clarify intent or non-obvious logic.
 - **MUST add tests**: Every new code change (components, libraries, API routes, types) requires corresponding tests. Do NOT consider any task complete without tests.
+- **MUST fix warnings**: `pnpm check` must complete with 0 errors and 0 warnings. Fix all TypeScript warnings (unused imports, unused variables, etc.) before considering a task complete.
+- **MUST update docs**: When implementation changes affect architecture, key files, environment variables, or external integrations, update both `CLAUDE.md` and `README.md` to reflect the changes.
 
 ## Testing and Quality Assurance
 
@@ -230,11 +236,12 @@ The application uses multiple layers of caching for performance:
 ### In-Memory Application Cache
 - **Location**: `frontend/src/libs/cache.ts`
 - **Scope**: In-memory cache that persists during container runtime
-- **Used by**: Archive API (`/api/archive`), Ghost client, RSS client
+- **Used by**: Archive API (`/api/archive`), Ghost client, RSS client, Qiita API client
 - **Cache Duration**: 
   - Archive articles: 1 hour (`ONE_HOUR_MS`)
   - Ghost API responses: 1 hour (configurable per endpoint)
-  - RSS feed responses: Varies by feed freshness
+  - RSS feed responses: 1 hour
+  - Qiita API responses: 1 hour (cache key: `qiita_api:{userId}`)
 
 ### Cache Management Commands
 

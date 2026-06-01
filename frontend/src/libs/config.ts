@@ -27,14 +27,22 @@ function parseExternalBlogs(envVar?: string): ExternalBlogConfig[] {
       }
 
       const blogObj = blog as Record<string, string>;
-      if (
-        typeof blogObj.name !== "string" ||
-        typeof blogObj.rssUrl !== "string"
-      ) {
-        astroLogger.warn("Invalid blog config: missing name or rssUrl", {
+      if (typeof blogObj.name !== "string") {
+        astroLogger.warn("Invalid blog config: missing name", {
           blog,
           type: "config_validation",
         });
+        return false;
+      }
+
+      const hasRssUrl = typeof blogObj.rssUrl === "string";
+      const hasQiitaUserId = typeof blogObj.qiitaUserId === "string";
+
+      if (!hasRssUrl && !hasQiitaUserId) {
+        astroLogger.warn(
+          "Invalid blog config: must have either rssUrl or qiitaUserId",
+          { blog, type: "config_validation" },
+        );
         return false;
       }
 

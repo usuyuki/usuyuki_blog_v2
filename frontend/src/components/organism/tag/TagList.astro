@@ -24,7 +24,7 @@ const tags = await ghostApiWithRetry.tags.browse(
 		<ul class={ulClass}>
 			{tags.map((tag: any) => (
 				<li class={`text-lg my-2 ${liClass}`}>
-					<a href={`/tags/${tag.slug}`}>🏷{tag.name}</a>
+					<a class="inline-block transition-transform duration-150 hover:scale-110" href={`/tags/${tag.slug}`}>🏷{tag.name}</a>
 				</li>
 			))}
 		</ul>

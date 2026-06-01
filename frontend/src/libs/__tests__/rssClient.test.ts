@@ -1,5 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ExternalBlogConfig } from "~/types/RSSType";
+
+vi.mock("~/libs/astroLogger", () => ({
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    debug: vi.fn(),
+    cacheLog: vi.fn(),
+  },
+}));
 
 // Mock cache module
 vi.mock("~/libs/cache", () => {
@@ -22,6 +32,7 @@ global.fetch = vi.fn();
 
 import { fetchRSS, fetchMultipleRSS } from "../rssClient";
 import { cache } from "../cache";
+import astroLogger from "~/libs/astroLogger";
 
 describe("RSSClient", () => {
   const mockConfig: ExternalBlogConfig = {
@@ -49,6 +60,94 @@ describe("RSSClient", () => {
     vi.clearAllMocks();
     // Reset cache mock to return null by default (cache miss)
     vi.mocked(cache.get).mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  describe("slow fetch warning", () => {
+    it("should warn when RSS fetch exceeds threshold", async () => {
+      vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(5000);
+
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        text: async () => mockRSSXML,
+      } as Response);
+
+      const mockXmlDoc = {
+        getElementsByTagName: vi.fn((tagName: string) => {
+          if (tagName === "parsererror") return [];
+          if (tagName === "rss") return [{}];
+          if (tagName === "channel")
+            return [
+              {
+                getElementsByTagName: (tag: string) => {
+                  if (tag === "title") return [{ textContent: "Test Blog" }];
+                  if (tag === "link")
+                    return [{ textContent: "https://example.com" }];
+                  if (tag === "description")
+                    return [{ textContent: "Test RSS Feed" }];
+                  return [];
+                },
+              },
+            ];
+          if (tagName === "item") return [];
+          return [];
+        }),
+      };
+      global.DOMParser = vi.fn().mockImplementation(() => ({
+        parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
+      }));
+
+      await fetchRSS(mockConfig);
+
+      expect(vi.mocked(astroLogger.warn)).toHaveBeenCalledWith(
+        expect.stringContaining("Slow RSS fetch"),
+        expect.objectContaining({ duration: 5000 }),
+      );
+    });
+
+    it("should not warn when RSS fetch is within threshold", async () => {
+      vi.spyOn(Date, "now").mockReturnValueOnce(0).mockReturnValueOnce(1000);
+
+      vi.mocked(global.fetch).mockResolvedValue({
+        ok: true,
+        text: async () => mockRSSXML,
+      } as Response);
+
+      const mockXmlDoc = {
+        getElementsByTagName: vi.fn((tagName: string) => {
+          if (tagName === "parsererror") return [];
+          if (tagName === "rss") return [{}];
+          if (tagName === "channel")
+            return [
+              {
+                getElementsByTagName: (tag: string) => {
+                  if (tag === "title") return [{ textContent: "Test Blog" }];
+                  if (tag === "link")
+                    return [{ textContent: "https://example.com" }];
+                  if (tag === "description")
+                    return [{ textContent: "Test RSS Feed" }];
+                  return [];
+                },
+              },
+            ];
+          if (tagName === "item") return [];
+          return [];
+        }),
+      };
+      global.DOMParser = vi.fn().mockImplementation(() => ({
+        parseFromString: vi.fn().mockReturnValue(mockXmlDoc),
+      }));
+
+      await fetchRSS(mockConfig);
+
+      expect(vi.mocked(astroLogger.warn)).not.toHaveBeenCalledWith(
+        expect.stringContaining("Slow RSS fetch"),
+        expect.any(Object),
+      );
+    });
   });
 
   describe("fetchRSS", () => {

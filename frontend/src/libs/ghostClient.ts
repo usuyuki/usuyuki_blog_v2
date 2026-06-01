@@ -143,6 +143,26 @@ function isRetryableError(error: Error): boolean {
   );
 }
 
+const SLOW_API_THRESHOLD_MS = 1000;
+
+async function timedGhostCall<T>(
+  fn: () => Promise<T>,
+  method: string,
+): Promise<T> {
+  const start = Date.now();
+  const result = await fn();
+  const duration = Date.now() - start;
+  if (duration > SLOW_API_THRESHOLD_MS) {
+    astroLogger.warn(`Slow Ghost API: ${method} took ${duration}ms`, {
+      logType: LOG_TYPES.API,
+      service: "ghost-api",
+      method,
+      duration,
+    });
+  }
+  return result;
+}
+
 // エラーログを簡潔に出力する関数
 function logGhostError(
   error: Error,
@@ -275,8 +295,10 @@ export const ghostApiWithRetry = {
             if (browseOptions.fields)
               finalBrowseOptions.fields = browseOptions.fields;
 
-            const browseResult =
-              await ghostClient.posts.browse(finalBrowseOptions);
+            const browseResult = await timedGhostCall(
+              () => ghostClient.posts.browse(finalBrowseOptions),
+              "posts.browse-by-slug",
+            );
             const result = browseResult?.[0] || null;
 
             // 結果をキャッシュに保存
@@ -309,9 +331,11 @@ export const ghostApiWithRetry = {
 
             return result;
           } else if (cleanOptions.id) {
-            const result = await ghostClient.posts.read({
-              id: cleanOptions.id,
-            });
+            const postId = cleanOptions.id;
+            const result = await timedGhostCall(
+              () => ghostClient.posts.read({ id: postId }),
+              "posts.read",
+            );
 
             // ID指定の場合もキャッシュ
             if (result) {
@@ -386,7 +410,10 @@ export const ghostApiWithRetry = {
           if (options.fields) browseOptions.fields = options.fields;
           if (options.include) browseOptions.include = options.include;
 
-          const result = await ghostClient.posts.browse(browseOptions);
+          const result = await timedGhostCall(
+            () => ghostClient.posts.browse(browseOptions),
+            "posts.browse",
+          );
           // 成功時に通常と長期両方のキャッシュに保存（生データをキャッシュ）
           setCache(cacheKey, result, 3600000); // 1時間キャッシュ
           setLongTermCache(cacheKey, result); // 1週間キャッシュ
@@ -482,12 +509,18 @@ export const ghostApiWithRetry = {
             if (browseOptions.fields)
               finalBrowseOptions.fields = browseOptions.fields;
 
-            const browseResult =
-              await ghostClient.tags.browse(finalBrowseOptions);
+            const browseResult = await timedGhostCall(
+              () => ghostClient.tags.browse(finalBrowseOptions),
+              "tags.browse-by-slug",
+            );
             const result = browseResult?.[0] || null;
             return result;
           } else if (cleanOptions.id) {
-            const result = await ghostClient.tags.read({ id: cleanOptions.id });
+            const tagId = cleanOptions.id;
+            const result = await timedGhostCall(
+              () => ghostClient.tags.read({ id: tagId }),
+              "tags.read",
+            );
             return result;
           } else {
             return null;
@@ -538,7 +571,10 @@ export const ghostApiWithRetry = {
           if (options.fields) browseOptions.fields = options.fields;
           if (options.include) browseOptions.include = options.include;
 
-          const result = await ghostClient.tags.browse(browseOptions);
+          const result = await timedGhostCall(
+            () => ghostClient.tags.browse(browseOptions),
+            "tags.browse",
+          );
           // 成功時にキャッシュに保存
           setCache(cacheKey, result, 3600000); // 1時間キャッシュ（レート制限対策）
           return result;

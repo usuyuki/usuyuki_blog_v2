@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { RSSItem } from "~/types/RSSType";
+import type { RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 // Mock the dependencies
@@ -15,17 +15,24 @@ vi.mock("~/libs/rssClient", () => ({
   fetchMultipleRSS: vi.fn(),
 }));
 
+vi.mock("~/libs/qiitaClient", () => ({
+  fetchQiitaItems: vi.fn(),
+}));
+
+const mockExternalBlogs: ExternalBlogConfig[] = [
+  { name: "Test Blog", rssUrl: "https://example.com/feed.xml" },
+];
+
 vi.mock("~/libs/config", () => ({
-  CONFIG: {
-    externalBlogs: [
-      { name: "Test Blog", rssUrl: "https://example.com/feed.xml" },
-    ],
+  get CONFIG() {
+    return { externalBlogs: mockExternalBlogs };
   },
 }));
 
 import { getLatestArticles, getFeaturedArticles } from "../articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { fetchMultipleRSS } from "~/libs/rssClient";
+import { fetchQiitaItems } from "~/libs/qiitaClient";
 
 describe("ArticleAggregator", () => {
   const mockGhostPost: ArticleArchiveType = {
@@ -253,6 +260,58 @@ describe("ArticleAggregator", () => {
       expect(articles.some((a) => a.title === "Valid Date RSS Post")).toBe(
         true,
       );
+    });
+  });
+
+  describe("getLatestArticles with Qiita API", () => {
+    beforeEach(() => {
+      // Reset to default RSS-only config
+      mockExternalBlogs.length = 0;
+      mockExternalBlogs.push({
+        name: "Test Blog",
+        rssUrl: "https://example.com/feed.xml",
+      });
+    });
+
+    it("should call fetchQiitaItems when qiitaUserId is set", async () => {
+      mockExternalBlogs.length = 0;
+      mockExternalBlogs.push({ name: "Qiita", qiitaUserId: "myuser" });
+
+      vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
+      vi.mocked(fetchMultipleRSS).mockResolvedValue([]);
+      vi.mocked(fetchQiitaItems).mockResolvedValue([
+        {
+          title: "Qiita Article",
+          link: "https://qiita.com/myuser/items/abc",
+          published_at: "2023-12-15T10:00:00+09:00",
+          source: "Qiita",
+        },
+      ]);
+
+      const articles = await getLatestArticles({
+        limit: 10,
+        includeExternal: true,
+      });
+
+      expect(vi.mocked(fetchQiitaItems)).toHaveBeenCalledWith(
+        expect.objectContaining({ qiitaUserId: "myuser" }),
+      );
+      expect(vi.mocked(fetchMultipleRSS)).toHaveBeenCalledWith([]);
+      expect(articles.some((a) => a.title === "Qiita Article")).toBe(true);
+    });
+
+    it("should not call fetchQiitaItems when only rssUrl is set", async () => {
+      vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
+      vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
+
+      const articles = await getLatestArticles({
+        limit: 10,
+        includeExternal: true,
+      });
+
+      expect(vi.mocked(fetchQiitaItems)).not.toHaveBeenCalled();
+      expect(vi.mocked(fetchMultipleRSS)).toHaveBeenCalled();
+      expect(articles.some((a) => a.title === "RSS Post Title")).toBe(true);
     });
   });
 

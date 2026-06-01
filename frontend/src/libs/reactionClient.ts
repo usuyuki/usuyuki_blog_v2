@@ -1,7 +1,12 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient, Prisma } from "~/generated/prisma/client";
+import type { QueryEvent } from "~/generated/prisma/internal/prismaNamespace";
 import { cache } from "./cache";
 import { getNsfwBlocklist } from "./env";
+import astroLogger from "./astroLogger";
+import { LOG_TYPES } from "./logTypes";
+
+const SLOW_QUERY_THRESHOLD_MS = 200;
 
 // GETリクエスト毎にgroupByクエリが走るのを防ぐため、集計結果をスラグ単位でキャッシュする。
 // reacted状態はユーザー固有なので集計カウントのみキャッシュし、findManyは都度実行する。
@@ -37,7 +42,24 @@ function buildDatasourceUrl(): string {
 function getClient(): PrismaClient {
   if (!prisma) {
     const adapter = new PrismaMariaDb(buildDatasourceUrl());
-    prisma = new PrismaClient({ adapter });
+    prisma = new PrismaClient({
+      adapter,
+      log: [{ emit: "event", level: "query" }] as const,
+    });
+    // $on の型は log オプション型から推論されるが、変数宣言で情報が失われるためアサーションで補完
+    type QueryAware = {
+      $on(event: "query", cb: (e: QueryEvent) => void): void;
+    };
+    (prisma as unknown as QueryAware).$on("query", (e) => {
+      if (e.duration > SLOW_QUERY_THRESHOLD_MS) {
+        astroLogger.warn(`Slow SQL query: ${e.duration}ms`, {
+          logType: LOG_TYPES.API,
+          service: "prisma",
+          query: e.query,
+          duration: e.duration,
+        });
+      }
+    });
   }
   return prisma;
 }

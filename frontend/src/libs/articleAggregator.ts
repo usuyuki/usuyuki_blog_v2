@@ -2,6 +2,7 @@ import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 import type { RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { fetchMultipleRSS } from "~/libs/rssClient";
+import { fetchQiitaItems } from "~/libs/qiitaClient";
 import { CONFIG } from "~/libs/config";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
@@ -138,21 +139,32 @@ export async function getLatestArticles(
     // Ghost APIがレート制限の場合はRSSのみ表示
   }
 
-  // RSS記事の取得
+  // 外部記事の取得（RSS + Qiita API）
   if (includeExternal && CONFIG.externalBlogs.length > 0) {
     try {
-      const rssItems = await fetchMultipleRSS(CONFIG.externalBlogs);
-      const rssArticles = rssItems.map((rssItem) => {
+      const rssConfigs = CONFIG.externalBlogs.filter((c) => !c.qiitaUserId);
+      const qiitaConfigs = CONFIG.externalBlogs.filter(
+        (c): c is ExternalBlogConfig & { qiitaUserId: string } =>
+          !!c.qiitaUserId,
+      );
+
+      const allResults = await Promise.all([
+        fetchMultipleRSS(rssConfigs),
+        ...qiitaConfigs.map((c) => fetchQiitaItems(c)),
+      ]);
+      const externalItems = allResults.flat();
+
+      const externalArticles = externalItems.map((item) => {
         const blogConfig = CONFIG.externalBlogs.find(
-          (config) => config.name === rssItem.source,
+          (config) => config.name === item.source,
         );
-        return convertRSSToArticle(rssItem, blogConfig);
+        return convertRSSToArticle(item, blogConfig);
       });
-      articles.push(...rssArticles);
+      articles.push(...externalArticles);
     } catch (error) {
       errorHandler.handleError(error as Error, {
-        service: "rss-aggregator",
-        type: "rss_fetch_error",
+        service: "external-aggregator",
+        type: "external_fetch_error",
       });
     }
   }
