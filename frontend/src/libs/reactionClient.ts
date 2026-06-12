@@ -36,7 +36,8 @@ function buildDatasourceUrl(): string {
   const user = process.env.REACTIONS_DB_USER ?? "root";
   const password = process.env.REACTIONS_DB_PASSWORD ?? "";
   const name = process.env.REACTIONS_DB_NAME ?? "usuyuki_blog";
-  return `mysql://${user}:${encodeURIComponent(password)}@${host}/${name}`;
+  // MySQL 8.0+ はデフォルト認証が caching_sha2_password のため allowPublicKeyRetrieval が必要
+  return `mariadb://${user}:${encodeURIComponent(password)}@${host}/${name}?allowPublicKeyRetrieval=true`;
 }
 
 function getClient(): PrismaClient {

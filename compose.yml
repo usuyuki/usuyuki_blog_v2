@@ -28,6 +28,9 @@ services:
       dockerfile: ../infra/dev/astro/Dockerfile
     volumes:
       - ./frontend:/frontend
+      # macのDocker Desktopはバインドマウント(VirtioFS)のI/Oが遅く、
+      # node_modulesをホスト共有すると開発サーバーが極端に遅くなるためnamed volumeに分離
+      - astro-node-modules:/frontend/node_modules
     ports:
       - "1000:1000"
     stdin_open: true
@@ -104,3 +107,4 @@ volumes:
   db-store:
   loki-data:
   grafana-storage:
+  astro-node-modules:
