@@ -4,8 +4,9 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm
 WORKDIR /frontend
 
-# Copy package files
+# Copy package files (patches are required by pnpm install via patchedDependencies)
 COPY package.json pnpm-lock.yaml ./
+COPY patches ./patches
 
 # Install dependencies (includes prisma generate via @prisma/client postinstall if schema exists)
 RUN pnpm install --frozen-lockfile
@@ -16,6 +17,25 @@ COPY . .
 # Set production environment and build (runs prisma generate + astro build)
 ENV NODE_ENV=production
 RUN pnpm build
+
+# Remove devDependencies to shrink the runtime image (build artifacts are already in dist).
+# The prisma CLI toolchain survives prune because pnpm keeps it as an auto-installed peer of
+# @prisma/client, but it is never imported at runtime (driver adapter + generated client only),
+# so delete it explicitly.
+RUN pnpm prune --prod --ignore-scripts \
+    && rm -rf node_modules/.pnpm/prisma@* \
+        node_modules/.pnpm/@prisma+studio-core@* \
+        node_modules/.pnpm/@prisma+dev@* \
+        node_modules/.pnpm/@prisma+engines@* \
+        node_modules/.pnpm/@prisma+config@* \
+        node_modules/.pnpm/@electric-sql+pglite* \
+        node_modules/.pnpm/effect@* \
+        node_modules/.pnpm/typescript@* \
+        node_modules/prisma \
+        node_modules/typescript \
+        node_modules/.bin/prisma \
+        node_modules/.bin/tsc \
+        node_modules/.bin/tsserver
 
 # Production stage
 FROM node:24-slim AS prod

@@ -20,6 +20,8 @@ This is a blog application with two main components:
 
 The project uses a Docker-based development and deployment setup:
 - Frontend runs on **Astro 7** with **Tailwind CSS 4** and **Svelte 5**
+- **@astrojs/node patch**: `frontend/patches/@astrojs__node@11.0.0-alpha.0.patch` (applied via pnpm `patchedDependencies`) replaces `app.getAdapterLogger()` with `app.adapterLogger` because astro 7.0.0-beta.3 removed that method while @astrojs/node 11.0.0-alpha.0 still calls it. Remove the patch once a compatible @astrojs/node release (built against astro 7 beta or later) is available.
+- **Dependency layout**: `dependencies` in `frontend/package.json` contains ONLY packages imported at runtime by the SSR bundle (`@astrojs/rss`, `@prisma/adapter-mariadb`, `@prisma/client`, `@tryghost/content-api`, `jsdom`, `sharp`, `winston`). Everything used only at build time (astro itself, adapters, integrations, tailwindcss, svelte, emoji-picker-element, etc.) lives in `devDependencies` so the production image can drop them with `pnpm prune --prod`. When adding a package, decide based on whether the built server (`dist/server`) imports it at runtime.
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
