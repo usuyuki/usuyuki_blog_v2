@@ -19,7 +19,7 @@ This is a blog application with two main components:
 ## Architecture
 
 The project uses a Docker-based development and deployment setup:
-- Frontend runs on **Astro 5** with **Tailwind CSS 4** and **Svelte 5**
+- Frontend runs on **Astro 7** with **Tailwind CSS 4** and **Svelte 5**
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization

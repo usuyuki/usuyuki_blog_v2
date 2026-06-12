@@ -17,16 +17,16 @@
     "test:run": "vitest run"
   },
   "dependencies": {
-    "@astrojs/node": "^10.1.1",
+    "@astrojs/node": "11.0.0-alpha.0",
     "@astrojs/partytown": "^2.1.7",
     "@astrojs/rss": "^4.0.18",
-    "@astrojs/svelte": "^8.1.1",
+    "@astrojs/svelte": "9.0.0-alpha.2",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@tailwindcss/vite": "^4.3.0",
     "@tryghost/content-api": "^1.12.8",
     "@tryghost/helpers": "^1.1.105",
-    "astro": "^6.3.6",
+    "astro": "7.0.0-beta.3",
     "emoji-picker-element": "^1.29.1",
     "emoji-picker-element-data": "^1.8.0",
     "image-size": "^2.0.2",
@@ -48,7 +48,7 @@
     "postcss-html": "^1.8.1",
     "prisma": "^7.8.0",
     "typescript": "^6.0.3",
-    "vite": "^7.3.2",
+    "vite": "^8.0.16",
     "vitest": "^4.1.7"
   },
   "packageManager": "pnpm@10.33.0",
