@@ -48,7 +48,7 @@ describe("ghostClient", () => {
   describe("slow API warning", () => {
     it("should warn when posts.browse exceeds threshold", async () => {
       // PostsOrPages is BrowseResults<PostOrPage> which extends Array with meta
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: BrowseResultsのメタ付き配列型をテストで簡略化
       vi.spyOn(ghostClient.posts, "browse").mockResolvedValue([] as any);
       vi.spyOn(Date, "now")
         .mockReturnValueOnce(0)
@@ -65,7 +65,7 @@ describe("ghostClient", () => {
 
     it("should not warn when posts.browse is within threshold", async () => {
       // PostsOrPages is BrowseResults<PostOrPage> which extends Array with meta
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // biome-ignore lint/suspicious/noExplicitAny: BrowseResultsのメタ付き配列型をテストで簡略化
       vi.spyOn(ghostClient.posts, "browse").mockResolvedValue([] as any);
       vi.spyOn(Date, "now")
         .mockReturnValueOnce(0)
