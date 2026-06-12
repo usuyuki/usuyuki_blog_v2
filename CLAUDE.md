@@ -31,6 +31,8 @@ The project uses a Docker-based development and deployment setup:
 
 **IMPORTANT: NEVER run `pnpm` commands directly on the host. ALWAYS use `docker compose exec astro pnpm` to ensure commands run inside the container with the correct store and environment.**
 
+**Note**: In development, `node_modules` is stored in a named Docker volume (`astro-node-modules`), not in the host bind mount. This avoids slow VirtioFS I/O on macOS. To reset dependencies completely, remove the volume: `docker compose down && docker volume rm usuyuki_blog_v2_astro-node-modules && docker compose up -d`.
+
 All development work happens in the `frontend/` directory. Use these commands:
 
 ```bash
