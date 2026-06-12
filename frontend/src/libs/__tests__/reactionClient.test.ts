@@ -31,6 +31,7 @@ const { mockEmojiReaction, MockPrismaClientKnownRequestError, mockPrismaOn } =
   });
 
 vi.mock("~/generated/prisma/client", () => ({
+  // biome-ignore lint/complexity/useArrowFunction: newで呼ばれるためコンストラクタ可能なfunction式が必要
   PrismaClient: vi.fn(function () {
     return { emojiReaction: mockEmojiReaction, $on: mockPrismaOn };
   }),
@@ -48,6 +49,7 @@ vi.mock("~/libs/astroLogger", () => ({
 }));
 
 vi.mock("@prisma/adapter-mariadb", () => ({
+  // biome-ignore lint/complexity/useArrowFunction: newで呼ばれるためコンストラクタ可能なfunction式が必要
   PrismaMariaDb: vi.fn(function () {
     return {};
   }),

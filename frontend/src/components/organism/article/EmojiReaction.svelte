@@ -150,7 +150,7 @@
         if (!shadowInput) return;
         const val = (shadowInput as HTMLInputElement).value;
         if (val.length === 1 && /[\u3040-\u9fff\uf900-\ufaff]/.test(val)) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          // biome-ignore lint/suspicious/noExplicitAny: _cmpは非公開内部APIのため型定義が存在しない
           (p as any)._cmp?.$set({ rawSearchText: val + val });
         }
       });
