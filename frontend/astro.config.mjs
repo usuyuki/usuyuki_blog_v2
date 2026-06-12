@@ -20,13 +20,7 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
-        external: (id) => {
-          return (
-            id.includes("winston") ||
-            id.includes("@prisma") ||
-            id.includes(".prisma")
-          );
-        },
+        external: [/winston/, /@prisma/, /\.prisma/],
       },
     },
   },
