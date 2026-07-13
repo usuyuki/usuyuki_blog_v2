@@ -57,12 +57,32 @@ const pageTitle = `${title} | ${SITE_TITLE}`;
 <ClientRouter />
 
 <script>
+  import { isSamePageTraverse } from "~/libs/helper/isSamePageTraverse";
+
   // ClientRouter (View Transitions) でページ遷移後もTwitterウィジェットを再初期化する
   document.addEventListener("astro:page-load", () => {
     // twttrはTwitterウィジェットがグローバルに登録する外部APIなので型定義がない
     const twttr = (window as unknown as { twttr?: { widgets?: { load: () => void } } }).twttr;
     if (twttr?.widgets) {
       twttr.widgets.load();
+    }
+  });
+
+  // 【フォールバック対策】同一記事内で目次タップ等によりhistoryへエントリが積まれた状態から
+  // ブラウザバック/スマホのスワイプバックジェスチャーで戻ると、ClientRouterが
+  // 「見覚えのないhistory.state」と判定してページを丸ごとフェッチ・差し替えしてしまい、
+  // 記事を読んでいる途中で強制的に前のページへ戻されたように見える不具合がある。
+  // isSamePageTraverse が true の場合(同一パスのハッシュ違いのみのtraverse)は
+  // ページ内ハッシュ移動でしかないため、ローダーとDOM差し替えをno-opにして無視する。
+  document.addEventListener("astro:before-preparation", (e) => {
+    if (isSamePageTraverse(e.from, e.to, e.navigationType)) {
+      e.loader = async () => {};
+    }
+  });
+
+  document.addEventListener("astro:before-swap", (e) => {
+    if (isSamePageTraverse(e.from, e.to, e.navigationType)) {
+      e.swap = () => {};
     }
   });
 </script>
