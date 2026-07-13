@@ -294,7 +294,7 @@
 				></div>
 			</div>
 			{#if reactions.length === 0}
-				<p class="text-sm text-gray-400" style="word-break: auto-phrase">絵文字で記事に反応できます</p>
+				<p class="text-sm text-gray-400" style="word-break: keep-all; overflow-wrap: anywhere;">絵文字で記事に<wbr>反応できます</p>
 			{/if}
 		</div>
 	{:else}

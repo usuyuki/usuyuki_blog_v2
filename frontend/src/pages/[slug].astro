@@ -30,8 +30,23 @@ import { LOG_TYPES } from "~/libs/logTypes";
 import type { TOCType } from "~/types/TOCType";
 import { createProxyImageUrl } from "~/libs/imageProxy";
 import { isSlug } from "~/libs/validation/isSlug";
+import { loadDefaultJapaneseParser } from "budoux";
+import { cache } from "~/libs/cache";
+import { clearCache } from "~/libs/ghostClient";
 
+const parser = loadDefaultJapaneseParser();
 const slug = Astro.params.slug;
+
+const debugParam = Astro.url.searchParams.get("debug");
+if (debugParam === "usuyuki-udekumi") {
+  cache.clear();
+  clearCache();
+  astroLogger.info("Manual cache clear via debug param", {
+    slug,
+    logType: LOG_TYPES.ACCESS,
+  });
+}
+
 if (!isSlug(slug)) {
   astroLogger.warn("Invalid slug parameter", {
     logType: LOG_TYPES.ACCESS,
@@ -112,7 +127,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 				<div class="article-label-row">
 					<ArticleLabel badge="Article" date={formatDotDate(post.published_at || "")} />
 				</div>
-				<h1 class="article-title" transition:name={`title-${post.slug}`}>{post.title}</h1>
+				<h1 class="article-title" transition:name={`title-${post.slug}`} set:html={parser.translateHTMLString(post.title || "")} />
 				<div class="article-meta">
 					{publicTags.length > 0 ? <HashTagList tags={publicTags} linked={true} /> : <span />}
 					{post.reading_time != null && post.reading_time > 0 && (

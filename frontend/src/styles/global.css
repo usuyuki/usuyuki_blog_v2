@@ -78,5 +78,6 @@ main {
   text-wrap: balance;
 }
 .auto-phrase {
+  overflow-wrap: anywhere;
   word-break: auto-phrase;
 }
