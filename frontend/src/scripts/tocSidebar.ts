@@ -21,7 +21,7 @@ document.addEventListener("astro:page-load", () => {
       document.getElementById(decodeURIComponent(id));
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
-      history.pushState(null, "", href);
+      history.replaceState(history.state, "", href);
     }
   };
 
