@@ -1,0 +1,106 @@
+---
+import type { TOCType } from "~/types/TOCType";
+
+// 記事の目次。sidebar: PC右カラム用(スクロールスパイ対象) / inline: モバイル用(本文冒頭details内)
+// withHeading: h2見出し(INDEX/灰色背景+下罫線)を出すか。モーダル用に見た目をsidebarと揃えたいがid重複は避けたい時に使う
+interface Props {
+  tocList: TOCType[];
+  variant?: "sidebar" | "inline";
+  id?: string;
+  withHeading?: boolean;
+}
+const {
+  tocList,
+  variant = "sidebar",
+  id,
+  withHeading = variant === "sidebar",
+} = Astro.props;
+const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
+---
+
+{
+	tocList.length > 0 && (
+		<nav class:list={["article-toc", variant]} id={navId} aria-label="目次">
+			{withHeading && <h2>INDEX</h2>}
+			<ol>
+				{tocList.map((toc) => (
+					<li class={`level-${toc.heading}`}>
+						<a href={`#${toc.id}`}>{toc.title}</a>
+					</li>
+				))}
+			</ol>
+		</nav>
+	)
+}
+
+<style>
+	.article-toc {
+		border: var(--bw) solid var(--color-ink);
+		background: var(--color-paper);
+	}
+	.article-toc h2 {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.72rem;
+		letter-spacing: 0.22em;
+		padding: 12px 18px;
+		border-bottom: var(--bw) solid var(--color-ink);
+		background: var(--color-gray);
+	}
+	.article-toc ol {
+		list-style: none;
+		counter-reset: toc;
+		padding: 10px 0;
+	}
+	.article-toc li {
+		counter-increment: toc;
+	}
+	.article-toc a {
+		display: flex;
+		gap: 10px;
+		padding: 8px 18px;
+		font-size: 0.8rem;
+		line-height: 1.6;
+		transition: background 0.15s;
+		word-break: normal;
+		overflow-wrap: break-word;
+	}
+	.article-toc a::before {
+		content: counter(toc, decimal-leading-zero);
+		font-family: var(--font-en);
+		font-weight: 700;
+		color: var(--color-muted);
+		flex: none;
+	}
+	.article-toc a:hover {
+		background: var(--color-gray);
+	}
+	.article-toc a.active {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	.article-toc a.active::before {
+		color: var(--color-paper);
+	}
+	/* 見出しレベルに応じたインデント(h2相当が基準) */
+	.article-toc .level-3 a {
+		padding-left: 30px;
+	}
+	.article-toc .level-4 a,
+	.article-toc .level-5 a,
+	.article-toc .level-6 a {
+		padding-left: 42px;
+	}
+	/* サイドバー用: 高さを超えたらスクロール */
+	.article-toc.sidebar ol {
+		max-height: calc(100vh - 260px);
+		overflow-y: auto;
+	}
+	/* インライン用(details内): 外枠はsummary側の枠線のみで表現するため、navの枠線は出さない */
+	.article-toc.inline {
+		border: none;
+	}
+	.article-toc.inline ol {
+		padding-top: 0;
+	}
+</style>

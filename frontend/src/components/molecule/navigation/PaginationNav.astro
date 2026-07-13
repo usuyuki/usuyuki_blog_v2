@@ -1,0 +1,82 @@
+---
+import {
+  buildArchiveUrl,
+  buildPageList,
+  type SortOrder,
+} from "~/libs/helper/archiveQuery";
+
+// 正方形の数字を並べるページネーション
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  year?: number;
+  sort: SortOrder;
+}
+const { currentPage, totalPages, year, sort } = Astro.props;
+
+const pageList = buildPageList(currentPage, totalPages);
+const pageHref = (page: number) => buildArchiveUrl({ year, sort, page });
+---
+
+{
+	totalPages > 1 && (
+		<nav class="pagination" aria-label="ページ送り">
+			{currentPage > 1 && (
+				<a href={pageHref(currentPage - 1)} aria-label="前のページ">
+					←
+				</a>
+			)}
+			{pageList.map((page) =>
+				page === "ellipsis" ? (
+					<span class="ellipsis">…</span>
+				) : page === currentPage ? (
+					<span aria-current="page">{page}</span>
+				) : (
+					<a href={pageHref(page)}>{page}</a>
+				),
+			)}
+			{currentPage < totalPages && (
+				<a href={pageHref(currentPage + 1)} aria-label="次のページ">
+					→
+				</a>
+			)}
+		</nav>
+	)
+}
+
+<style>
+	.pagination {
+		display: flex;
+		justify-content: center;
+		margin-top: 56px;
+		flex-wrap: wrap;
+	}
+	.pagination a,
+	.pagination span {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.9rem;
+		width: 52px;
+		height: 52px;
+		display: grid;
+		place-items: center;
+		border: var(--bw) solid var(--color-ink);
+		border-left: none;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.pagination > :first-child {
+		border-left: var(--bw) solid var(--color-ink);
+	}
+	.pagination a:hover {
+		background: var(--color-gray);
+	}
+	.pagination [aria-current] {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	.pagination .ellipsis {
+		color: var(--color-muted);
+	}
+</style>

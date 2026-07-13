@@ -1,0 +1,82 @@
+---
+import SectionHead from "~/components/atom/section/SectionHead.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+
+// 罫線で仕切ったタグの壁。/tagsページ本体ではPageHeadが見出しを担うためwithSectionHead=falseで見出しを省略できる
+interface Props {
+  sectionId?: string;
+  withSectionHead?: boolean;
+}
+const { sectionId = "tags", withSectionHead = true } = Astro.props;
+
+const tags = await ghostApiWithRetry.tags.browse(
+  {
+    limit: 100,
+    order: "count.posts DESC",
+    filter: "visibility:public",
+    include: "count.posts",
+  },
+  3,
+  Astro.request,
+);
+---
+
+{
+	tags && tags.length > 0 && (
+		<section
+			class:list={["tags-section", { "no-head": !withSectionHead }]}
+			id={sectionId}
+			aria-label="タグから探す"
+		>
+			<div class="container">
+				{withSectionHead && <SectionHead en="All Tags" jp="タグから探す" />}
+				<div class="tag-wall">
+					{tags.map((tag) => (
+						<a href={`/tags/${tag.slug}`}>{tag.name}</a>
+					))}
+				</div>
+			</div>
+		</section>
+	)
+}
+
+<style>
+	.tags-section {
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	/* SectionHeadを省略した場合はその分の上余白を補う */
+	.tags-section.no-head {
+		padding-top: 48px;
+	}
+	.tag-wall {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		max-width: 100%;
+		margin-bottom: 64px;
+	}
+	.tag-wall a {
+		border: var(--bw) solid var(--color-ink);
+		padding: 12px 22px;
+		font-size: 0.85rem;
+		font-weight: 700;
+		max-width: 100%;
+		min-width: 0;
+		word-break: break-all;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.tag-wall a::before {
+		content: "#";
+		color: var(--color-muted);
+		margin-right: 3px;
+	}
+	.tag-wall a:hover {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	.tag-wall a:hover::before {
+		color: var(--color-paper);
+	}
+</style>

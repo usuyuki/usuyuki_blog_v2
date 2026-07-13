@@ -1,6 +1,8 @@
 ---
-import ArticleArchive from "~/components/molecule/articleArchive/YMDArticleArchive.astro";
-import TagList from "~/components/organism/tag/TagList.astro";
+import PageHead from "~/components/atom/section/PageHead.astro";
+import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
+import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
+import TagWall from "~/components/organism/tag/TagWall.astro";
 import { SITE_URL } from "~/consts";
 import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
@@ -18,6 +20,7 @@ const posts =
       filter: `tag:${tagSlug}`,
       limit: 100,
       order: "published_at DESC",
+      include: "tags",
     },
     3,
     Astro.request,
@@ -35,10 +38,6 @@ if (!tag) {
   return new Response(null, { status: 404 });
 }
 
-const postsData = {
-  posts,
-};
-
 const headMeta: HeadMetaType = {
   title: `${tag.name}タグの記事一覧`,
   slug: `/tag/${tagSlug}`,
@@ -49,19 +48,52 @@ const headMeta: HeadMetaType = {
 ---
 
 <ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-2 mx-2 text-center">「{tag.name}」タグの付いたの記事</h2>
-	<div class="flex justify-center mb-12">
-		<p class="">{tag.description ?? ''}</p>
-	</div>
+	<PageHead en={tag.name ?? tagSlug} jp="タグの記事一覧" count={posts.length} />
 	{
-		postsData.posts && postsData.posts.length > 0 ? (
-			<ArticleArchive {...postsData} />
-		) : (
-			<p class="text-center text-xl mt-2 mb-8">このタグの記事をはありません！</p>
+		tag.description && (
+			<div class="tag-description">
+				<div class="container">
+					<p>{tag.description}</p>
+				</div>
+			</div>
 		)
 	}
-	<div class="mt-12 mb-2">
-		<h2 class="text-2xl font-bold mb-4 text-center">タグ一覧</h2>
-		<TagList liClass="ml-2" ulClass="flex justify-center flex-wrap md:flex-row flex-col" />
-	</div>
+	<section class="tag-list-section" aria-label={`${tag.name}タグの記事一覧`}>
+		<div class="container">
+			{
+				posts.length > 0 ? (
+					<ArticleCellGrid variant="list" class="tag-grid">
+						{posts.map((article, index) => (
+							<ArticleCell article={article} headingLevel="h2" eager={index === 0} />
+						))}
+					</ArticleCellGrid>
+				) : (
+					<p class="empty-message">このタグの記事はありません！</p>
+				)
+			}
+		</div>
+	</section>
+	<TagWall sectionId="tags" />
 </ArchiveLayout>
+
+<style>
+	.tag-description {
+		border-bottom: 1px solid var(--color-border-light);
+	}
+	.tag-description p {
+		padding: 16px 0;
+		font-size: 0.9rem;
+		color: var(--color-muted-dark);
+	}
+	.tag-list-section {
+		padding-bottom: 72px;
+	}
+	.tag-list-section :global(.tag-grid) {
+		margin-top: 48px;
+	}
+	.empty-message {
+		text-align: center;
+		font-size: 1.1rem;
+		padding: 72px 0 24px;
+	}
+</style>

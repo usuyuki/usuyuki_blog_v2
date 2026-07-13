@@ -1,0 +1,55 @@
+---
+import SectionHead from "~/components/atom/section/SectionHead.astro";
+import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
+import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// トップページの最近の記事グリッド(先頭は2x2の大セル)
+interface Props {
+  articles: ArticleArchiveType[];
+}
+const { articles } = Astro.props;
+---
+
+<section class="latest" id="latest" aria-label="最近の記事">
+	<div class="container">
+		<SectionHead en="Latest Articles" jp="最近の記事" />
+		<ArticleCellGrid variant="latest" class="latest-grid">
+			{
+				articles.map((article, index) => (
+					<ArticleCell
+						article={article}
+						feature={index === 0}
+						reveal={true}
+					/>
+				))
+			}
+		</ArticleCellGrid>
+		<a class="view-all" href="/archive">VIEW ALL →</a>
+	</div>
+</section>
+
+<style>
+	.latest {
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	/* グリッド下の中央寄せVIEW ALLボタン(横並びのSectionHeadリンクだと気づきにくいため) */
+	.view-all {
+		display: block;
+		width: fit-content;
+		margin: 40px auto 64px;
+		border: var(--bw) solid var(--color-ink);
+		padding: 16px 56px;
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.85rem;
+		letter-spacing: 0.18em;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.view-all:hover {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+</style>

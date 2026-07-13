@@ -1,0 +1,123 @@
+---
+import {
+  buildHatenaBookmarkUrl,
+  buildMisskeyShareUrl,
+  buildTwitterShareUrl,
+} from "~/libs/helper/shareUrl";
+
+// 罫線のシェアバー(X / MISSKEY / HATENA / FEEDLY / COPY LINK / TOPへ戻る)
+interface Props {
+  url: string;
+  title: string;
+}
+const { url, title } = Astro.props;
+
+const shareLinks = [
+  { label: "X", href: buildTwitterShareUrl(url, title) },
+  { label: "MISSKEY", href: buildMisskeyShareUrl(url, title) },
+  { label: "HATENA", href: buildHatenaBookmarkUrl(url) },
+  {
+    label: "FEEDLY",
+    href: "https://feedly.com/i/subscription/feed%2Fhttps%3A%2F%2Fblog.usuyuki.net%2Frss.xml",
+  },
+];
+---
+
+<div class="share-bar">
+	<span class="label">SHARE</span>
+	{
+		shareLinks.map((link) => (
+			<a href={link.href} target="_blank" rel="noopener noreferrer">
+				{link.label}
+			</a>
+		))
+	}
+	<button type="button" data-copy-link data-copy-url={url}>COPY LINK</button>
+	<button type="button" data-back-to-top aria-label="トップへ戻る">↑ TOP</button>
+</div>
+
+<script>
+	// COPY LINKとトップへ戻る。ClientRouter対応でページ遷移ごとに再登録する
+	document.addEventListener("astro:page-load", () => {
+		const copyButton = document.querySelector<HTMLButtonElement>("[data-copy-link]");
+		copyButton?.addEventListener("click", async () => {
+			const url = copyButton.dataset.copyUrl;
+			if (!url) return;
+			try {
+				await navigator.clipboard.writeText(url);
+				const originalText = copyButton.textContent;
+				copyButton.textContent = "COPIED!";
+				setTimeout(() => {
+					copyButton.textContent = originalText;
+				}, 2000);
+			} catch {
+				// クリップボードAPIが使えない環境では何もしない
+			}
+		});
+
+		document.querySelector("[data-back-to-top]")?.addEventListener("click", () => {
+			window.scrollTo({ top: 0, behavior: "smooth" });
+		});
+	});
+</script>
+
+<style>
+	.share-bar {
+		display: flex;
+		align-items: stretch;
+		justify-content: center;
+		flex-wrap: wrap;
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	.share-bar .label {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.74rem;
+		letter-spacing: 0.22em;
+		padding: 16px 24px;
+		display: flex;
+		align-items: center;
+	}
+	.share-bar a,
+	.share-bar button {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.8rem;
+		letter-spacing: 0.14em;
+		padding: 16px 28px;
+		border: none;
+		border-left: 1px solid var(--color-border-light);
+		background: none;
+		color: inherit;
+		cursor: pointer;
+		transition:
+			background 0.15s,
+			color 0.15s;
+		display: flex;
+		align-items: center;
+	}
+	.share-bar button:last-child {
+		border-right: 1px solid var(--color-border-light);
+	}
+	.share-bar a:hover,
+	.share-bar button:hover {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	@media (max-width: 640px) {
+		.share-bar {
+			justify-content: flex-start;
+		}
+		.share-bar a,
+		.share-bar button {
+			flex: 1 1 33.333%;
+			justify-content: center;
+			padding: 14px 12px;
+		}
+		.share-bar .label {
+			width: 100%;
+			justify-content: center;
+			border-bottom: 1px solid var(--color-border-light);
+		}
+	}
+</style>

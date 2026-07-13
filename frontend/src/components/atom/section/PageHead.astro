@@ -1,0 +1,70 @@
+---
+// 一覧系ページの巨大ページタイトル(+任意の記事数バッジ)
+interface Props {
+  en: string;
+  jp: string;
+  count?: number;
+  countLabel?: string;
+}
+const { en, jp, count, countLabel = "ARTICLES" } = Astro.props;
+---
+
+<div class="page-head">
+	<div class="container page-head-inner">
+		<h1 class="page-title">
+			<span class="en">{en}</span>
+			<span class="jp">{jp}</span>
+		</h1>
+		{
+			count !== undefined && (
+				<p class="article-count">
+					<strong>{count}</strong>
+					{countLabel}
+				</p>
+			)
+		}
+	</div>
+</div>
+
+<style>
+	.page-head {
+		border-bottom: var(--bw) solid var(--color-ink);
+		padding: 56px 0 40px;
+	}
+	.page-head-inner {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 24px;
+		flex-wrap: wrap;
+	}
+	.page-title .en {
+		display: block;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: clamp(2.4rem, 7vw, 4.5rem);
+		letter-spacing: 0.01em;
+		line-height: 1;
+		text-transform: uppercase;
+	}
+	.page-title .jp {
+		display: inline-block;
+		margin-top: 12px;
+		font-size: 0.85rem;
+		font-weight: 700;
+		border-left: 4px solid var(--color-ink);
+		padding-left: 10px;
+	}
+	.article-count {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.8rem;
+		letter-spacing: 0.18em;
+		border: var(--bw) solid var(--color-ink);
+		padding: 10px 20px;
+	}
+	.article-count strong {
+		font-size: 1.3rem;
+		margin-right: 4px;
+	}
+</style>

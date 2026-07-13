@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOGRAが最高という話 ~あにめないと~ | うすゆきブログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS(トップページと共通)
+   ============================================================ */
+:root {
+  --ink: #141414;
+  --paper: #ffffff;
+  --gray: #f4f3f0;
+  --orange: #ff5c00;
+
+  --bw: 2px;
+  --font-display: "Archivo", sans-serif;
+  --font-en: "Space Grotesk", sans-serif;
+  --font-jp: "Zen Kaku Gothic New", sans-serif;
+
+  --max-w: 1240px;
+  --article-w: 760px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+body {
+  font-family: var(--font-jp);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.9;
+  font-size: 15.5px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+img { max-width: 100%; display: block; }
+
+:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ============================================================
+   HEADER(共通)
+   ============================================================ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--paper);
+  border-bottom: var(--bw) solid var(--ink);
+}
+.header-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: 60px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-square { width: 18px; height: 18px; background: var(--orange); flex: none; }
+.brand-mark {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.brand-sub { font-size: 0.68rem; color: #777; white-space: nowrap; }
+.global-nav ul { display: flex; height: 100%; }
+.global-nav li { display: flex; }
+.global-nav a {
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  border-left: 1px solid #ddd;
+  transition: background 0.15s, color 0.15s;
+}
+.global-nav li:last-child a { border-right: 1px solid #ddd; }
+.global-nav a:hover { background: var(--ink); color: var(--paper); }
+.nav-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .brand-sub { display: none; }
+  .global-nav {
+    position: fixed;
+    inset: 60px 0 auto 0;
+    background: var(--paper);
+    border-bottom: var(--bw) solid var(--ink);
+    transform: translateY(-130%);
+    transition: transform 0.25s ease;
+  }
+  .global-nav.open { transform: translateY(0); }
+  .global-nav ul { flex-direction: column; height: auto; }
+  .global-nav a { width: 100%; padding: 16px 24px; border-left: none; border-top: 1px solid #ddd; }
+  .global-nav li:last-child a { border-right: none; }
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 60px;
+    align-self: stretch;
+    padding: 0 18px;
+    background: none;
+    border: none;
+    border-left: 1px solid #ddd;
+    cursor: pointer;
+  }
+  .nav-toggle span { height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+}
+
+/* ============================================================
+   パンくず
+   ============================================================ */
+.breadcrumb {
+  border-bottom: 1px solid #ddd;
+}
+.breadcrumb ol {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0;
+  font-family: var(--font-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  color: #888;
+}
+.breadcrumb li:not(:last-child)::after { content: "/"; margin-left: 8px; color: #ccc; }
+.breadcrumb a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.breadcrumb [aria-current] { color: var(--ink); font-weight: 500; }
+
+/* ============================================================
+   記事ヘッダー
+   ============================================================ */
+.article-header {
+  border-bottom: var(--bw) solid var(--ink);
+  padding: 48px 0;
+}
+.article-header-inner {
+  max-width: var(--article-w);
+  margin: 0 auto;
+}
+.article-label {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 24px;
+  font-family: var(--font-en);
+}
+.article-label .badge {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  padding: 5px 14px;
+  text-transform: uppercase;
+}
+.article-label .date {
+  border: var(--bw) solid var(--ink);
+  border-left: none;
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  padding: 5px 14px;
+  display: flex;
+  align-items: center;
+}
+.article-title {
+  font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+  font-weight: 900;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+.article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.hash-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.hash-tags a::before { content: "#"; color: #999; margin-right: 2px; font-weight: 700; }
+.hash-tags a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.reading-time {
+  font-family: var(--font-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: #888;
+}
+.article-hero {
+  max-width: var(--article-w);
+  margin: 32px auto 0;
+  aspect-ratio: 16 / 8;
+  border: var(--bw) solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  background:
+    repeating-linear-gradient(-45deg, transparent 0 34px, rgba(255,255,255,0.5) 34px 36px),
+    linear-gradient(120deg, #e9e7e3 0%, #b6b2ac 100%);
+}
+
+/* ============================================================
+   記事本文レイアウト(本文 + 目次サイドバー)
+   ============================================================ */
+.article-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 56px;
+  padding: 56px 0 72px;
+  max-width: calc(var(--article-w) + 260px + 56px);
+  margin: 0 auto;
+}
+@media (max-width: 1020px) {
+  .article-layout { grid-template-columns: 1fr; max-width: var(--article-w); }
+  .article-toc { display: none; }
+}
+
+/* --- 目次(sticky) --- */
+.article-toc {
+  position: sticky;
+  top: 100px;
+  align-self: start;
+  border: var(--bw) solid var(--ink);
+}
+.article-toc h2 {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  padding: 12px 18px;
+  border-bottom: var(--bw) solid var(--ink);
+  background: var(--gray);
+}
+.article-toc ol {
+  list-style: none;
+  counter-reset: toc;
+  padding: 10px 0;
+}
+.article-toc li { counter-increment: toc; }
+.article-toc a {
+  display: flex;
+  gap: 10px;
+  padding: 8px 18px;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  transition: background 0.15s;
+}
+.article-toc a::before {
+  content: counter(toc, decimal-leading-zero);
+  font-family: var(--font-en);
+  font-weight: 700;
+  color: #999;
+}
+.article-toc a:hover { background: var(--gray); }
+.article-toc a.active { background: var(--ink); color: var(--paper); }
+.article-toc a.active::before { color: var(--paper); }
+
+/* --- 本文タイポグラフィ --- */
+.article-body { min-width: 0; }
+.article-body > * + * { margin-top: 1.6em; }
+.article-body p { }
+.article-body h2 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  line-height: 1.6;
+  margin-top: 3em;
+  padding: 12px 18px;
+  border: var(--bw) solid var(--ink);
+  border-left-width: 10px;
+  scroll-margin-top: 90px;
+}
+.article-body h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-top: 2.4em;
+  padding-bottom: 8px;
+  border-bottom: var(--bw) solid var(--ink);
+  scroll-margin-top: 90px;
+}
+.article-body a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1.5px;
+}
+.article-body a:hover { background: var(--ink); color: var(--paper); text-decoration: none; }
+.article-body ul, .article-body ol { padding-left: 1.4em; }
+.article-body ul { list-style: square; }
+.article-body ol { list-style: decimal; }
+.article-body li { margin-top: 0.4em; }
+.article-body li::marker { color: #999; font-weight: 700; }
+.article-body blockquote {
+  border-left: var(--bw) solid var(--ink);
+  background: var(--gray);
+  padding: 16px 22px;
+  color: #555;
+  font-size: 0.95em;
+}
+.article-body figure { margin-top: 2em; }
+.article-body .img-placeholder {
+  aspect-ratio: 16 / 9;
+  border: var(--bw) solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  background: linear-gradient(120deg, #f1efec, #d4d0ca);
+}
+.article-body figcaption {
+  font-size: 0.78rem;
+  color: #888;
+  padding: 8px 2px;
+  border-bottom: 1px solid #ddd;
+}
+.article-body code {
+  font-family: "Space Grotesk", monospace;
+  background: var(--gray);
+  border: 1px solid #ddd;
+  padding: 1px 6px;
+  font-size: 0.88em;
+}
+.article-body pre {
+  background: var(--ink);
+  color: #eee;
+  padding: 20px 24px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.article-body pre code { background: none; border: none; padding: 0; color: inherit; }
+
+/* ============================================================
+   シェア + 前後記事ナビ
+   ============================================================ */
+.article-footer {
+  border-top: var(--bw) solid var(--ink);
+}
+.share-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-bottom: var(--bw) solid var(--ink);
+}
+.share-bar .label {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.74rem;
+  letter-spacing: 0.22em;
+  padding: 16px 24px;
+}
+.share-bar a {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  padding: 16px 28px;
+  border-left: 1px solid #ddd;
+  transition: background 0.15s, color 0.15s;
+}
+.share-bar a:last-child { border-right: 1px solid #ddd; }
+.share-bar a:hover { background: var(--ink); color: var(--paper); }
+
+.prev-next {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: var(--bw) solid var(--ink);
+}
+.prev-next a {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.prev-next a:hover { background: var(--gray); }
+.prev-next a:hover .pn-title { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
+.prev-next .next { border-left: var(--bw) solid var(--ink); text-align: right; align-items: flex-end; }
+.pn-label {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  color: #888;
+}
+.pn-title { font-weight: 700; font-size: 0.92rem; line-height: 1.6; }
+@media (max-width: 640px) {
+  .prev-next { grid-template-columns: 1fr; }
+  .prev-next .next { border-left: none; border-top: var(--bw) solid var(--ink); }
+}
+
+/* ============================================================
+   関連記事
+   ============================================================ */
+.related { padding-bottom: 72px; }
+.section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 56px 0 24px;
+}
+.section-title .en {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.section-title .jp {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-left: 4px solid var(--ink);
+  padding-left: 10px;
+}
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: var(--bw) solid var(--ink);
+  border-left: var(--bw) solid var(--ink);
+}
+@media (max-width: 860px) { .related-grid { grid-template-columns: 1fr; } }
+.article-cell {
+  border-right: var(--bw) solid var(--ink);
+  border-bottom: var(--bw) solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  transition: background 0.15s;
+}
+.article-cell:hover { background: var(--gray); }
+.cell-thumb {
+  aspect-ratio: 16 / 9;
+  border-bottom: var(--bw) solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 2.6rem;
+}
+.t1 { background: linear-gradient(120deg, #f1efec, #d4d0ca); }
+.t2 { background: linear-gradient(120deg, #faf9f7, #c8c4be); }
+.t3 { background: linear-gradient(120deg, #ebe9e5, #a7a29b); }
+.cell-body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.cell-date {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #888;
+}
+.cell-title { font-size: 0.95rem; font-weight: 700; line-height: 1.65; flex: 1; }
+.article-cell:hover .cell-title { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
+
+/* ============================================================
+   FOOTER(共通)
+   ============================================================ */
+.site-footer { background: var(--ink); color: #eee; padding: 56px 0 32px; }
+.footer-huge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 9vw, 6.5rem);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--paper);
+  border-bottom: var(--bw) solid #444;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+}
+.footer-huge .dot { color: var(--orange); }
+.footer-grid { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; margin-bottom: 48px; }
+.footer-tag { font-size: 0.85rem; color: #aaa; max-width: 320px; }
+.footer-links { display: flex; gap: 64px; flex-wrap: wrap; }
+.footer-links h3 {
+  font-family: var(--font-en);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: #999;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.footer-links li { margin-bottom: 8px; }
+.footer-links a { font-size: 0.86rem; color: #ccc; }
+.footer-links a:hover { color: var(--paper); text-decoration: underline; text-underline-offset: 4px; }
+.footer-copy {
+  border-top: 1px solid #333;
+  padding-top: 20px;
+  font-family: var(--font-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #777;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="#">
+      <span class="brand-square" aria-hidden="true"></span>
+      <span class="brand-mark">USUYUKI BLOG</span>
+      <span class="brand-sub">急須で入れたような何か</span>
+    </a>
+    <button class="nav-toggle" aria-label="メニューを開閉" aria-expanded="false" aria-controls="global-nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="global-nav" id="global-nav" aria-label="グローバルナビゲーション">
+      <ul>
+        <li><a href="#">TOP</a></li>
+        <li><a href="#">ALL</a></li>
+        <li><a href="#">TAGS</a></li>
+        <li><a href="#">ABOUT</a></li>
+        <li><a href="#">RSS</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ パンくず ============ -->
+<nav class="breadcrumb" aria-label="パンくず">
+  <div class="container">
+    <ol>
+      <li><a href="#">TOP</a></li>
+      <li><a href="#">記事一覧</a></li>
+      <li aria-current="page">MOGRAが最高という話</li>
+    </ol>
+  </div>
+</nav>
+
+<main>
+
+<!-- ============ 記事ヘッダー ============ -->
+<header class="article-header">
+  <div class="container">
+    <div class="article-header-inner">
+      <div class="article-label">
+        <span class="badge">Article</span>
+        <span class="date">2026.06.18</span>
+      </div>
+      <h1 class="article-title">MOGRAが最高という話 ~あにめないと~</h1>
+      <div class="article-meta">
+        <div class="hash-tags">
+          <a href="#">アニメ</a>
+          <a href="#">おでかけ</a>
+        </div>
+        <span class="reading-time">READ: 5 MIN</span>
+      </div>
+    </div>
+    <div class="article-hero" role="img" aria-label="記事カバー画像(実装時はOGP画像に差し替え)">🎧</div>
+  </div>
+</header>
+
+<!-- ============ 本文 + 目次 ============ -->
+<div class="container">
+  <div class="article-layout">
+
+    <article class="article-body">
+      <p>秋葉原MOGRAの「あにめないと」に行ってきた。結論から言うと最高だった。この記事では、初めてアニソンクラブイベントに行く人向けに、何がどう最高だったのかを順を追って書いていく。</p>
+      <p>ダミーテキストです。実装時はここにMarkdownから変換された本文が入ります。イベントの雰囲気、客層、音響、そして「アニソンで踊る」という体験がどういうものかを、体験ベースで綴っていきます。</p>
+
+      <h2 id="sec-1">MOGRAとは何か</h2>
+      <p>秋葉原の末広町にあるクラブで、アニソン・ゲーム音楽・ボカロなどを中心としたイベントが多く開催されている。いわゆる「オタク向けクラブ」の聖地のような場所。</p>
+      <p>ダミー段落。<a href="#">テキストリンクのスタイル</a>はこのように下線+ホバーで黒反転します。</p>
+      <blockquote>
+        <p>引用のスタイル。イベント公式の説明文や、他の方の感想を引用するときはこの見た目になります。</p>
+      </blockquote>
+
+      <h2 id="sec-2">あにめないとの雰囲気</h2>
+      <p>ダミー段落。フロアの熱気、コールの一体感、DJの選曲の妙などについて書くセクション。</p>
+      <h3>客層について</h3>
+      <p>ダミー段落。初見でも入りやすい空気感について。</p>
+      <h3>音響と照明</h3>
+      <p>ダミー段落。箇条書きのスタイルはこちら:</p>
+      <ul>
+        <li>低音がしっかり出ていて、普段イヤホンで聴く曲が別物になる</li>
+        <li>照明の演出が曲のサビに合わせて変わる</li>
+        <li>スクリーンにMVやアニメ映像が流れる</li>
+      </ul>
+      <figure>
+        <div class="img-placeholder" aria-hidden="true">📸</div>
+        <figcaption>フロアの様子(実装時は撮影画像に差し替え)</figcaption>
+      </figure>
+
+      <h2 id="sec-3">行くときのTips</h2>
+      <p>ダミー段落。番号付きリストのスタイル:</p>
+      <ol>
+        <li>チケットは事前購入がおすすめ</li>
+        <li>ドリンク代は現金で用意しておく</li>
+        <li>荷物はロッカーへ(小さめのバッグ推奨)</li>
+      </ol>
+      <p>技術ブログ記事用に、コードブロックのスタイルも用意しています。インラインコードは <code>docker compose up -d</code> のような見た目です。</p>
+      <pre><code>// コードブロックのスタイル
+const kyusu = pour("hojicha");
+console.log(kyusu); // "何か"</code></pre>
+
+      <h2 id="sec-4">まとめ</h2>
+      <p>ダミー段落。MOGRAは最高。アニソンが好きなら一度は行くべき場所だと思う。次はRe:animationにも行ってみたい。</p>
+    </article>
+
+    <!-- 目次(PCのみ表示 / sticky) -->
+    <nav class="article-toc" aria-label="目次">
+      <h2>INDEX</h2>
+      <ol>
+        <li><a href="#sec-1">MOGRAとは何か</a></li>
+        <li><a href="#sec-2">あにめないとの雰囲気</a></li>
+        <li><a href="#sec-3">行くときのTips</a></li>
+        <li><a href="#sec-4">まとめ</a></li>
+      </ol>
+    </nav>
+
+  </div>
+</div>
+
+<!-- ============ シェア + 前後記事 ============ -->
+<footer class="article-footer">
+  <div class="container">
+    <div class="share-bar">
+      <span class="label">SHARE</span>
+      <a href="#">X</a>
+      <a href="#">MISSKEY</a>
+      <a href="#">COPY LINK</a>
+    </div>
+    <nav class="prev-next" aria-label="前後の記事">
+      <a class="prev" href="#">
+        <span class="pn-label">← PREV</span>
+        <span class="pn-title">しぐれういのライブ Wishing Umbrella で心臓をぶち抜かれた話</span>
+      </a>
+      <a class="next" href="#">
+        <span class="pn-label">NEXT →</span>
+        <span class="pn-title">うすゆきブログの最近の改善(リアクション機能など)</span>
+      </a>
+    </nav>
+  </div>
+</footer>
+
+<!-- ============ 関連記事 ============ -->
+<section class="related" aria-labelledby="related-title">
+  <div class="container">
+    <div class="section-head">
+      <h2 class="section-title" id="related-title">
+        <span class="en">Related</span>
+        <span class="jp">関連記事</span>
+      </h2>
+    </div>
+    <div class="related-grid">
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t1" aria-hidden="true">☂️</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.05.31</span>
+          <h3 class="cell-title">しぐれういのライブ Wishing Umbrella で心臓をぶち抜かれた話</h3>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t2" aria-hidden="true">💖</div>
+        <div class="cell-body">
+          <span class="cell-date">2023.07.03</span>
+          <h3 class="cell-title">推しという感情はお得</h3>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t3" aria-hidden="true">🌉</div>
+        <div class="cell-body">
+          <span class="cell-date">2023.06.07</span>
+          <h3 class="cell-title">#さな歩き でめぐる隅田川の古い橋11つ</h3>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container">
+    <p class="footer-huge">Usuyuki Blog<span class="dot">.</span></p>
+    <div class="footer-grid">
+      <p class="footer-tag">急須で入れたような何かを、ゆるゆると注いでいくブログです。</p>
+      <div class="footer-links">
+        <div>
+          <h3>Site Map</h3>
+          <ul>
+            <li><a href="#">このブログについて</a></li>
+            <li><a href="#">アーカイブ</a></li>
+            <li><a href="#">RSS</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Links</h3>
+          <ul>
+            <li><a href="https://x.com/usuyuki26">X</a></li>
+            <li><a href="https://m5y.usuyuki.net/@usuyuki">Misskey</a></li>
+            <li><a href="https://github.com/usuyuki">GitHub</a></li>
+            <li><a href="https://usuyuki.net">ポートフォリオ</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">
+      <span>© USUYUKI</span>
+      <span>POURED FROM A KYUSU, SINCE 2020</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// モバイルナビ開閉
+const toggle = document.querySelector('.nav-toggle');
+const nav = document.getElementById('global-nav');
+toggle.addEventListener('click', () => {
+  const open = nav.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', String(open));
+});
+
+// 目次のアクティブ表示(スクロール連動)
+const tocLinks = [...document.querySelectorAll('.article-toc a')];
+const headings = tocLinks.map((a) => document.querySelector(a.getAttribute('href')));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) {
+      const idx = headings.indexOf(e.target);
+      tocLinks.forEach((a, i) => a.classList.toggle('active', i === idx));
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+headings.forEach((h) => h && spy.observe(h));
+</script>
+
+</body>
+</html>

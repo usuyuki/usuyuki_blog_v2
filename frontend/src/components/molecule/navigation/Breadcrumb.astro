@@ -1,0 +1,61 @@
+---
+// パンくずリスト。最後の項目が現在ページになる
+interface Props {
+  items: { label: string; href?: string }[];
+}
+const { items } = Astro.props;
+---
+
+<nav class="breadcrumb" aria-label="パンくず">
+	<div class="container">
+		<ol>
+			{
+				items.map((item, index) =>
+					index === items.length - 1 ? (
+						<li aria-current="page">{item.label}</li>
+					) : (
+						<li>
+							<a href={item.href}>{item.label}</a>
+						</li>
+					),
+				)
+			}
+		</ol>
+	</div>
+</nav>
+
+<style>
+	.breadcrumb {
+		border-bottom: 1px solid var(--color-border-light);
+	}
+	.breadcrumb ol {
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		padding: 12px 0;
+		font-family: var(--font-en);
+		font-size: 0.72rem;
+		letter-spacing: 0.12em;
+		color: var(--color-muted);
+	}
+	.breadcrumb li:not(:last-child)::after {
+		content: "/";
+		margin-left: 8px;
+		color: var(--color-faint);
+	}
+	.breadcrumb a:hover {
+		color: var(--color-ink);
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.breadcrumb [aria-current] {
+		color: var(--color-ink);
+		font-weight: 500;
+		/* 長いタイトルでも1行に収める */
+		max-width: 60ch;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+</style>

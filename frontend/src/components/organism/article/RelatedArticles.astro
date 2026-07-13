@@ -1,0 +1,33 @@
+---
+import SectionHead from "~/components/atom/section/SectionHead.astro";
+import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
+import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// 記事詳細下部の関連記事(タグベース3件)
+interface Props {
+  articles: ArticleArchiveType[];
+}
+const { articles } = Astro.props;
+---
+
+{
+	articles.length > 0 && (
+		<section class="related" aria-label="関連記事">
+			<div class="container">
+				<SectionHead en="Related" jp="関連記事" />
+				<ArticleCellGrid variant="related">
+					{articles.map((article) => (
+						<ArticleCell article={article} contextPrefix="related-" />
+					))}
+				</ArticleCellGrid>
+			</div>
+		</section>
+	)
+}
+
+<style>
+	.related {
+		padding-bottom: 72px;
+	}
+</style>

@@ -90,20 +90,36 @@ The frontend follows Atomic Design principles:
 - **Molecule**: Components that depend on other components
 - **Organism**: Components that fetch external data or manage state
 
+## Design System
+
+エディトリアル(新聞・雑誌)調のデザイン。原典は `wire/` のワイヤーフレーム3枚(トップ・記事一覧・記事詳細のHTML)。
+
+- **デザイントークン**: `frontend/src/styles/tailwind.css` の `@theme` で定義 — `--color-ink: #141414`(文字・罫線)/ `--color-paper: #ffffff`(背景)/ `--color-gray: #f4f3f0` / `--color-orange: #ff5c00`(アクセント)/ `--font-display`・`--font-en`(システムサンセリフ。Webフォントは使わない)
+- **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px`
+- **原則**: 角丸なし(`rounded-*` を使わない)、2px罫線で構造を見せる、英字見出しは900ウェイト+letter-spacing、ホバーは黒反転か下線
+- **レイアウト**: `main` はフルブリード。各セクションが内側に `.container` を持つ
+- **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)
+- **記事セル**: `molecule/articleArchive/ArticleCell.astro`(+`ArticleCellGrid.astro`)をトップ/一覧/タグ/関連記事で共用。外部記事(Qiita/Zenn)はソース名バッジ付きで外部リンク
+- **クライアントスクリプト**: `src/scripts/globalNav.ts`(ハンバーガー)/ `reveal.ts`(スクロール出現)/ `tocSidebar.ts`(目次スクロールスパイ)。すべて `astro:page-load` で初期化(ClientRouter対応)
+
 ## Key Files and Directories
 
-- `frontend/src/consts.ts` - Site configuration constants
-- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching
+- `frontend/src/consts.ts` - Site configuration constants(`SITE_TITLE_EN`: ヘッダー/フッター共用の英字ブランド表記、`SOCIAL_LINKS`: SNS・外部プロフィールリンクの一覧。console banner(`libs/console/snsLinkProvider.ts`)も含め表記揺れを避けるためこれらを唯一の情報源とする)
+- `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching (posts.browse は `include: "tags"` で公開タグも変換)
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
-- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
+- `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
+- `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
+- `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
 - `frontend/src/libs/qiitaClient.ts` - Qiita API v2 client with pagination and caching (full article history)
 - `frontend/src/libs/config.ts` - Configuration management for external integrations
 - `frontend/src/libs/errorHandler.ts` - Centralized error handling and logging
 - `frontend/src/libs/cache.ts` - In-memory caching system for API responses
 - `frontend/src/components/` - Astro components organized by atomic design
-- `frontend/src/pages/` - Astro pages and routes
-- `frontend/src/styles/` - CSS files including Ghost content styling
+- `frontend/src/pages/` - Astro pages and routes (`/archive` は `?year=&sort=&page=` のSSRクエリパラメータ方式。旧 `/archive/[year]`・`/archive/[year]/[month]` は301で `/archive?year=` へリダイレクト。`/tags` はタグ一覧ページで、ヘッダーのTAGSナビのリンク先)
+- `frontend/src/styles/` - CSS files including Ghost content styling (`blog/blogCommon.css` が記事本文タイポグラフィ)
+- `wire/` - 新デザインのワイヤーフレーム(HTML3枚、デザインの原典)
 - `compose.yml` - Development Docker configuration
 - `compose-prod.yml` - Production Docker configuration
 
@@ -240,9 +256,9 @@ The application uses multiple layers of caching for performance:
 ### In-Memory Application Cache
 - **Location**: `frontend/src/libs/cache.ts`
 - **Scope**: In-memory cache that persists during container runtime
-- **Used by**: Archive API (`/api/archive`), Ghost client, RSS client, Qiita API client
+- **Used by**: 記事一覧ページ・前後記事ナビ (`getAllArticlesCached`、キー `aggregated_all_articles:v2:*`), Ghost client, RSS client, Qiita API client
 - **Cache Duration**: 
-  - Archive articles: 1 hour (`ONE_HOUR_MS`)
+  - Aggregated articles: 1 hour (`ONE_HOUR_MS`)
   - Ghost API responses: 1 hour (configurable per endpoint)
   - RSS feed responses: 1 hour
   - Qiita API responses: 1 hour (cache key: `qiita_api:{userId}`)

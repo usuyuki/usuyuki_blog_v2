@@ -1,0 +1,66 @@
+---
+// 罫線グリッドのラッパー。variantで列数とレスポンシブ挙動を切り替える
+// latest: トップ(4列、featureセルあり) / list: 一覧(4列) / related: 関連記事(3列)
+interface Props {
+  variant?: "latest" | "list" | "related";
+  class?: string;
+}
+const { variant = "list", class: className = "" } = Astro.props;
+---
+
+<div class:list={["cell-grid", variant, className]}>
+	<slot />
+</div>
+
+<style>
+	.cell-grid {
+		display: grid;
+		border-top: var(--bw) solid var(--color-ink);
+		border-left: var(--bw) solid var(--color-ink);
+	}
+	/*
+	 * 以下のブレークポイントはtailwind.cssの--breakpoint-*とは独立した値。
+	 * セル内コンテンツ(サムネ16:9+タイトル+タグ)が窮屈にならない最小幅を列数ごとに
+	 * 逆算した値のため、共通トークンに丸めると列がつぶれて可読性が落ちる。
+	 * 列数を増減する場合は各バリアントごとに実機で確認しながら調整すること。
+	 */
+	.latest {
+		grid-template-columns: repeat(4, 1fr);
+	}
+	@media (max-width: 960px) {
+		.latest {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+	@media (max-width: 560px) {
+		.latest {
+			grid-template-columns: 1fr;
+		}
+	}
+	.list {
+		grid-template-columns: repeat(4, 1fr);
+	}
+	@media (max-width: 1080px) {
+		.list {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+	@media (max-width: 820px) {
+		.list {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+	@media (max-width: 540px) {
+		.list {
+			grid-template-columns: 1fr;
+		}
+	}
+	.related {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	@media (max-width: 860px) {
+		.related {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>

@@ -11,9 +11,13 @@ import type {
   Tag,
 } from "@tryghost/content-api";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+import { getPublicTags } from "~/libs/helper/articleCell";
 
 // Ghost APIのnullable型を内部型に変換(Astro内部ではnullableを気にしなくて良くなるようにしたいので)
 function convertToArticleArchiveType(post: PostOrPage): ArticleArchiveType {
+  // includeにtagsを指定した場合のみpost.tagsが入る。公開タグだけを表示に使う
+  const publicTags = post.tags ? getPublicTags(post.tags) : undefined;
+
   return {
     slug: post.slug || "",
     published_at: post.published_at || "",
@@ -25,6 +29,7 @@ function convertToArticleArchiveType(post: PostOrPage): ArticleArchiveType {
         : post.excerpt
       : undefined,
     isExternal: false,
+    tags: publicTags,
   };
 }
 

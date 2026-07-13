@@ -1,111 +1,13 @@
 ---
-import ArticleArchive from "~/components/molecule/articleArchive/DArticleArchive.astro";
-import { SITE_URL } from "~/consts";
-import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
-import { getLatestArticles } from "~/libs/articleAggregator";
 import { isMonth } from "~/libs/validation/isMonth";
 import { isYear } from "~/libs/validation/isYear";
-import type { HeadMetaType } from "~/types/HeadMetaType";
 
-//バリデーション
+// 月別アーカイブは廃止し、一覧ページの年フィルターへ301で恒久リダイレクトする
 const yearSlug = Number(Astro.params.year);
 const monthSlug = Number(Astro.params.month);
 if (!(isYear(yearSlug) && isMonth(monthSlug))) {
   return new Response(null, { status: 404 });
 }
 
-/**
- * 月の終わりの日は年と月によって異なるのでdataオブジェクト経由で取得
- * Dateオブジェクトで0を使うと前の月の最終日を取得できるので、1月足した上でその月の0日を取得→前の月の最終日がわかる
- * 月が12月でも動作する。
- */
-const date = new Date(yearSlug, monthSlug + -1, 1);
-date.setMonth(date.getMonth() + 1);
-date.setDate(date.getDate() - 1);
-const lastDay = date.getDate();
-// getLatestArticles関数で全記事取得後、年月でフィルタリング
-const allArticles = await getLatestArticles({
-  includeExternal: true, // RSS記事も含める
-  unlimited: true, // 全記事を取得
-});
-
-// 指定年月の記事のみフィルタリング
-const monthStart = new Date(
-  `${yearSlug}-${monthSlug.toString().padStart(2, "0")}-01T00:00:00`,
-);
-const monthEnd = new Date(
-  `${yearSlug}-${monthSlug.toString().padStart(2, "0")}-${lastDay}T23:59:59`,
-);
-
-const posts = allArticles
-  .filter((article) => {
-    let articleDate: Date;
-
-    if (typeof article.published_at === "string") {
-      articleDate = new Date(article.published_at);
-    } else {
-      // DateType format
-      articleDate = new Date(
-        `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
-      );
-    }
-
-    return articleDate >= monthStart && articleDate <= monthEnd;
-  })
-  .sort((a, b) => {
-    // 日付順でソート（古い順 = ASC）
-    const dateA =
-      typeof a.published_at === "string"
-        ? new Date(a.published_at).getTime()
-        : new Date(
-            `${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`,
-          ).getTime();
-
-    const dateB =
-      typeof b.published_at === "string"
-        ? new Date(b.published_at).getTime()
-        : new Date(
-            `${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`,
-          ).getTime();
-
-    return dateA - dateB; // ASC order
-  });
-
-//先月と来月の算出
-const prevMonth = new Date(yearSlug, monthSlug - 2, 1);
-const nextMonth = new Date(yearSlug, monthSlug, 1);
-
-const postsData = {
-  posts: posts || [],
-};
-
-const headMeta: HeadMetaType = {
-  title: `${yearSlug}年${monthSlug}月の記事`,
-  slug: `/archive/${yearSlug}/${monthSlug}`,
-  description: `うすゆきブログ${yearSlug}年の${monthSlug}アーカイブです`,
-  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
-};
+return Astro.redirect(`/archive?year=${yearSlug}`, 301);
 ---
-
-<ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-12 mx-2 text-center">{yearSlug}年{monthSlug}月の記事</h2>
-	{
-		postsData.posts && postsData.posts.length > 0 ? (
-			<ArticleArchive {...postsData} />
-		) : (
-			<p class="text-center text-xl mt-2 mb-8">
-				{yearSlug}年{monthSlug}月はまだ記事を書いていません！ごめんなさい！
-			</p>
-		)
-	}
-	<div class="flex justify-center mt-12">
-		<a
-			href={`/archive/${nextMonth.getFullYear()}/${nextMonth.getMonth() + 1}`}
-			class="text-blue text-xl mx-2">←次の月</a
-		>
-		<a
-			href={`/archive/${prevMonth.getFullYear()}/${prevMonth.getMonth() + 1}`}
-			class="text-blue text-xl mx-2">前の月→</a
-		>
-	</div>
-</ArchiveLayout>

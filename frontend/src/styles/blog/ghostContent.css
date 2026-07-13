@@ -2,10 +2,10 @@
 @import "../tailwind.css";
 @layer components {
   .kg-bookmark-card {
-    @apply mx-auto my-2 p-4 md:w-4/5 rounded-lg border-dashed border-black border-2 hover:shadow-lg duration-500;
+    @apply mx-auto my-2 p-4 md:w-4/5 border-2 border-ink hover:bg-gray duration-150;
   }
   .kg-callout-card {
-    @apply flex my-4 px-2 py-4 rounded-lg border-2 w-full items-center border-orange;
+    @apply flex my-4 px-2 py-4 border-2 w-full items-center border-orange;
   }
   .kg-callout-emoji {
     @apply p-2 text-2xl font-bold mr-2;
@@ -20,27 +20,36 @@
     @apply !aspect-video w-full h-fit;
   }
   .kg-bookmark-icon {
-    @apply object-contain w-6 h-6 mr-2;
+    @apply object-contain w-5 h-5 mr-2;
   }
+  /* タイトルは全幅、その下に説明文+サムネ・メタデータ+サムネの2行を並べるgrid
+     (contentはdisplay:contentsで消し、直下のtitle/description/metadataを直接gridアイテム化する) */
   .kg-bookmark-container {
-    @apply flex md:flex-row flex-col;
+    @apply grid grid-cols-1 gap-x-4 md:grid-cols-[3fr_2fr] no-underline;
   }
   .kg-bookmark-content {
-    @apply md:w-3/5;
+    @apply contents;
   }
   .kg-bookmark-thumbnail {
-    @apply md:w-2/5;
+    @apply md:row-span-2 md:col-start-2 md:row-start-2;
   }
   .kg-bookmark-thumbnail > img {
-    @apply object-cover w-full rounded-lg aspect-video;
+    @apply object-cover w-full aspect-video border-2 border-ink;
   }
   .kg-bookmark-title {
-    @apply text-xl font-bold;
+    @apply md:col-span-2 text-xl font-bold line-clamp-2 min-h-0 max-h-14 mb-3;
   }
   .kg-bookmark-description {
-    @apply flex h-20 text-sm overflow-y-hidden;
+    @apply md:col-start-1 md:row-start-2 text-sm line-clamp-2 min-h-0 max-h-10 text-muted;
   }
   .kg-bookmark-metadata {
-    @apply items-center flex-wrap mb-2 w-full md:flex hidden md:h-6;
+    @apply md:col-start-1 md:row-start-3 items-center flex-nowrap overflow-hidden mt-3 w-full md:flex hidden md:h-6;
+  }
+  .kg-bookmark-author,
+  .kg-bookmark-publisher {
+    @apply truncate text-xs font-bold tracking-wide;
+  }
+  .kg-bookmark-publisher {
+    @apply flex-none ml-2 text-muted;
   }
 }

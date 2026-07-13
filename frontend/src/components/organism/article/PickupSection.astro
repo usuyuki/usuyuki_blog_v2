@@ -1,0 +1,34 @@
+---
+import SectionHead from "~/components/atom/section/SectionHead.astro";
+import PickupRow from "~/components/molecule/pickup/PickupRow.astro";
+import { getFeaturedArticles } from "~/libs/articleAggregator";
+
+// Ghostでfeatured指定した記事を番号付きリストで見せるセクション
+const featuredArticles = await getFeaturedArticles({ limit: 6 });
+---
+
+{
+	featuredArticles.length > 0 && (
+		<section class="pickup" aria-label="初めての方におすすめ">
+			<div class="container">
+				<SectionHead en="Pickup" jp="初めての方におすすめ" />
+				<div class="pickup-list">
+					{featuredArticles.map((article, index) => (
+						<PickupRow article={article} no={index + 1} />
+					))}
+				</div>
+			</div>
+		</section>
+	)
+}
+
+<style>
+	.pickup {
+		background: var(--color-gray);
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	.pickup-list {
+		border-top: var(--bw) solid var(--color-ink);
+		margin-bottom: 64px;
+	}
+</style>

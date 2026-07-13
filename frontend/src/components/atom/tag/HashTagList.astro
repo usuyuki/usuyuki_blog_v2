@@ -1,0 +1,39 @@
+---
+import type { ArticleTagType } from "~/types/ArticleArchiveType";
+
+// 「#タグ名」の並び。記事セルなど<a>の内側で使うときはlinked=false(span)にする
+interface Props {
+  tags: ArticleTagType[];
+  linked?: boolean;
+}
+const { tags, linked = false } = Astro.props;
+---
+
+<div class="hash-tags">
+	{
+		tags.map((tag) =>
+			linked ? <a href={`/tags/${tag.slug}`}>{tag.name}</a> : <span>{tag.name}</span>,
+		)
+	}
+</div>
+
+<style>
+	.hash-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px 14px;
+		font-size: 0.78rem;
+		font-weight: 500;
+	}
+	.hash-tags span::before,
+	.hash-tags a::before {
+		content: "#";
+		color: var(--color-muted);
+		margin-right: 2px;
+		font-weight: 700;
+	}
+	.hash-tags a:hover {
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+</style>

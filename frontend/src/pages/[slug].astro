@@ -1,19 +1,28 @@
 ---
 import "~/styles/blog/ghostContent.css";
 import "~/styles/blog/wordpressContent.css";
-import "~/styles/blog/ghostToc.css";
 import "~/styles/blog/blogCommon.css";
-import YMDMolecule from "~/components/atom/date/YMDMolecule.astro";
-import TOC from "~/components/atom/TOC.astro";
-import TagList from "~/components/atom/tag/TagList.astro";
+import ArticleLabel from "~/components/atom/article/ArticleLabel.astro";
+import HashTagList from "~/components/atom/tag/HashTagList.astro";
+import ArticleToc from "~/components/molecule/article/ArticleToc.astro";
+import PrevNextNav from "~/components/molecule/article/PrevNextNav.astro";
+import ShareBar from "~/components/molecule/article/ShareBar.astro";
+import Breadcrumb from "~/components/molecule/navigation/Breadcrumb.astro";
 import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
-import ArticleShareButtons from "~/components/molecule/article/ArticleShareButtons.astro";
+import RelatedArticles from "~/components/organism/article/RelatedArticles.astro";
 import { getFrontendUrl } from "~/libs/env";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
+import {
+  getAdjacentArticles,
+  getAllGhostArticlesForArticlePage,
+  getRelatedArticles,
+} from "~/libs/articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { addHeadingIds } from "~/libs/helper/addHeadingIds";
+import { addTargetBlankToLinks } from "~/libs/helper/addTargetBlankToLinks";
+import { getPublicTags } from "~/libs/helper/articleCell";
+import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
-import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import astroLogger from "~/libs/astroLogger";
@@ -50,7 +59,20 @@ if (!post) {
   });
   return new Response(null, { status: 404 });
 }
-const publishedDate = iso8601TimeToDate(post.published_at || "");
+
+// 公開タグのみ表示・関連記事検索に使う
+const publicTags = getPublicTags(post.tags);
+
+// 前後記事・関連記事の両方が使うGhost全記事リストを一度だけ取得する。
+// この時点でslugの鮮度チェック(公開直後のキャッシュミス時は強制再取得)まで
+// 済ませておくことで、後続の2関数が同じ鮮度のスナップショットを参照できる。
+const allGhostArticles = await getAllGhostArticlesForArticlePage(slug);
+
+// 前後記事と関連記事を並列取得
+const [adjacent, relatedArticles] = await Promise.all([
+  getAdjacentArticles(slug, allGhostArticles),
+  getRelatedArticles({ slug, tags: publicTags }, { allGhostArticles }),
+]);
 
 astroLogger.requestLog(Astro.request, { status: 200 });
 
@@ -64,97 +86,389 @@ const headMeta = {
 
 const isWpArticle = judgeWpArticle(post.html || "");
 // WP記事は見出しにidがないため、テキストからidを生成して付与する
-const processedHtml = isWpArticle
+const headingProcessedHtml = isWpArticle
   ? addHeadingIds(post.html || "")
   : post.html || "";
-const tocList: TOCType[] = generateTOC(processedHtml);
+const tocList: TOCType[] = generateTOC(headingProcessedHtml);
+// 本文内リンクは全て新しいタブで開く
+const processedHtml = addTargetBlankToLinks(headingProcessedHtml);
+
+const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 ---
 
 <ArticleLayout {...headMeta}>
-	<div class="flex justify-end mx-auto w-full lg:w-4/5 xl:w-5/7 flex-wrap">
-		<div class="w-full pb-4 flex justify-center">
+	<Breadcrumb
+		items={[
+			{ label: "TOP", href: "/" },
+			{ label: "記事一覧", href: "/archive" },
+			{ label: post.title || "" },
+		]}
+	/>
+
+	<!-- 記事ヘッダー -->
+	<header class="article-header" id="article-header">
+		<div class="container">
+			<div class="article-header-inner">
+				<div class="article-label-row">
+					<ArticleLabel badge="Article" date={formatDotDate(post.published_at || "")} />
+				</div>
+				<h1 class="article-title" transition:name={`title-${post.slug}`}>{post.title}</h1>
+				<div class="article-meta">
+					{publicTags.length > 0 ? <HashTagList tags={publicTags} linked={true} /> : <span />}
+					{post.reading_time != null && post.reading_time > 0 && (
+						<span class="reading-time">READ: {post.reading_time} MIN</span>
+					)}
+				</div>
+			</div>
 			{
-				post.feature_image ? (
+				post.feature_image && (
 					<img
-						src={optimizeGhostImageUrl(post.feature_image, { width: 600, height: 600 })}
-						width={600}
+						class="article-hero"
+						src={optimizeGhostImageUrl(post.feature_image, { width: 1200, height: 600 })}
+						width={1200}
 						height={600}
-						class="object-cover w-96 h-96 rounded-md"
 						alt="記事サムネイル"
-						transition:name={'image-' + post.slug}
+						transition:name={`image-${post.slug}`}
 						loading="eager"
 						fetchpriority="high"
 					/>
-				) : (
-					''
 				)
 			}
 		</div>
-		<div class="md:w-1/5 hidden md:block">
-			<YMDMolecule
-				year={publishedDate.year}
-				month={publishedDate.month}
-				day={publishedDate.day}
-				slug={post.slug}
-			/>
-		</div>
-		<div class="w-full md:w-3/5">
-			<h2
-				class="text-center mb-2 text-4xl text-wrap-balance auto-phrase"
-				transition:name={'title-' + post.slug}
-			>
-				{post.title}
-			</h2>
-			<p class="text-center my-2 text-orange text-lg md:hidden block">
-				{publishedDate.year}年{publishedDate.month}月{publishedDate.day}日
-			</p>
-			<p class="text-right">{post.reading_time} 分くらいで読めます！</p>
-		</div>
-		<div class="w-full md:w-1/5 hidden md:block pl-4"></div>
-	</div>
-	<div class="mb-4 mt-4 p-2 m-2">
-		<TagList tags={post.tags?.map(tag => ({ name: tag.name || '', slug: tag.slug || '', visibility: tag.visibility || 'public' })) || []} />
-	</div>
-	<!-- 基本的にWordPress記事では目次生成の正規表現でマッチしないが、WordPressから移行した記事を一度Ghostで保存すると目次生成が可能になってしまい、spanタグの付いたぶっ壊れ目次が生まれるので防ぐ -->
-	{
-		isWpArticle ? (
-			''
-		) : (
-			<div class="flex justify-center" id="toc-inline-wrapper">
-				<TOC tocList={tocList} />
+	</header>
+
+	<!-- 本文 + サイドバー(目次・リアクション) -->
+	<div class="container">
+		<div class="article-layout">
+			<div class="article-main">
+				{
+					/* WordPress記事は本文内に目次があるため本文冒頭のインライン目次(details)だけ出さない。
+					   フローティングボタン・モーダルはWordPress記事でも出し、常に目次へアクセスできるようにする */
+					!isWpArticle && tocList.length > 0 && (
+						<details class="toc-inline" id="toc-inline-wrapper" open>
+							<summary>INDEX / 目次</summary>
+							<ArticleToc tocList={tocList} variant="inline" />
+						</details>
+					)
+				}
+				{
+					tocList.length > 0 && (
+						<Fragment>
+							{
+								/* 本文冒頭の目次(toc-inline、WordPress記事では記事ヘッダー)がスクロールで見切れたらモバイルで表示するフローティングボタン */
+							}
+							<button
+								type="button"
+								class="toc-float-button"
+								id="toc-float-button"
+								data-toc-observe-target={isWpArticle ? "header" : "inline"}
+								aria-label="目次を開く"
+								aria-haspopup="dialog"
+								aria-controls="toc-modal"
+							>
+								INDEX
+							</button>
+							<div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-label="目次">
+								<div class="toc-modal-backdrop" id="toc-modal-backdrop" />
+								<div class="toc-modal-panel">
+									<button
+										type="button"
+										class="toc-modal-header"
+										id="toc-modal-label"
+										aria-label="目次を閉じる"
+									>
+										<span class="toc-modal-back-arrow" aria-hidden="true">&lt;</span>
+										INDEX
+									</button>
+									<ArticleToc tocList={tocList} variant="inline" />
+								</div>
+							</div>
+						</Fragment>
+					)
+				}
+				<article class="blog-content" set:html={processedHtml} />
+				<!-- モバイル用絵文字リアクション（サイドバーが消える幅でのみハイドレート） -->
+				<div class="mobile-reaction">
+					<EmojiReaction slug={post.slug} client:media="(max-width: 1019.98px)" />
+				</div>
 			</div>
-		)
-	}
-	{}
-	<article class="blog-content" set:html={processedHtml} />
-	<!-- モバイル用絵文字リアクション（xl未満でのみ表示・ハイドレート） -->
-	<div class="px-4 mb-4 mx-auto xl:hidden" style="max-width: var(--article-max-width)">
-		<EmojiReaction slug={post.slug} client:media="(max-width: 1279px)" />
+			<aside class="article-side">
+				<div class="article-side-sticky">
+					{tocList.length > 0 && <ArticleToc tocList={tocList} variant="sidebar" />}
+					<EmojiReaction slug={post.slug} scrollable={true} client:media="(min-width: 1020px)" />
+				</div>
+			</aside>
+		</div>
 	</div>
-	<div class="px-4 mx-auto" style="max-width: var(--article-max-width)">
-		<ArticleShareButtons url={`${getFrontendUrl()}${Astro.url.pathname}`} title={post.title || ""} />
-	</div>
-	{}
-	<!-- PC用スクロール追従サイドバー目次（xl以上で表示） -->
-	{
-		tocList.length > 0 && (
-			<div
-				id="toc-sidebar"
-				class="hidden xl:block fixed z-50 top-4 max-h-[calc(100vh-2rem)] overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300"
-				style="left: calc(50vw + var(--article-max-width, 800px) / 2 + 2rem); width: calc((100vw - var(--article-max-width, 800px)) / 2 - 4rem); max-width: 20rem; background-color: var(--white)"
-			>
-				<TOC tocList={tocList} extraClass="ghost-toc-sidebar" />
-			</div>
-		)
-	}
-	<!-- PC用スクロール追従サイドバー絵文字リアクション（xl以上で表示・ハイドレート、左側・記事端寄せ） -->
-	<div
-		id="reaction-sidebar"
-		class="hidden xl:block fixed z-50 top-20 opacity-0 pointer-events-none transition-opacity duration-300 bg-[var(--white)]"
-		style="right: calc(50vw + var(--article-max-width, 800px) / 2 + 0.5rem); width: 14rem"
-	>
-		<EmojiReaction slug={post.slug} scrollable={true} client:media="(min-width: 1280px)" />
-	</div>
+
+	<!-- シェア + 前後記事 -->
+	<footer class="article-footer">
+		<div class="container">
+			<ShareBar url={articleUrl} title={post.title || ""} />
+			<PrevNextNav prev={adjacent.prev} next={adjacent.next} />
+		</div>
+	</footer>
+
+	<RelatedArticles articles={relatedArticles} />
 
 	<script src="../scripts/tocSidebar.ts"></script>
 </ArticleLayout>
+
+<style>
+	.article-header {
+		border-bottom: var(--bw) solid var(--color-ink);
+		padding: 48px 0;
+	}
+	.article-header-inner {
+		max-width: var(--article-max-width);
+		margin: 0 auto;
+	}
+	.article-label-row {
+		display: flex;
+		margin-bottom: 24px;
+	}
+	.article-title {
+		font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+		font-weight: 900;
+		line-height: 1.55;
+		margin-bottom: 20px;
+		text-wrap: pretty;
+		word-break: auto-phrase;
+	}
+	.article-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+	.reading-time {
+		font-family: var(--font-en);
+		font-size: 0.72rem;
+		letter-spacing: 0.16em;
+		color: var(--color-muted);
+		white-space: nowrap;
+	}
+	.article-hero {
+		max-width: var(--article-max-width);
+		width: 100%;
+		margin: 32px auto 0;
+		aspect-ratio: 16 / 8;
+		object-fit: cover;
+		border: var(--bw) solid var(--color-ink);
+		display: block;
+	}
+
+	.article-layout {
+		display: grid;
+		grid-template-columns: 1fr 260px;
+		gap: 56px;
+		padding: 56px 0 72px;
+		max-width: calc(var(--article-max-width) + 260px + 56px);
+		margin: 0 auto;
+	}
+	.article-main {
+		min-width: 0;
+	}
+	.article-side-sticky {
+		position: sticky;
+		top: calc(var(--heder-height) + 40px);
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+	}
+	.toc-inline {
+		display: none;
+	}
+	.toc-float-button {
+		display: none;
+	}
+	.toc-modal {
+		display: none;
+	}
+	.mobile-reaction {
+		display: none;
+	}
+	.article-footer {
+		border-top: var(--bw) solid var(--color-ink);
+	}
+	.article-footer :global(.share-bar) {
+		margin-bottom: 32px;
+	}
+
+	/* 記事本文+サイドバー(目次/リアクション)の2カラムを1カラムに畳む幅。--breakpoint-lg(1024px)相当 */
+	@media (max-width: 1020px) {
+		.article-layout {
+			grid-template-columns: 1fr;
+			max-width: var(--article-max-width);
+		}
+		.article-side {
+			display: none;
+		}
+		.toc-inline {
+			display: block;
+			margin-bottom: 32px;
+			border: var(--bw) solid var(--color-ink);
+			background: var(--color-paper);
+		}
+		.toc-inline summary {
+			font-family: var(--font-en);
+			font-weight: 700;
+			font-size: 0.78rem;
+			letter-spacing: 0.18em;
+			padding: 12px 18px;
+			cursor: pointer;
+			background: var(--color-gray);
+		}
+		.toc-inline[open] summary {
+			border-bottom: var(--bw) solid var(--color-ink);
+		}
+		.mobile-reaction {
+			display: block;
+			margin-top: 48px;
+			padding-top: 32px;
+			position: relative;
+		}
+		.mobile-reaction::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 10%;
+			width: 80%;
+			border-top: 1px dashed var(--color-ink-border);
+		}
+		/* 本文冒頭の目次(toc-inline)がスクロールで見切れた時だけ.visibleが付き表示される */
+		.toc-float-button {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			opacity: 0;
+			visibility: hidden;
+			position: fixed;
+			top: calc(var(--heder-height) + 20px);
+			left: 20px;
+			z-index: 40;
+			font-family: var(--font-en);
+			font-weight: 700;
+			font-size: 0.68rem;
+			letter-spacing: 0.16em;
+			padding: 12px 18px 12px 14px;
+			border-radius: 999px;
+			border: none;
+			color: var(--color-paper);
+			background: var(--color-ink);
+			box-shadow: 0 6px 16px rgb(20 20 20 / 25%);
+			cursor: pointer;
+			transform: translateY(-6px) scale(0.94);
+			transition:
+				opacity 0.2s ease,
+				transform 0.2s ease,
+				visibility 0.2s;
+		}
+		.toc-float-button::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: var(--color-orange);
+			flex: none;
+		}
+		.toc-float-button:hover {
+			background: var(--color-orange);
+		}
+		.toc-float-button:hover::before {
+			background: var(--color-paper);
+		}
+		.toc-float-button.visible {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0) scale(1);
+		}
+		.toc-modal {
+			display: block;
+			pointer-events: none;
+			position: fixed;
+			top: var(--heder-height);
+			right: 0;
+			bottom: 0;
+			left: 0;
+			z-index: 50;
+		}
+		.toc-modal.open {
+			pointer-events: auto;
+		}
+		.toc-modal-backdrop {
+			position: absolute;
+			inset: 0;
+			background: rgb(20 20 20 / 45%);
+			backdrop-filter: blur(2px);
+			opacity: 0;
+			transition: opacity 0.25s ease;
+		}
+		.toc-modal.open .toc-modal-backdrop {
+			opacity: 1;
+		}
+		.toc-modal-panel {
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: min(320px, 84vw);
+			display: flex;
+			flex-direction: column;
+			background: var(--color-paper);
+			box-shadow: 12px 0 32px rgb(20 20 20 / 18%);
+			transform: translateX(-100%);
+			transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+		}
+		.toc-modal.open .toc-modal-panel {
+			transform: translateX(0);
+		}
+		.toc-modal-panel :global(.article-toc.inline) {
+			flex: 1;
+			overflow-y: auto;
+		}
+		.toc-modal-header {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			flex: none;
+			width: 100%;
+			border: none;
+			font-family: var(--font-en);
+			font-weight: 700;
+			font-size: 0.72rem;
+			letter-spacing: 0.22em;
+			padding: 14px 18px;
+			border-bottom: var(--bw) solid var(--color-ink);
+			background: var(--color-gray);
+			color: var(--color-ink);
+			cursor: pointer;
+			transition: background 0.15s;
+		}
+		.toc-modal-header:hover {
+			background: var(--color-border-light);
+		}
+		.toc-modal-back-arrow {
+			font-size: 0.9rem;
+		}
+		.toc-modal :global(.article-toc.inline) {
+			border: none;
+		}
+		.toc-modal :global(.article-toc.inline ol) {
+			padding-top: 12px;
+		}
+		.toc-modal :global(.article-toc.inline a.active) {
+			position: relative;
+		}
+		.toc-modal :global(.article-toc.inline a.active::after) {
+			content: "";
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 3px;
+			background: var(--color-orange);
+		}
+	}
+</style>
