@@ -112,7 +112,9 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 				<h1 class="article-title" transition:name={`title-${post.slug}`}>{post.title}</h1>
 				<div class="article-meta">
 					{publicTags.length > 0 ? <HashTagList tags={publicTags} linked={true} /> : <span />}
-					{post.reading_time && <span class="reading-time">READ: {post.reading_time} MIN</span>}
+					{post.reading_time != null && post.reading_time > 0 && (
+						<span class="reading-time">READ: {post.reading_time} MIN</span>
+					)}
 				</div>
 			</div>
 			{
@@ -139,10 +141,37 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 				{
 					/* WordPress記事は本文内に目次があるためインライン目次は出さない */
 					!isWpArticle && tocList.length > 0 && (
-						<details class="toc-inline" id="toc-inline-wrapper">
-							<summary>INDEX / 目次</summary>
-							<ArticleToc tocList={tocList} variant="inline" />
-						</details>
+						<Fragment>
+							<details class="toc-inline" id="toc-inline-wrapper">
+								<summary>INDEX / 目次</summary>
+								<ArticleToc tocList={tocList} variant="inline" />
+							</details>
+							{
+								/* 本文冒頭の目次(toc-inline)がスクロールで見切れたらモバイルで表示するフローティングボタン */
+							}
+							<button
+								type="button"
+								class="toc-float-button"
+								id="toc-float-button"
+								aria-label="目次を開く"
+								aria-haspopup="dialog"
+								aria-controls="toc-modal"
+							>
+								INDEX
+							</button>
+							<div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-label="目次">
+								<div class="toc-modal-backdrop" id="toc-modal-backdrop" />
+								<div class="toc-modal-panel">
+									<div class="toc-modal-header">
+										<span>INDEX / 目次</span>
+										<button type="button" class="toc-modal-close" id="toc-modal-close" aria-label="目次を閉じる">
+											×
+										</button>
+									</div>
+									<ArticleToc tocList={tocList} variant="inline" />
+								</div>
+							</div>
+						</Fragment>
 					)
 				}
 				<article class="blog-content" set:html={processedHtml} />
@@ -191,7 +220,8 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		font-weight: 900;
 		line-height: 1.55;
 		margin-bottom: 20px;
-		text-wrap: balance;
+		text-wrap: pretty;
+		word-break: auto-phrase;
 	}
 	.article-meta {
 		display: flex;
@@ -257,23 +287,158 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		.toc-inline {
 			display: block;
 			margin-bottom: 32px;
+			border: var(--bw) solid var(--color-ink);
+			background: var(--color-paper);
 		}
 		.toc-inline summary {
 			font-family: var(--font-en);
 			font-weight: 700;
 			font-size: 0.78rem;
 			letter-spacing: 0.18em;
-			border: var(--bw) solid var(--color-ink);
 			padding: 12px 18px;
 			cursor: pointer;
 			background: var(--color-gray);
 		}
 		.toc-inline[open] summary {
-			border-bottom: none;
+			border-bottom: var(--bw) solid var(--color-ink);
 		}
 		.mobile-reaction {
 			display: block;
 			margin-top: 48px;
+			padding-top: 32px;
+			position: relative;
+		}
+		.mobile-reaction::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			left: 10%;
+			width: 80%;
+			border-top: 1px dashed var(--color-ink-border);
+		}
+		/* 本文冒頭の目次(toc-inline)がスクロールで見切れた時だけ.visibleが付き表示される */
+		.toc-float-button {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			opacity: 0;
+			visibility: hidden;
+			position: fixed;
+			top: calc(var(--heder-height) + 20px);
+			left: 20px;
+			z-index: 40;
+			font-family: var(--font-en);
+			font-weight: 700;
+			font-size: 0.68rem;
+			letter-spacing: 0.16em;
+			padding: 12px 18px 12px 14px;
+			border-radius: 999px;
+			border: none;
+			color: var(--color-paper);
+			background: var(--color-ink);
+			box-shadow: 0 6px 16px rgb(20 20 20 / 25%);
+			cursor: pointer;
+			transform: translateY(-6px) scale(0.94);
+			transition:
+				opacity 0.2s ease,
+				transform 0.2s ease,
+				visibility 0.2s;
+		}
+		.toc-float-button::before {
+			content: "";
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: var(--color-orange);
+			flex: none;
+		}
+		.toc-float-button:hover {
+			background: var(--color-orange);
+		}
+		.toc-float-button:hover::before {
+			background: var(--color-paper);
+		}
+		.toc-float-button.visible {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0) scale(1);
+		}
+		.toc-modal {
+			pointer-events: none;
+			position: fixed;
+			inset: 0;
+			z-index: 50;
+		}
+		.toc-modal.open {
+			pointer-events: auto;
+		}
+		.toc-modal-backdrop {
+			position: absolute;
+			inset: 0;
+			background: rgb(20 20 20 / 45%);
+			backdrop-filter: blur(2px);
+			opacity: 0;
+			transition: opacity 0.25s ease;
+		}
+		.toc-modal.open .toc-modal-backdrop {
+			opacity: 1;
+		}
+		.toc-modal-panel {
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			width: min(320px, 84vw);
+			overflow-y: auto;
+			background: var(--color-paper);
+			box-shadow: 12px 0 32px rgb(20 20 20 / 18%);
+			transform: translateX(-100%);
+			transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+		}
+		.toc-modal.open .toc-modal-panel {
+			transform: translateX(0);
+		}
+		.toc-modal-header {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-family: var(--font-en);
+			font-weight: 900;
+			font-size: 0.82rem;
+			letter-spacing: 0.16em;
+			padding: 22px 20px 18px;
+			border-bottom: 3px solid var(--color-orange);
+		}
+		.toc-modal-close {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			font-size: 1.1rem;
+			line-height: 1;
+			color: var(--color-ink);
+			cursor: pointer;
+			transition: background 0.15s;
+		}
+		.toc-modal-close:hover {
+			background: var(--color-gray);
+		}
+		.toc-modal :global(.article-toc.inline) {
+			border: none;
+		}
+		.toc-modal :global(.article-toc.inline a.active) {
+			position: relative;
+		}
+		.toc-modal :global(.article-toc.inline a.active::after) {
+			content: "";
+			position: absolute;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			width: 3px;
+			background: var(--color-orange);
 		}
 	}
 </style>

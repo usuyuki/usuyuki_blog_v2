@@ -48,7 +48,7 @@ const isCurrent = (href: string): boolean => {
 					))
 				}
 				<li class="nav-search">
-					<SearchForm placeholder="サイト内検索(google)" />
+					<SearchForm placeholder="Google内検索" />
 				</li>
 			</ul>
 		</nav>
@@ -139,6 +139,7 @@ const isCurrent = (href: string): boolean => {
 		.global-nav {
 			position: fixed;
 			inset: var(--heder-height) 0 auto 0;
+			z-index: 90;
 			background: var(--color-paper);
 			border-bottom: var(--bw) solid var(--color-ink);
 			transform: translateY(-130%);

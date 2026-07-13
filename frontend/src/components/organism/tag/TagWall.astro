@@ -51,6 +51,7 @@ const tags = await ghostApiWithRetry.tags.browse(
 	.tag-wall {
 		display: flex;
 		flex-wrap: wrap;
+		max-width: 100%;
 		border-top: var(--bw) solid var(--color-ink);
 		border-left: var(--bw) solid var(--color-ink);
 		margin-bottom: 64px;
@@ -61,6 +62,8 @@ const tags = await ghostApiWithRetry.tags.browse(
 		padding: 12px 22px;
 		font-size: 0.85rem;
 		font-weight: 700;
+		max-width: 100%;
+		overflow-wrap: anywhere;
 		transition:
 			background 0.15s,
 			color 0.15s;

@@ -83,3 +83,64 @@ document.addEventListener("astro:page-load", () => {
   });
   updateActiveHeading();
 });
+
+// モバイル用: 本文冒頭の目次(toc-inline)がスクロールで見切れたらフローティングボタンを表示し、
+// タップでモーダルとして目次を開閉する
+document.addEventListener("astro:page-load", () => {
+  const abortController = new AbortController();
+  const { signal } = abortController;
+  document.addEventListener(
+    "astro:before-preparation",
+    () => abortController.abort(),
+    { once: true },
+  );
+
+  const tocInline = document.getElementById("toc-inline-wrapper");
+  const floatButton = document.getElementById("toc-float-button");
+  const modal = document.getElementById("toc-modal");
+  const modalBackdrop = document.getElementById("toc-modal-backdrop");
+  const modalClose = document.getElementById("toc-modal-close");
+  if (!tocInline || !floatButton || !modal || !modalBackdrop || !modalClose) {
+    return;
+  }
+
+  // 本文冒頭の目次が画面上端より上にスクロールしたらボタンを表示する
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      floatButton.classList.toggle(
+        "visible",
+        entry !== undefined &&
+          !entry.isIntersecting &&
+          entry.boundingClientRect.top < 0,
+      );
+    },
+    { threshold: 0 },
+  );
+  observer.observe(tocInline);
+  document.addEventListener(
+    "astro:before-preparation",
+    () => observer.disconnect(),
+    {
+      once: true,
+    },
+  );
+
+  const openModal = () => {
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  };
+  const closeModal = () => {
+    modal.classList.remove("open");
+    document.body.style.overflow = "";
+  };
+
+  floatButton.addEventListener("click", openModal, { signal });
+  modalBackdrop.addEventListener("click", closeModal, { signal });
+  modalClose.addEventListener("click", closeModal, { signal });
+
+  // モーダル内の目次リンクをクリックしたら遷移前に閉じる
+  const modalTocLinks = modal.querySelectorAll(".article-toc a[href^='#']");
+  for (const link of modalTocLinks) {
+    link.addEventListener("click", closeModal, { signal });
+  }
+});

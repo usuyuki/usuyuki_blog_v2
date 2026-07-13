@@ -16,14 +16,28 @@ const { tocList, variant = "sidebar" } = Astro.props;
 			id={variant === "sidebar" ? "toc-sidebar" : undefined}
 			aria-label="目次"
 		>
-			<h2>INDEX</h2>
-			<ol>
-				{tocList.map((toc) => (
-					<li class={`level-${toc.heading}`}>
-						<a href={`#${toc.id}`}>{toc.title}</a>
-					</li>
-				))}
-			</ol>
+			{
+				variant === "sidebar" ? (
+					<Fragment>
+						<h2>INDEX</h2>
+						<ol>
+							{tocList.map((toc) => (
+								<li class={`level-${toc.heading}`}>
+									<a href={`#${toc.id}`}>{toc.title}</a>
+								</li>
+							))}
+						</ol>
+					</Fragment>
+				) : (
+					<ol>
+						{tocList.map((toc) => (
+							<li class={`level-${toc.heading}`}>
+								<a href={`#${toc.id}`}>{toc.title}</a>
+							</li>
+						))}
+					</ol>
+				)
+			}
 		</nav>
 	)
 }
@@ -90,5 +104,12 @@ const { tocList, variant = "sidebar" } = Astro.props;
 	.article-toc.sidebar ol {
 		max-height: calc(100vh - 260px);
 		overflow-y: auto;
+	}
+	/* インライン用(details内): 外枠はsummary側の枠線のみで表現するため、navの枠線は出さない */
+	.article-toc.inline {
+		border: none;
+	}
+	.article-toc.inline ol {
+		padding-top: 0;
 	}
 </style>
