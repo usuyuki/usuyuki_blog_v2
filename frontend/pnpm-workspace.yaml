@@ -2,6 +2,9 @@ settings:
   onlyBuiltDependencies:
     - esbuild
     - sharp
+    - "@prisma/engines"
+    - prisma
+    - "@prisma/client"
   strictDepBuilds: true
   minimumReleaseAge: 1440
   blockExoticSubdeps: true
