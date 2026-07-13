@@ -2,16 +2,6 @@
 // サイドバー目次はCSSのstickyで固定されるため、ここではスクロールスパイ
 // (現在見出しのハイライト)とスムーズスクロールだけを行う。
 // View Transitions（ClientRouter）対応: ページ遷移のたびに再初期化する
-//
-// 【history.pushStateについての注意】
-// ClientRouterはhistory.stateに自前の内部情報(index/scrollX/scrollY)を持たせて
-// 履歴スタックを管理している。目次クリックで pushState(null, ...) のように
-// stateをnullで上書きすると、次にユーザーがブラウザバック(モバイルのスワイプ
-// バックジェスチャーを含む)した際、ClientRouterが「見覚えのないstate」と判定して
-// ページ全体をフェッチし直しview transitionで丸ごと差し替えてしまう
-// (=記事を読んでいる途中で前のページへ強制的に戻されたように見える)。
-// 対策として既存の history.state をそのまま引き継いで pushState する。
-// 参考: https://github.com/withastro/astro/issues/13943
 document.addEventListener("astro:page-load", () => {
   const abortController = new AbortController();
   const { signal } = abortController;
@@ -31,8 +21,7 @@ document.addEventListener("astro:page-load", () => {
       document.getElementById(decodeURIComponent(id));
     if (target) {
       target.scrollIntoView({ behavior: "smooth" });
-      // ClientRouterが管理するhistory.stateを維持したままハッシュだけ書き換える
-      history.pushState({ ...history.state }, "", href);
+      history.pushState(null, "", href);
     }
   };
 
