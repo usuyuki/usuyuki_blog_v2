@@ -15,6 +15,50 @@ const headMeta: HeadMetaType = {
 ---
 
 <PageLayout {...headMeta}>
-	<h1 class="text-center text-3xl">404 Not Found</h1>
-	<p class="text-center">このページは存在しません！</p>
+	<div class="container not-found">
+		<p class="huge">404</p>
+		<p class="sub">NOT FOUND</p>
+		<p class="message">このページは存在しません！</p>
+		<a class="back-link" href="/">BACK TO TOP →</a>
+	</div>
 </PageLayout>
+
+<style>
+	.not-found {
+		text-align: center;
+		padding: 80px 24px 120px;
+	}
+	.huge {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: clamp(5rem, 20vw, 12rem);
+		line-height: 1;
+	}
+	.sub {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 1rem;
+		letter-spacing: 0.4em;
+		margin-top: 8px;
+	}
+	.message {
+		margin-top: 24px;
+	}
+	.back-link {
+		display: inline-block;
+		margin-top: 32px;
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.78rem;
+		letter-spacing: 0.16em;
+		border: var(--bw) solid var(--color-ink);
+		padding: 10px 20px;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.back-link:hover {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+</style>

@@ -1,0 +1,68 @@
+---
+// セクション見出し(巨大英字 + 日本語サブ見出し + 任意のリンクボタン)
+interface Props {
+  en: string;
+  jp: string;
+  linkHref?: string;
+  linkLabel?: string;
+  headingId?: string;
+}
+const { en, jp, linkHref, linkLabel, headingId } = Astro.props;
+---
+
+<div class="section-head">
+	<h2 class="section-title" id={headingId}>
+		<span class="en">{en}</span>
+		<span class="jp">{jp}</span>
+	</h2>
+	{
+		linkHref && linkLabel && (
+			<a class="section-link" href={linkHref}>
+				{linkLabel}
+			</a>
+		)
+	}
+</div>
+
+<style>
+	.section-head {
+		display: flex;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 20px;
+		padding: 56px 0 24px;
+	}
+	.section-title .en {
+		display: block;
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: clamp(2rem, 5.5vw, 3.4rem);
+		letter-spacing: 0.01em;
+		line-height: 1.05;
+		text-transform: uppercase;
+	}
+	.section-title .jp {
+		display: inline-block;
+		margin-top: 8px;
+		font-size: 0.8rem;
+		font-weight: 700;
+		border-left: 4px solid var(--color-ink);
+		padding-left: 10px;
+	}
+	.section-link {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.78rem;
+		letter-spacing: 0.16em;
+		border: var(--bw) solid var(--color-ink);
+		padding: 10px 20px;
+		white-space: nowrap;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.section-link:hover {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+</style>

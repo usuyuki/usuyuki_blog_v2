@@ -70,8 +70,7 @@ th {
   font-size: 16px;
   margin: 8px auto;
   padding: 16px;
-  border: 2px dotted var(--pink);
-  border-radius: 0.75rem;
+  border: var(--bw) solid var(--color-ink);
 }
 #toc_container a {
   font-size: 20px;
@@ -88,7 +87,7 @@ th {
   margin: 0.5rem 0;
 }
 
-/* blogCommonのaタグ青色の上書き */
+/* blogCommonのaタグ装飾の上書き */
 #toc_container .toc_list a {
-  color: var(--black);
+  color: var(--color-ink);
 }

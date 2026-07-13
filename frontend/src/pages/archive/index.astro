@@ -1,18 +1,109 @@
 ---
-import ArchiveArticleList from "~/components/organism/article/ArchiveArticleList.astro";
+import PageHead from "~/components/atom/section/PageHead.astro";
+import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
+import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
+import PaginationNav from "~/components/molecule/navigation/PaginationNav.astro";
+import SortSelect from "~/components/molecule/navigation/SortSelect.astro";
+import YearTabs from "~/components/molecule/navigation/YearTabs.astro";
 import { SITE_URL } from "~/consts";
 import IndexLayout from "~/layouts/extends/IndexLayout.astro";
+import { getAllArticlesCached } from "~/libs/articleAggregator";
+import {
+  filterByYear,
+  listYears,
+  paginate,
+  sortArticles,
+  type SortOrder,
+} from "~/libs/helper/archiveQuery";
+import { isYear } from "~/libs/validation/isYear";
 import type { HeadMetaType } from "~/types/HeadMetaType";
+import astroLogger from "~/libs/astroLogger";
+
+// クエリパラメータ(year/sort/page)のバリデーション。不正値はデフォルトに丸める
+const searchParams = Astro.url.searchParams;
+const yearParam = searchParams.get("year");
+const year =
+  yearParam !== null && isYear(Number(yearParam))
+    ? Number(yearParam)
+    : undefined;
+const sort: SortOrder =
+  searchParams.get("sort") === "oldest" ? "oldest" : "newest";
+const pageParam = Number(searchParams.get("page") ?? "1");
+
+// 全記事(外部込み)から年フィルター → ソート → ページ分割
+const allArticles = await getAllArticlesCached(true);
+const years = listYears(allArticles);
+const filteredArticles =
+  year !== undefined ? filterByYear(allArticles, year) : allArticles;
+const sortedArticles = sortArticles(filteredArticles, sort);
+const { items, currentPage, totalPages } = paginate(sortedArticles, pageParam);
 
 const headMeta: HeadMetaType = {
-  title: "アーカイブ",
-  slug: "/archive",
+  title: year !== undefined ? `${year}年の記事一覧` : "記事一覧",
+  slug: "archive",
   description:
-    "うすゆきブログのアーカイブページです。月ごとに記事を整理しています。",
+    year !== undefined
+      ? `うすゆきブログ${year}年の記事一覧です`
+      : "うすゆきブログの全記事一覧です",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
 };
+
+astroLogger.requestLog(Astro.request, { status: 200 });
 ---
 
 <IndexLayout {...headMeta}>
-	<ArchiveArticleList />
+	<PageHead en="All Articles" jp="記事一覧" count={filteredArticles.length} />
+
+	<div class="filter-bar">
+		<div class="container filter-inner">
+			<YearTabs years={years} currentYear={year} sort={sort} />
+			<SortSelect currentYear={year} sort={sort} />
+		</div>
+	</div>
+
+	<section class="list-section" aria-label="記事一覧">
+		<div class="container">
+			{
+				items.length > 0 ? (
+					<ArticleCellGrid variant="list" class="list-grid">
+						{items.map((article) => (
+							<ArticleCell article={article} headingLevel="h2" />
+						))}
+					</ArticleCellGrid>
+				) : (
+					<p class="empty-message">{year}年はまだ記事を書いていません！ごめんなさい！</p>
+				)
+			}
+			<PaginationNav
+				currentPage={currentPage}
+				totalPages={totalPages}
+				year={year}
+				sort={sort}
+			/>
+		</div>
+	</section>
 </IndexLayout>
+
+<style>
+	.filter-bar {
+		border-bottom: var(--bw) solid var(--color-ink);
+		overflow-x: auto;
+	}
+	.filter-inner {
+		display: flex;
+		align-items: stretch;
+		justify-content: space-between;
+		min-width: max-content;
+	}
+	.list-section {
+		padding-bottom: 72px;
+	}
+	.list-section :global(.list-grid) {
+		margin-top: 48px;
+	}
+	.empty-message {
+		text-align: center;
+		font-size: 1.1rem;
+		padding: 72px 0 24px;
+	}
+</style>

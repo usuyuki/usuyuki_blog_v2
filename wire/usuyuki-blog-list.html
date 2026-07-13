@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>記事一覧 | うすゆきブログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   DESIGN TOKENS(トップページと共通)
+   ============================================================ */
+:root {
+  --ink: #141414;
+  --paper: #ffffff;
+  --gray: #f4f3f0;
+  --orange: #ff5c00;
+
+  --bw: 2px;
+  --font-display: "Archivo", sans-serif;
+  --font-en: "Space Grotesk", sans-serif;
+  --font-jp: "Zen Kaku Gothic New", sans-serif;
+
+  --max-w: 1240px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+body {
+  font-family: var(--font-jp);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.8;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+
+:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.container {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ============================================================
+   HEADER(共通)
+   ============================================================ */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--paper);
+  border-bottom: var(--bw) solid var(--ink);
+}
+.header-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  height: 60px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-square { width: 18px; height: 18px; background: var(--orange); flex: none; }
+.brand-mark {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.brand-sub { font-size: 0.68rem; color: #777; white-space: nowrap; }
+.global-nav ul { display: flex; height: 100%; }
+.global-nav li { display: flex; }
+.global-nav a {
+  display: flex;
+  align-items: center;
+  padding: 0 22px;
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.18em;
+  border-left: 1px solid #ddd;
+  transition: background 0.15s, color 0.15s;
+}
+.global-nav li:last-child a { border-right: 1px solid #ddd; }
+.global-nav a:hover, .global-nav a[aria-current] { background: var(--ink); color: var(--paper); }
+.nav-toggle { display: none; }
+
+@media (max-width: 860px) {
+  .brand-sub { display: none; }
+  .global-nav {
+    position: fixed;
+    inset: 60px 0 auto 0;
+    background: var(--paper);
+    border-bottom: var(--bw) solid var(--ink);
+    transform: translateY(-130%);
+    transition: transform 0.25s ease;
+  }
+  .global-nav.open { transform: translateY(0); }
+  .global-nav ul { flex-direction: column; height: auto; }
+  .global-nav a { width: 100%; padding: 16px 24px; border-left: none; border-top: 1px solid #ddd; }
+  .global-nav li:last-child a { border-right: none; }
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 60px;
+    align-self: stretch;
+    padding: 0 18px;
+    background: none;
+    border: none;
+    border-left: 1px solid #ddd;
+    cursor: pointer;
+  }
+  .nav-toggle span { height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+  .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+}
+
+/* ============================================================
+   ページタイトル — 巨大タイポ + 記事数
+   ============================================================ */
+.page-head {
+  border-bottom: var(--bw) solid var(--ink);
+  padding: 56px 0 40px;
+}
+.page-head-inner {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.page-title .en {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.4rem, 7vw, 4.5rem);
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.page-title .jp {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-left: 4px solid var(--ink);
+  padding-left: 10px;
+}
+.article-count {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  border: var(--bw) solid var(--ink);
+  padding: 10px 20px;
+}
+.article-count strong { font-size: 1.3rem; margin-right: 4px; }
+
+/* ============================================================
+   フィルターバー — 年別タブ + 並び順
+   ============================================================ */
+.filter-bar {
+  border-bottom: var(--bw) solid var(--ink);
+  overflow-x: auto;
+}
+.filter-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  min-width: max-content;
+}
+.year-tabs { display: flex; }
+.year-tabs a {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  padding: 14px 22px;
+  border-right: 1px solid #ddd;
+  transition: background 0.15s, color 0.15s;
+}
+.year-tabs a:first-child { border-left: 1px solid #ddd; }
+.year-tabs a:hover { background: var(--gray); }
+.year-tabs a[aria-current] { background: var(--ink); color: var(--paper); }
+.sort-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 4px 0 20px;
+  border-left: 1px solid #ddd;
+  font-family: var(--font-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  color: #888;
+}
+.sort-select select {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: none;
+  background: none;
+  padding: 14px 8px;
+  cursor: pointer;
+}
+
+/* ============================================================
+   記事グリッド — 罫線セル(4列)
+   ============================================================ */
+.list-section { padding-bottom: 72px; }
+.list-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-left: var(--bw) solid var(--ink);
+  margin-top: 48px;
+  border-top: var(--bw) solid var(--ink);
+}
+@media (max-width: 1080px) { .list-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 820px) { .list-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 540px) { .list-grid { grid-template-columns: 1fr; } }
+
+.article-cell {
+  border-right: var(--bw) solid var(--ink);
+  border-bottom: var(--bw) solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  transition: background 0.15s;
+}
+.article-cell:hover { background: var(--gray); }
+.cell-thumb {
+  aspect-ratio: 16 / 9;
+  border-bottom: var(--bw) solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 2.4rem;
+}
+.t1 { background: linear-gradient(120deg, #f1efec, #d4d0ca); }
+.t2 { background: linear-gradient(120deg, #faf9f7, #c8c4be); }
+.t3 { background: linear-gradient(120deg, #ebe9e5, #a7a29b); }
+.t4 { background: linear-gradient(120deg, #f6f4f1, #beb9b3); }
+.t5 { background: linear-gradient(120deg, #e6e3de, #99948d); }
+
+.cell-body {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.cell-date {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: #888;
+}
+.cell-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.65;
+  flex: 1;
+}
+.article-cell:hover .cell-title { text-decoration: underline; text-underline-offset: 5px; text-decoration-thickness: 2px; }
+.hash-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+.hash-tags span::before { content: "#"; color: #999; margin-right: 2px; font-weight: 700; }
+
+/* ============================================================
+   ページネーション — 正方形の数字
+   ============================================================ */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 56px;
+}
+.pagination a, .pagination span {
+  font-family: var(--font-en);
+  font-weight: 700;
+  font-size: 0.9rem;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: var(--bw) solid var(--ink);
+  border-left: none;
+  transition: background 0.15s, color 0.15s;
+}
+.pagination > *:first-child { border-left: var(--bw) solid var(--ink); }
+.pagination a:hover { background: var(--gray); }
+.pagination [aria-current] { background: var(--ink); color: var(--paper); }
+.pagination .ellipsis { border-color: var(--ink); color: #999; }
+
+/* ============================================================
+   FOOTER(共通)
+   ============================================================ */
+.site-footer { background: var(--ink); color: #eee; padding: 56px 0 32px; }
+.footer-huge {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2.6rem, 9vw, 6.5rem);
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--paper);
+  border-bottom: var(--bw) solid #444;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
+}
+.footer-huge .dot { color: var(--orange); }
+.footer-grid { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; margin-bottom: 48px; }
+.footer-tag { font-size: 0.85rem; color: #aaa; max-width: 320px; }
+.footer-links { display: flex; gap: 64px; flex-wrap: wrap; }
+.footer-links h3 {
+  font-family: var(--font-en);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: #999;
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.footer-links li { margin-bottom: 8px; }
+.footer-links a { font-size: 0.86rem; color: #ccc; }
+.footer-links a:hover { color: var(--paper); text-decoration: underline; text-underline-offset: 4px; }
+.footer-copy {
+  border-top: 1px solid #333;
+  padding-top: 20px;
+  font-family: var(--font-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: #777;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="#">
+      <span class="brand-square" aria-hidden="true"></span>
+      <span class="brand-mark">USUYUKI BLOG</span>
+      <span class="brand-sub">急須で入れたような何か</span>
+    </a>
+    <button class="nav-toggle" aria-label="メニューを開閉" aria-expanded="false" aria-controls="global-nav">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="global-nav" id="global-nav" aria-label="グローバルナビゲーション">
+      <ul>
+        <li><a href="#">TOP</a></li>
+        <li><a href="#" aria-current="page">ALL</a></li>
+        <li><a href="#">TAGS</a></li>
+        <li><a href="#">ABOUT</a></li>
+        <li><a href="#">RSS</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ ページタイトル ============ -->
+<div class="page-head">
+  <div class="container page-head-inner">
+    <h1 class="page-title">
+      <span class="en">All Articles</span>
+      <span class="jp">記事一覧</span>
+    </h1>
+    <p class="article-count"><strong>128</strong>ARTICLES</p>
+  </div>
+</div>
+
+<!-- ============ フィルターバー ============ -->
+<div class="filter-bar">
+  <div class="container filter-inner">
+    <nav class="year-tabs" aria-label="年別フィルター">
+      <a href="#" aria-current="page">ALL</a>
+      <a href="#">2026</a>
+      <a href="#">2025</a>
+      <a href="#">2024</a>
+      <a href="#">2023</a>
+      <a href="#">2022</a>
+      <a href="#">2021</a>
+      <a href="#">2020</a>
+    </nav>
+    <label class="sort-select">
+      SORT
+      <select aria-label="並び順">
+        <option>NEWEST</option>
+        <option>OLDEST</option>
+      </select>
+    </label>
+  </div>
+</div>
+
+<!-- ============ 記事グリッド ============ -->
+<section class="list-section" aria-label="記事一覧">
+  <div class="container">
+    <div class="list-grid">
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t1" aria-hidden="true">🎧</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.06.18</span>
+          <h2 class="cell-title">MOGRAが最高という話 ~あにめないと~</h2>
+          <div class="hash-tags"><span>アニメ</span><span>おでかけ</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t2" aria-hidden="true">☂️</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.05.31</span>
+          <h2 class="cell-title">しぐれういのライブ Wishing Umbrella で心臓をぶち抜かれた話</h2>
+          <div class="hash-tags"><span>しぐれうい</span><span>VTuber</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t3" aria-hidden="true">🔧</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.05.20</span>
+          <h2 class="cell-title">うすゆきブログの最近の改善(リアクション機能など)</h2>
+          <div class="hash-tags"><span>プログラミング</span><span>お知らせ</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t4" aria-hidden="true">🛕</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.05.09</span>
+          <h2 class="cell-title">チェンマイで気分転換</h2>
+          <div class="hash-tags"><span>おでかけ</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t5" aria-hidden="true">🛒</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.04.12</span>
+          <h2 class="cell-title">(いまさら)2025年の買ってよかったものTOP5</h2>
+          <div class="hash-tags"><span>買ってよかったもの</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t1" aria-hidden="true">💼</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.04.08</span>
+          <h2 class="cell-title">社会人2年目終了、つまり3年目</h2>
+          <div class="hash-tags"><span>社会人感想シリーズ</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t2" aria-hidden="true">⛴️</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.03.22</span>
+          <h2 class="cell-title">意識を失う前に船に乗る</h2>
+          <div class="hash-tags"><span>おでかけ</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t3" aria-hidden="true">✅</div>
+        <div class="cell-body">
+          <span class="cell-date">2026.02.16</span>
+          <h2 class="cell-title">チェックボックスをたくさん押せると毎日が幸せになる</h2>
+          <div class="hash-tags"><span>生活</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t4" aria-hidden="true">🔔</div>
+        <div class="cell-body">
+          <span class="cell-date">2024.04.21</span>
+          <h2 class="cell-title">A接点のないインターホンを、CdSセルとESP32で無理やりIoT化する</h2>
+          <div class="hash-tags"><span>マイコン</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t5" aria-hidden="true">💖</div>
+        <div class="cell-body">
+          <span class="cell-date">2023.07.03</span>
+          <h2 class="cell-title">推しという感情はお得</h2>
+          <div class="hash-tags"><span>お気持ち</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t1" aria-hidden="true">🌉</div>
+        <div class="cell-body">
+          <span class="cell-date">2023.06.07</span>
+          <h2 class="cell-title">#さな歩き でめぐる隅田川の古い橋11つ</h2>
+          <div class="hash-tags"><span>名取さな</span><span>歩く</span></div>
+        </div>
+      </a>
+      <a class="article-cell" href="#">
+        <div class="cell-thumb t2" aria-hidden="true">🚲</div>
+        <div class="cell-body">
+          <span class="cell-date">2023.02.24</span>
+          <h2 class="cell-title">チャリで巡る波照間島</h2>
+          <div class="hash-tags"><span>離島</span></div>
+        </div>
+      </a>
+    </div>
+
+    <!-- ページネーション -->
+    <nav class="pagination" aria-label="ページ送り">
+      <span aria-current="page">1</span>
+      <a href="#">2</a>
+      <a href="#">3</a>
+      <span class="ellipsis">…</span>
+      <a href="#">11</a>
+      <a href="#" aria-label="次のページ">→</a>
+    </nav>
+  </div>
+</section>
+
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="container">
+    <p class="footer-huge">Usuyuki Blog<span class="dot">.</span></p>
+    <div class="footer-grid">
+      <p class="footer-tag">急須で入れたような何かを、ゆるゆると注いでいくブログです。</p>
+      <div class="footer-links">
+        <div>
+          <h3>Site Map</h3>
+          <ul>
+            <li><a href="#">このブログについて</a></li>
+            <li><a href="#">アーカイブ</a></li>
+            <li><a href="#">RSS</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Links</h3>
+          <ul>
+            <li><a href="https://x.com/usuyuki26">X</a></li>
+            <li><a href="https://m5y.usuyuki.net/@usuyuki">Misskey</a></li>
+            <li><a href="https://github.com/usuyuki">GitHub</a></li>
+            <li><a href="https://usuyuki.net">ポートフォリオ</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">
+      <span>© USUYUKI</span>
+      <span>POURED FROM A KYUSU, SINCE 2020</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// モバイルナビ開閉
+const toggle = document.querySelector('.nav-toggle');
+const nav = document.getElementById('global-nav');
+toggle.addEventListener('click', () => {
+  const open = nav.classList.toggle('open');
+  toggle.setAttribute('aria-expanded', String(open));
+});
+</script>
+
+</body>
+</html>

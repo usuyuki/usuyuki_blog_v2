@@ -1,0 +1,40 @@
+---
+// 黒ベタバッジ + 罫線日付のラベル(Hero・記事ヘッダー共用)
+interface Props {
+  badge: string;
+  date: string;
+}
+const { badge, date } = Astro.props;
+---
+
+<div class="article-label">
+	<span class="badge">{badge}</span>
+	<span class="date">{date}</span>
+</div>
+
+<style>
+	.article-label {
+		display: flex;
+		align-items: stretch;
+		font-family: var(--font-en);
+	}
+	.badge {
+		background: var(--color-ink);
+		color: var(--color-paper);
+		font-weight: 700;
+		font-size: 0.74rem;
+		letter-spacing: 0.2em;
+		padding: 6px 16px;
+		text-transform: uppercase;
+	}
+	.date {
+		border: var(--bw) solid var(--color-ink);
+		border-left: none;
+		font-weight: 500;
+		font-size: 0.74rem;
+		letter-spacing: 0.16em;
+		padding: 6px 16px;
+		display: flex;
+		align-items: center;
+	}
+</style>

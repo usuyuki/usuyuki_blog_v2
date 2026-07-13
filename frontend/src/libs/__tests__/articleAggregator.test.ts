@@ -338,6 +338,7 @@ describe("ArticleAggregator", () => {
         filter: "featured:true",
         order: "published_at DESC",
         limit: 5,
+        include: "tags",
       });
     });
 

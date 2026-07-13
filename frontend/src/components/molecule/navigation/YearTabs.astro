@@ -1,0 +1,54 @@
+---
+import { buildArchiveUrl, type SortOrder } from "~/libs/helper/archiveQuery";
+
+// 一覧ページの年別タブ(ALL + 記事が存在する年)
+interface Props {
+  years: number[];
+  currentYear?: number;
+  sort: SortOrder;
+}
+const { years, currentYear, sort } = Astro.props;
+---
+
+<nav class="year-tabs" aria-label="年別フィルター">
+	<a href={buildArchiveUrl({ sort })} aria-current={currentYear === undefined ? "page" : undefined}>
+		ALL
+	</a>
+	{
+		years.map((year) => (
+			<a
+				href={buildArchiveUrl({ year, sort })}
+				aria-current={currentYear === year ? "page" : undefined}
+			>
+				{year}
+			</a>
+		))
+	}
+</nav>
+
+<style>
+	.year-tabs {
+		display: flex;
+	}
+	.year-tabs a {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.8rem;
+		letter-spacing: 0.14em;
+		padding: 14px 22px;
+		border-right: 1px solid #ddd;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.year-tabs a:first-child {
+		border-left: 1px solid #ddd;
+	}
+	.year-tabs a:hover {
+		background: var(--color-gray);
+	}
+	.year-tabs a[aria-current] {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+</style>

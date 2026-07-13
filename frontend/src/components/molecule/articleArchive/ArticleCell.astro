@@ -1,0 +1,160 @@
+---
+import HashTagList from "~/components/atom/tag/HashTagList.astro";
+import {
+  articleHref,
+  sourceBadgeBackground,
+  thumbGradient,
+  viewTransitionSlug,
+} from "~/libs/helper/articleCell";
+import { formatDotDate } from "~/libs/helper/formatDotDate";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// 罫線グリッド用の記事セル。feature=trueで2x2の大セルになる
+interface Props {
+  article: ArticleArchiveType;
+  feature?: boolean;
+  headingLevel?: "h2" | "h3";
+  contextPrefix?: string;
+  eager?: boolean;
+  reveal?: boolean;
+}
+const {
+  article,
+  feature = false,
+  headingLevel = "h3",
+  contextPrefix = "",
+  eager = false,
+  reveal = false,
+} = Astro.props;
+
+const href = articleHref(article);
+const Heading = headingLevel;
+const vtSlug = viewTransitionSlug(article);
+const gradient = thumbGradient(article.slug);
+const sourceBadgeColor = sourceBadgeBackground(article.sourceColor);
+
+const imageWidth = feature ? 1200 : 600;
+---
+
+<a
+	class:list={["article-cell", { feature, reveal }]}
+	href={href}
+	target={article.isExternal ? "_blank" : undefined}
+	rel={article.isExternal ? "noopener noreferrer" : undefined}
+>
+	<div class="cell-thumb">
+		{
+			article.feature_image ? (
+				<img
+					src={optimizeGhostImageUrl(article.feature_image, {
+						width: imageWidth,
+						height: Math.round((imageWidth / 16) * 9),
+					})}
+					alt=""
+					width={imageWidth}
+					height={Math.round((imageWidth / 16) * 9)}
+					loading={eager ? "eager" : "lazy"}
+					fetchpriority={eager ? "high" : "auto"}
+					transition:name={`image-${contextPrefix}${vtSlug}`}
+				/>
+			) : (
+				<div class="thumb-placeholder" style={`background: ${gradient}`} aria-hidden="true" />
+			)
+		}
+	</div>
+	<div class="cell-body">
+		<span class="cell-meta">
+			<span class="cell-date">{formatDotDate(article.published_at)}</span>
+			{
+				article.isExternal && article.source && (
+					<span class="cell-source" style={`background: ${sourceBadgeColor}`}>
+						{article.source}
+					</span>
+				)
+			}
+		</span>
+		<Heading class="cell-title" transition:name={`title-${contextPrefix}${vtSlug}`}>
+			{article.title}
+		</Heading>
+		{article.tags && article.tags.length > 0 && <HashTagList tags={article.tags.slice(0, 3)} />}
+	</div>
+</a>
+
+<style>
+	.article-cell {
+		border-right: var(--bw) solid var(--color-ink);
+		border-bottom: var(--bw) solid var(--color-ink);
+		display: flex;
+		flex-direction: column;
+		background: var(--color-paper);
+		transition: background 0.15s;
+	}
+	.article-cell:hover {
+		background: var(--color-gray);
+	}
+	.article-cell.feature {
+		grid-column: span 2;
+		grid-row: span 2;
+	}
+	.cell-thumb {
+		aspect-ratio: 16 / 9;
+		border-bottom: var(--bw) solid var(--color-ink);
+		overflow: hidden;
+	}
+	.cell-thumb img,
+	.thumb-placeholder {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+	.cell-body {
+		padding: 18px 20px 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		flex: 1;
+	}
+	.cell-meta {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+	.cell-date {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.72rem;
+		letter-spacing: 0.18em;
+		color: #888;
+	}
+	.cell-source {
+		color: var(--color-paper);
+		font-size: 0.68rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		padding: 1px 8px;
+	}
+	.cell-title {
+		font-size: 0.95rem;
+		font-weight: 700;
+		line-height: 1.65;
+		flex: 1;
+	}
+	.feature .cell-title {
+		font-size: clamp(1.1rem, 2vw, 1.4rem);
+		font-weight: 900;
+	}
+	.article-cell:hover .cell-title {
+		text-decoration: underline;
+		text-underline-offset: 5px;
+		text-decoration-thickness: 2px;
+	}
+	@media (max-width: 560px) {
+		.article-cell.feature {
+			grid-column: span 1;
+			grid-row: span 1;
+		}
+	}
+</style>

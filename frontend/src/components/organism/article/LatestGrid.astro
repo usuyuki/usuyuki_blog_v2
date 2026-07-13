@@ -1,0 +1,39 @@
+---
+import SectionHead from "~/components/atom/section/SectionHead.astro";
+import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
+import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// トップページの最近の記事グリッド(先頭は2x2の大セル)
+interface Props {
+  articles: ArticleArchiveType[];
+}
+const { articles } = Astro.props;
+---
+
+<section class="latest" id="latest" aria-label="最近の記事">
+	<div class="container">
+		<SectionHead en="Latest Articles" jp="最近の記事" linkHref="/archive" linkLabel="VIEW ALL →" />
+		<ArticleCellGrid variant="latest" class="latest-grid">
+			{
+				articles.map((article, index) => (
+					<ArticleCell
+						article={article}
+						feature={index === 0}
+						eager={index === 0}
+						reveal={true}
+					/>
+				))
+			}
+		</ArticleCellGrid>
+	</div>
+</section>
+
+<style>
+	.latest {
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	.latest :global(.latest-grid) {
+		margin-bottom: 64px;
+	}
+</style>

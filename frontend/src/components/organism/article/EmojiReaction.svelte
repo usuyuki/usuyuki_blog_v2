@@ -231,10 +231,10 @@
 			>
 				{#each reactions as reaction (reaction.emoji)}
 					<button
-						class="flex items-center gap-1 px-3 py-1.5 rounded-full border text-sm transition-all duration-150 min-w-11 min-h-11 cursor-pointer"
-						class:bg-blue-50={reaction.reacted}
-						class:border-blue-400={reaction.reacted}
-						class:border-gray-200={!reaction.reacted}
+						class="flex items-center gap-1 px-3 py-1.5 border text-sm transition-all duration-150 min-w-11 min-h-11 cursor-pointer"
+						class:bg-orange-50={reaction.reacted}
+						class:border-orange={reaction.reacted}
+						class:border-gray-300={!reaction.reacted}
 						class:bounce={bouncing === reaction.emoji}
 						onclick={() => toggleReaction(reaction.emoji)}
 						disabled={posting !== null}
@@ -242,7 +242,7 @@
 						aria-pressed={reaction.reacted}
 					>
 						<span>{reaction.emoji}</span>
-						<span class="font-numbers text-gray-600">{reaction.count}</span>
+						<span class="font-en text-gray-600">{reaction.count}</span>
 					</button>
 				{/each}
 			</div>
@@ -260,7 +260,7 @@
 			{/if}
 			<div class="relative" bind:this={pickerWrapper}>
 				<button
-					class="flex items-center justify-center w-11 h-11 rounded-full border border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+					class="flex items-center justify-center w-11 h-11 border border-dashed border-gray-300 text-gray-400 hover:border-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
 					onclick={handleOpenPicker}
 					aria-label="絵文字を追加"
 				>
@@ -330,18 +330,18 @@
 
 	:global(emoji-picker) {
 		max-width: min(340px, calc(100vw - 2rem));
-		--border-radius: 0.75rem;
-		--background: var(--white);
-		--border-color: var(--brown);
-		--button-active-background: color-mix(in srgb, var(--blue) 15%, var(--white));
-		--button-hover-background: color-mix(in srgb, var(--brown) 15%, var(--white));
-		--category-font-color: color-mix(in srgb, var(--brown) 70%, var(--black));
+		--border-radius: 0;
+		--background: var(--color-paper);
+		--border-color: var(--color-ink);
+		--button-active-background: color-mix(in srgb, var(--color-orange) 15%, var(--color-paper));
+		--button-hover-background: var(--color-gray);
+		--category-font-color: #555;
 		--emoji-padding: 0.4rem;
-		--indicator-color: var(--blue);
-		--input-border-color: var(--brown);
-		--input-font-color: var(--black);
-		--input-placeholder-color: color-mix(in srgb, var(--brown) 60%, var(--white));
-		--outline-color: var(--blue);
-		--skintone-border-radius: 1rem;
+		--indicator-color: var(--color-orange);
+		--input-border-color: var(--color-ink);
+		--input-font-color: var(--color-ink);
+		--input-placeholder-color: #999;
+		--outline-color: var(--color-orange);
+		--skintone-border-radius: 0;
 	}
 </style>

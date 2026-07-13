@@ -1,0 +1,202 @@
+---
+import ArticleLabel from "~/components/atom/article/ArticleLabel.astro";
+import HashTagList from "~/components/atom/tag/HashTagList.astro";
+import { SITE_SUB_TITLE } from "~/consts";
+import { articleHref, viewTransitionSlug } from "~/libs/helper/articleCell";
+import { formatDotDate } from "~/libs/helper/formatDotDate";
+import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// トップページのHero(最新記事1件を大きく見せる)
+interface Props {
+  article: ArticleArchiveType;
+}
+const { article } = Astro.props;
+
+const href = articleHref(article);
+
+// VOL表記は最新記事の年月から生成する
+const publishedDate =
+  typeof article.published_at === "string"
+    ? iso8601TimeToDate(article.published_at)
+    : article.published_at;
+const volLabel = `VOL. ${publishedDate.year}-${String(publishedDate.month).padStart(2, "0")}`;
+
+const badge =
+  article.isExternal && article.source ? article.source : "New Article";
+const vtSlug = viewTransitionSlug(article);
+---
+
+<section class="hero" aria-labelledby="hero-label">
+	<div class="hero-grid">
+		<div class="hero-side" aria-hidden="true">
+			<span class="vertical">{SITE_SUB_TITLE}</span>
+			<span class="issue-no">{volLabel}</span>
+		</div>
+		<div class="hero-main">
+			<div class="hero-label" id="hero-label">
+				<ArticleLabel badge={badge} date={formatDotDate(article.published_at)} />
+			</div>
+			<a
+				class="hero-cover"
+				href={href}
+				target={article.isExternal ? "_blank" : undefined}
+				rel={article.isExternal ? "noopener noreferrer" : undefined}
+			>
+				{
+					article.feature_image ? (
+						<img
+							class="hero-visual"
+							src={optimizeGhostImageUrl(article.feature_image, { width: 1600, height: 686 })}
+							alt=""
+							width={1600}
+							height={686}
+							loading="eager"
+							fetchpriority="high"
+							transition:name={`image-${vtSlug}`}
+						/>
+					) : (
+						<div class="hero-visual hero-visual-placeholder" aria-hidden="true" />
+					)
+				}
+				<div class="hero-titlebox">
+					<h1 class="hero-title" transition:name={`title-${vtSlug}`}>
+						{article.title}
+					</h1>
+					{article.excerpt && <p class="hero-excerpt">{article.excerpt}</p>}
+					<div class="hero-meta">
+						{
+							article.tags && article.tags.length > 0 ? (
+								<HashTagList tags={article.tags.slice(0, 3)} />
+							) : (
+								<span />
+							)
+						}
+						<span class="read-more">READ ARTICLE</span>
+					</div>
+				</div>
+			</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	.hero-grid {
+		display: grid;
+		grid-template-columns: 64px 1fr;
+		max-width: var(--max-w);
+		margin: 0 auto;
+	}
+	.hero-side {
+		border-right: var(--bw) solid var(--color-ink);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: space-between;
+		padding: 24px 0;
+		gap: 24px;
+	}
+	.hero-side .vertical {
+		writing-mode: vertical-rl;
+		font-weight: 700;
+		font-size: 0.8rem;
+		letter-spacing: 0.32em;
+	}
+	.hero-side .issue-no {
+		writing-mode: vertical-rl;
+		font-family: var(--font-en);
+		font-size: 0.7rem;
+		letter-spacing: 0.24em;
+		color: #999;
+	}
+	.hero-main {
+		position: relative;
+		padding: 40px 24px 56px 40px;
+	}
+	.hero-label {
+		margin-bottom: 20px;
+	}
+	.hero-cover {
+		display: block;
+	}
+	.hero-visual {
+		width: 100%;
+		aspect-ratio: 21 / 9;
+		object-fit: cover;
+		border: var(--bw) solid var(--color-ink);
+		display: block;
+	}
+	.hero-visual-placeholder {
+		background:
+			repeating-linear-gradient(-45deg, transparent 0 34px, rgba(255, 255, 255, 0.5) 34px 36px),
+			linear-gradient(120deg, #e9e7e3 0%, #b6b2ac 100%);
+	}
+	.hero-titlebox {
+		position: relative;
+		margin: -72px 0 0 auto;
+		width: min(620px, 92%);
+		background: var(--color-paper);
+		border: var(--bw) solid var(--color-ink);
+		padding: 28px 32px 30px;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease;
+	}
+	.hero-cover:hover .hero-titlebox {
+		transform: translate(-6px, -6px);
+		box-shadow: 6px 6px 0 var(--color-ink);
+	}
+	.hero-title {
+		font-size: clamp(1.35rem, 2.8vw, 1.85rem);
+		font-weight: 900;
+		line-height: 1.5;
+		margin-bottom: 10px;
+	}
+	.hero-excerpt {
+		font-size: 0.88rem;
+		color: #555;
+		margin-bottom: 14px;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+	}
+	.hero-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 16px;
+		flex-wrap: wrap;
+	}
+	.read-more {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.76rem;
+		letter-spacing: 0.18em;
+		white-space: nowrap;
+	}
+	.read-more::after {
+		content: " →";
+	}
+
+	@media (max-width: 720px) {
+		.hero-grid {
+			grid-template-columns: 44px 1fr;
+		}
+		.hero-main {
+			padding: 24px 16px 40px 20px;
+		}
+		.hero-visual {
+			aspect-ratio: 4 / 3;
+		}
+		.hero-titlebox {
+			margin-top: -40px;
+			width: 94%;
+			padding: 20px;
+		}
+	}
+</style>

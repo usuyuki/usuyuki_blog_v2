@@ -4,6 +4,11 @@ export type DateType = {
   day: number;
 };
 
+export type ArticleTagType = {
+  name: string;
+  slug: string;
+};
+
 export type ArticleArchiveType = {
   slug: string;
   published_at: string | DateType;
@@ -14,4 +19,5 @@ export type ArticleArchiveType = {
   isExternal?: boolean; // 外部記事フラグ
   externalUrl?: string; // 外部記事の場合のURL
   sourceColor?: string; // 外部記事のサムネイル色
+  tags?: ArticleTagType[]; // 公開タグ（Ghost記事のみ。外部記事はundefined）
 };

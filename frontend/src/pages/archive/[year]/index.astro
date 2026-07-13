@@ -1,87 +1,11 @@
 ---
-import ArticleArchive from "~/components/molecule/articleArchive/MDArticleArchive.astro";
-import { SITE_URL } from "~/consts";
-import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
-import { getLatestArticles } from "~/libs/articleAggregator";
 import { isYear } from "~/libs/validation/isYear";
-import type { HeadMetaType } from "~/types/HeadMetaType";
 
-//バリデーション
+// 年別アーカイブは一覧ページの年フィルターに統合したため、301で恒久リダイレクトする
 const yearSlug = Number(Astro.params.year);
-//数字かつ整数かつ4桁であるか
 if (!isYear(yearSlug)) {
   return new Response(null, { status: 404 });
 }
 
-// getLatestArticles関数で全記事取得後、年でフィルタリング
-const allArticles = await getLatestArticles({
-  includeExternal: true, // RSS記事も含める
-  unlimited: true, // 全記事を取得
-});
-
-// 指定年の記事のみフィルタリング
-const yearStart = new Date(`${yearSlug}-01-01T00:00:00`);
-const yearEnd = new Date(`${yearSlug}-12-31T23:59:59`);
-
-const posts = allArticles
-  .filter((article) => {
-    let articleDate: Date;
-
-    if (typeof article.published_at === "string") {
-      articleDate = new Date(article.published_at);
-    } else {
-      // DateType format
-      articleDate = new Date(
-        `${article.published_at.year}-${article.published_at.month.toString().padStart(2, "0")}-${article.published_at.day.toString().padStart(2, "0")}`,
-      );
-    }
-
-    return articleDate >= yearStart && articleDate <= yearEnd;
-  })
-  .sort((a, b) => {
-    // 日付順でソート（古い順 = ASC）
-    const dateA =
-      typeof a.published_at === "string"
-        ? new Date(a.published_at).getTime()
-        : new Date(
-            `${a.published_at.year}-${a.published_at.month.toString().padStart(2, "0")}-${a.published_at.day.toString().padStart(2, "0")}`,
-          ).getTime();
-
-    const dateB =
-      typeof b.published_at === "string"
-        ? new Date(b.published_at).getTime()
-        : new Date(
-            `${b.published_at.year}-${b.published_at.month.toString().padStart(2, "0")}-${b.published_at.day.toString().padStart(2, "0")}`,
-          ).getTime();
-
-    return dateA - dateB; // ASC order
-  });
-
-const postsData = {
-  posts: posts || [],
-};
-
-const headMeta: HeadMetaType = {
-  title: `${yearSlug}年の記事`,
-  slug: `/archive/${yearSlug}`,
-  description: `うすゆきブログ${yearSlug}年のアーカイブです`,
-  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
-};
+return Astro.redirect(`/archive?year=${yearSlug}`, 301);
 ---
-
-<ArchiveLayout {...headMeta}>
-	<h2 class="text-blue text-2xl mt-4 mb-12 mx-2 text-center">{yearSlug}年の記事</h2>
-	{
-		postsData.posts && postsData.posts.length > 0 ? (
-			<ArticleArchive {...postsData} />
-		) : (
-			<p class="text-center text-xl mt-2 mb-8">
-				{yearSlug}年はまだ記事を書いていません！ごめんなさい！
-			</p>
-		)
-	}
-	<div class="flex justify-center mt-12">
-		<a href={`/archive/${yearSlug + 1}`} class="text-blue text-xl mx-2">←次の年</a>
-		<a href={`/archive/${yearSlug - 1}`} class="text-blue text-xl mx-2">前の年→</a>
-	</div>
-</ArchiveLayout>

@@ -1,0 +1,33 @@
+---
+import PageHead from "~/components/atom/section/PageHead.astro";
+import TagWall from "~/components/organism/tag/TagWall.astro";
+import { SITE_URL } from "~/consts";
+import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
+import { ghostApiWithRetry } from "~/libs/ghostClient";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
+// タグ数の表示用。TagWallと同一オプションなのでghostClientのキャッシュにヒットする
+const tags =
+  (await ghostApiWithRetry.tags.browse(
+    {
+      limit: 100,
+      order: "count.posts DESC",
+      filter: "visibility:public",
+      include: "count.posts",
+    },
+    3,
+    Astro.request,
+  )) || [];
+
+const headMeta: HeadMetaType = {
+  title: "タグ一覧",
+  slug: "/tags",
+  description: "うすゆきブログのタグ一覧です。タグから記事を探せます。",
+  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+};
+---
+
+<ArchiveLayout {...headMeta}>
+	<PageHead en="All Tags" jp="タグから探す" count={tags.length} countLabel="TAGS" />
+	<TagWall withSectionHead={false} />
+</ArchiveLayout>

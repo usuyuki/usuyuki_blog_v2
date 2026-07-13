@@ -1,11 +1,43 @@
 ---
+// aboutページの1セクション(罫線ボックス+英字風見出し)
 interface Props {
   title: string;
 }
 const { title } = Astro.props;
 ---
 
-<div class="mt-4 px-2">
-	<h2 class="text-xl">{title}</h2>
-	<slot />
-</div>
+<section class="about-section">
+	<h2>{title}</h2>
+	<div class="about-body">
+		<slot />
+	</div>
+</section>
+
+<style>
+	.about-section {
+		border: var(--bw) solid var(--color-ink);
+		margin-top: 32px;
+	}
+	.about-section h2 {
+		font-size: 0.95rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		padding: 12px 18px;
+		border-bottom: var(--bw) solid var(--color-ink);
+		background: var(--color-gray);
+	}
+	.about-body {
+		padding: 18px 20px;
+		font-size: 0.95rem;
+	}
+	.about-body :global(a) {
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		font-weight: 700;
+	}
+	.about-body :global(a:hover) {
+		background: var(--color-ink);
+		color: var(--color-paper);
+		text-decoration: none;
+	}
+</style>

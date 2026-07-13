@@ -1,8 +1,8 @@
 ---
 import "~/styles/global.css";
-import CommonFooter from "~/components/atom/footer/CommonFooter.astro";
+import SiteFooter from "~/components/atom/footer/SiteFooter.astro";
 import CommonHead from "~/components/atom/head/CommonHead.astro";
-import CommonHeader from "~/components/atom/header/CommonHeader.astro";
+import SiteHeader from "~/components/molecule/header/SiteHeader.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
 interface Props extends HeadMetaType {}
@@ -16,16 +16,15 @@ const headMeta: Props = Astro.props;
 		<slot name="head" />
 	</head>
 	<body>
-		<CommonHeader />
-		<!-- <main transition:animate="slide"> -->
-		<!-- <main transition:animate={fade({ duration: '2.0s' })}> -->
+		<SiteHeader />
 		<main>
 			<slot />
 		</main>
-		<CommonFooter />
+		<SiteFooter />
 		<script>
 			import { snsLinkProvider } from '~/libs/console/snsLinkProvider';
 			snsLinkProvider();
 		</script>
+		<script src="../scripts/reveal.ts"></script>
 	</body>
 </html>

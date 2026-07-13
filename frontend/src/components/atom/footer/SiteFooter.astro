@@ -1,0 +1,131 @@
+---
+// サイト内リンク
+const siteMapLinks = [
+  { label: "このブログについて", href: "/aboutThisBlog" },
+  { label: "アーカイブ", href: "/archive" },
+  { label: "リアクション", href: "/reactions" },
+  { label: "RSS", href: "/rss.xml" },
+];
+
+// 外部リンク
+const externalLinks = [
+  { label: "X", href: "https://x.com/usuyuki26" },
+  { label: "Misskey", href: "https://m5y.usuyuki.net/@usuyuki" },
+  { label: "GitHub", href: "https://github.com/usuyuki" },
+  { label: "ポートフォリオ", href: "https://usuyuki.net" },
+];
+---
+
+<footer class="site-footer">
+	<div class="container">
+		<p class="footer-huge">Usuyuki Blog<span class="dot">.</span></p>
+		<div class="footer-grid">
+			<p class="footer-tag">急須で入れたような何かを、ゆるゆると注いでいくブログです。</p>
+			<div class="footer-links">
+				<div>
+					<h2>Site Map</h2>
+					<ul>
+						{
+							siteMapLinks.map((link) => (
+								<li>
+									<a href={link.href}>{link.label}</a>
+								</li>
+							))
+						}
+					</ul>
+				</div>
+				<div>
+					<h2>Links</h2>
+					<ul>
+						{
+							externalLinks.map((link) => (
+								<li>
+									<a href={link.href} target="_blank" rel="noopener noreferrer">
+										{link.label}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="footer-copy">
+			<span>© USUYUKI</span>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		background: var(--color-ink);
+		color: #eee;
+		padding: 56px 0 32px;
+		margin-top: auto;
+	}
+	.footer-huge {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: clamp(2.6rem, 9vw, 6.5rem);
+		line-height: 1;
+		letter-spacing: 0.01em;
+		text-transform: uppercase;
+		color: var(--color-paper);
+		border-bottom: var(--bw) solid #444;
+		padding-bottom: 32px;
+		margin-bottom: 32px;
+	}
+	.footer-huge .dot {
+		color: var(--color-orange);
+	}
+	.footer-grid {
+		display: flex;
+		justify-content: space-between;
+		gap: 40px;
+		flex-wrap: wrap;
+		margin-bottom: 48px;
+	}
+	.footer-tag {
+		font-size: 0.85rem;
+		color: #aaa;
+		max-width: 320px;
+	}
+	.footer-links {
+		display: flex;
+		gap: 64px;
+		flex-wrap: wrap;
+	}
+	.footer-links h2 {
+		font-family: var(--font-en);
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.24em;
+		color: #999;
+		margin-bottom: 14px;
+		text-transform: uppercase;
+	}
+	.footer-links li {
+		margin-bottom: 8px;
+	}
+	.footer-links a {
+		font-size: 0.86rem;
+		color: #ccc;
+	}
+	.footer-links a:hover {
+		color: var(--color-paper);
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+	.footer-copy {
+		border-top: 1px solid #333;
+		padding-top: 20px;
+		font-family: var(--font-en);
+		font-size: 0.72rem;
+		letter-spacing: 0.18em;
+		color: #777;
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+</style>

@@ -1,0 +1,198 @@
+---
+import SearchForm from "~/components/molecule/search/SearchForm.astro";
+import { SITE_SUB_TITLE } from "~/consts";
+
+// グローバルナビの項目
+const navItems = [
+  { label: "TOP", href: "/" },
+  { label: "ALL", href: "/archive" },
+  { label: "TAGS", href: "/tags" },
+  { label: "ABOUT", href: "/aboutThisBlog" },
+];
+
+const currentPath = Astro.url.pathname;
+
+// TOPは完全一致、アンカーは対象外、その他は前方一致で現在地を判定する
+const isCurrent = (href: string): boolean => {
+  if (href === "/") return currentPath === "/";
+  if (href.includes("#")) return false;
+  return currentPath === href || currentPath.startsWith(`${href}/`);
+};
+---
+
+<header class="site-header">
+	<div class="container header-inner">
+		<a class="brand" href="/">
+			<span class="brand-square" aria-hidden="true"></span>
+			<span class="brand-mark">USUYUKI BLOG</span>
+			<span class="brand-sub">{SITE_SUB_TITLE}</span>
+		</a>
+		<button
+			id="global-nav-toggle"
+			class="nav-toggle"
+			aria-label="メニューを開閉"
+			aria-expanded="false"
+			aria-controls="global-nav"
+		>
+			<span></span><span></span><span></span>
+		</button>
+		<nav class="global-nav" id="global-nav" aria-label="グローバルナビゲーション">
+			<ul>
+				{
+					navItems.map((item) => (
+						<li>
+							<a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+								{item.label}
+							</a>
+						</li>
+					))
+				}
+				<li class="nav-search">
+					<SearchForm placeholder="サイト内検索(google)" />
+				</li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+<script src="../../../scripts/globalNav.ts"></script>
+
+<style>
+	.site-header {
+		position: sticky;
+		top: 0;
+		z-index: 100;
+		background: var(--color-paper);
+		border-bottom: var(--bw) solid var(--color-ink);
+	}
+	.header-inner {
+		display: flex;
+		align-items: stretch;
+		justify-content: space-between;
+		height: var(--heder-height);
+	}
+	.brand {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	.brand-square {
+		width: 18px;
+		height: 18px;
+		background: var(--color-orange);
+		flex: none;
+	}
+	.brand-mark {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: 1.05rem;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+	}
+	.brand-sub {
+		font-size: 0.68rem;
+		color: #777;
+		white-space: nowrap;
+	}
+	.global-nav ul {
+		display: flex;
+		height: 100%;
+		align-items: stretch;
+	}
+	.global-nav li {
+		display: flex;
+	}
+	.global-nav li > a {
+		display: flex;
+		align-items: center;
+		padding: 0 22px;
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.78rem;
+		letter-spacing: 0.18em;
+		border-left: 1px solid #ddd;
+		transition:
+			background 0.15s,
+			color 0.15s;
+	}
+	.global-nav li > a:hover,
+	.global-nav li > a[aria-current] {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	.nav-search {
+		align-items: center;
+		padding: 0 16px;
+		border-left: 1px solid #ddd;
+		border-right: 1px solid #ddd;
+		width: 240px;
+	}
+	.nav-toggle {
+		display: none;
+	}
+
+	@media (max-width: 860px) {
+		.brand-sub {
+			display: none;
+		}
+		.global-nav {
+			position: fixed;
+			inset: var(--heder-height) 0 auto 0;
+			background: var(--color-paper);
+			border-bottom: var(--bw) solid var(--color-ink);
+			transform: translateY(-130%);
+			transition: transform 0.25s ease;
+			visibility: hidden;
+		}
+		.global-nav.open {
+			transform: translateY(0);
+			visibility: visible;
+		}
+		.global-nav ul {
+			flex-direction: column;
+			height: auto;
+		}
+		.global-nav li > a {
+			width: 100%;
+			padding: 16px 24px;
+			border-left: none;
+			border-top: 1px solid #ddd;
+		}
+		.nav-search {
+			width: 100%;
+			padding: 16px 24px;
+			border-left: none;
+			border-right: none;
+			border-top: 1px solid #ddd;
+		}
+		.nav-toggle {
+			display: inline-flex;
+			flex-direction: column;
+			justify-content: center;
+			gap: 5px;
+			width: 60px;
+			align-self: stretch;
+			padding: 0 18px;
+			background: none;
+			border: none;
+			border-left: 1px solid #ddd;
+			cursor: pointer;
+		}
+		.nav-toggle span {
+			height: 2px;
+			background: var(--color-ink);
+			transition:
+				transform 0.2s,
+				opacity 0.2s;
+		}
+		.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+			transform: translateY(7px) rotate(45deg);
+		}
+		.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+			opacity: 0;
+		}
+		.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+			transform: translateY(-7px) rotate(-45deg);
+		}
+	}
+</style>

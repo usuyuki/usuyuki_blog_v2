@@ -1,0 +1,122 @@
+---
+import {
+  articleHref,
+  thumbGradient,
+  viewTransitionSlug,
+} from "~/libs/helper/articleCell";
+import { formatDotDate } from "~/libs/helper/formatDotDate";
+import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
+import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+
+// 番号付きのピックアップ行(01〜 + 正方サムネ + タイトル + 矢印)
+interface Props {
+  article: ArticleArchiveType;
+  no: number;
+  contextPrefix?: string;
+}
+const { article, no, contextPrefix = "pickup-" } = Astro.props;
+
+const href = articleHref(article);
+const vtSlug = viewTransitionSlug(article);
+const gradient = thumbGradient(article.slug);
+---
+
+<a class="pickup-row reveal" href={href}>
+	<span class="pickup-no">{String(no).padStart(2, "0")}</span>
+	<span class="pickup-thumb">
+		{
+			article.feature_image ? (
+				<img
+					src={optimizeGhostImageUrl(article.feature_image, { width: 300, height: 300 })}
+					alt=""
+					width={96}
+					height={96}
+					loading="lazy"
+					transition:name={`image-${contextPrefix}${vtSlug}`}
+				/>
+			) : (
+				<span class="thumb-placeholder" style={`background: ${gradient}`} aria-hidden="true" />
+			)
+		}
+	</span>
+	<span class="pickup-body">
+		<span class="pickup-date">{formatDotDate(article.published_at)}</span>
+		<h3 class="pickup-title">{article.title}</h3>
+	</span>
+	<span class="pickup-arrow" aria-hidden="true">→</span>
+</a>
+
+<style>
+	.pickup-row {
+		display: grid;
+		grid-template-columns: 90px 96px 1fr auto;
+		align-items: center;
+		gap: 20px;
+		border-bottom: var(--bw) solid var(--color-ink);
+		padding: 18px 8px;
+		background: transparent;
+		transition: background 0.15s;
+	}
+	.pickup-row:hover {
+		background: var(--color-paper);
+	}
+	.pickup-no {
+		font-family: var(--font-display);
+		font-weight: 900;
+		font-size: 2rem;
+		line-height: 1;
+		color: var(--color-ink);
+	}
+	.pickup-thumb {
+		width: 96px;
+		aspect-ratio: 1;
+		border: var(--bw) solid var(--color-ink);
+		overflow: hidden;
+		display: block;
+	}
+	.pickup-thumb img,
+	.thumb-placeholder {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+	.pickup-body {
+		min-width: 0;
+	}
+	.pickup-date {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.7rem;
+		letter-spacing: 0.18em;
+		color: #888;
+	}
+	.pickup-title {
+		font-size: 1rem;
+		font-weight: 700;
+		line-height: 1.6;
+	}
+	.pickup-row:hover .pickup-title {
+		text-decoration: underline;
+		text-underline-offset: 5px;
+		text-decoration-thickness: 2px;
+	}
+	.pickup-arrow {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 1.2rem;
+		color: var(--color-ink);
+		padding-right: 8px;
+	}
+	@media (max-width: 640px) {
+		.pickup-row {
+			grid-template-columns: 56px 1fr auto;
+		}
+		.pickup-thumb {
+			display: none;
+		}
+		.pickup-no {
+			font-size: 1.5rem;
+		}
+	}
+</style>

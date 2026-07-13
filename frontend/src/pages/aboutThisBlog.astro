@@ -1,5 +1,6 @@
 ---
 import AboutThisBlogWrapper from "~/components/atom/wrapper/AboutThisBlogWrapper.astro";
+import PageHead from "~/components/atom/section/PageHead.astro";
 import { SITE_URL } from "~/consts";
 import PageLayout from "~/layouts/extends/PageLayout.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
@@ -16,7 +17,8 @@ const headMeta: HeadMetaType = {
 ---
 
 <PageLayout {...headMeta}>
-	<h1 class="text-center text-3xl">このブログについて</h1>
+	<PageHead en="About" jp="このブログについて" />
+	<div class="container about-sections">
 	<AboutThisBlogWrapper title="筆者">
 		<p>
 			このブログはうすゆきによってすべて書かれています。広告なども付けておらず完全に個人の趣味です。<br
@@ -49,4 +51,12 @@ const headMeta: HeadMetaType = {
 			Cookie（有効期限1年）として保存します。このCookieは同一ユーザによる重複リアクションを防ぐためにのみ使用され、個人を特定する情報は一切含みません。CookieはブラウザのCookie設定から削除できます。
 		</p>
 	</AboutThisBlogWrapper>
+	</div>
 </PageLayout>
+
+<style>
+	.about-sections {
+		max-width: calc(var(--article-max-width) + 48px);
+		padding-bottom: 96px;
+	}
+</style>

@@ -1,9 +1,13 @@
-import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+import type {
+  ArticleArchiveType,
+  ArticleTagType,
+} from "~/types/ArticleArchiveType";
 import type { RSSItem, ExternalBlogConfig } from "~/types/RSSType";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { fetchMultipleRSS } from "~/libs/rssClient";
 import { fetchQiitaItems } from "~/libs/qiitaClient";
 import { CONFIG } from "~/libs/config";
+import { cache, ONE_HOUR_MS } from "~/libs/cache";
 import astroLogger from "./astroLogger";
 import errorHandler from "./errorHandler";
 
@@ -74,6 +78,7 @@ export async function getLatestArticles(
         order: "published_at DESC",
         limit: apiLimit,
         page: page,
+        include: "tags",
       });
 
       if (!ghostPosts || ghostPosts.length === 0) {
@@ -264,6 +269,107 @@ export async function getLatestArticles(
   return finalArticles;
 }
 
+// 全件リストのキャッシュキー(集約ロジックを変えたらバージョンを上げて無効化する)
+const ALL_ARTICLES_CACHE_KEY = "aggregated_all_articles:v2";
+
+// 全記事をキャッシュ付きで取得する(一覧ページ・前後記事ナビで共用)
+export async function getAllArticlesCached(
+  includeExternal = true,
+): Promise<ArticleArchiveType[]> {
+  const cacheKey = `${ALL_ARTICLES_CACHE_KEY}:${includeExternal ? "all" : "ghost"}`;
+  const cached = cache.get<ArticleArchiveType[]>(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const articles = await getLatestArticles({
+    includeExternal,
+    unlimited: true,
+  });
+  // 取得失敗などで空のときはキャッシュせず、次のリクエストで再取得させる
+  if (articles.length > 0) {
+    cache.set(cacheKey, articles, ONE_HOUR_MS);
+  }
+  return articles;
+}
+
+// 記事詳細用: 指定slugの前後の記事を返す
+// prev = 1つ古い記事、next = 1つ新しい記事。外部記事(Qiita/Zenn等)はナビに含めない
+export async function getAdjacentArticles(slug: string): Promise<{
+  prev: ArticleArchiveType | null;
+  next: ArticleArchiveType | null;
+}> {
+  const ghostArticles = await getAllArticlesCached(false);
+  // リストは新しい順なので、index+1が古い記事、index-1が新しい記事
+  const index = ghostArticles.findIndex((article) => article.slug === slug);
+  if (index === -1) {
+    return { prev: null, next: null };
+  }
+  return {
+    prev: ghostArticles[index + 1] ?? null,
+    next: index > 0 ? ghostArticles[index - 1] : null,
+  };
+}
+
+// 記事詳細用: タグが共通するGhost記事を関連記事として取得する
+// タグなし・該当不足のときは最新記事(自分以外)で補完する
+export async function getRelatedArticles(
+  post: { slug: string; tags?: ArticleTagType[] },
+  options: { limit?: number } = {},
+): Promise<ArticleArchiveType[]> {
+  const { limit = 3 } = options;
+  const tagSlugs = (post.tags ?? [])
+    .map((tag) => tag.slug)
+    .filter((tagSlug) => tagSlug !== "");
+
+  const related: ArticleArchiveType[] = [];
+
+  if (tagSlugs.length > 0) {
+    try {
+      const posts = await ghostApiWithRetry.posts.browse({
+        filter: `tags:[${tagSlugs.join(",")}]+slug:-${post.slug}`,
+        order: "published_at DESC",
+        limit,
+        include: "tags",
+      });
+      if (posts) {
+        related.push(...posts.slice(0, limit));
+      }
+    } catch (error) {
+      errorHandler.handleError(error as Error, {
+        service: "article-aggregator",
+        method: "getRelatedArticles",
+        type: "related_posts_error",
+      });
+    }
+  }
+
+  // タグ一致だけで埋まらない場合は最新記事で補完
+  if (related.length < limit) {
+    try {
+      const latest = await getLatestArticles({
+        includeExternal: false,
+        // 自分自身とタグ一致分が除外されても足りるように多めに取る
+        limit: limit + related.length + 1,
+      });
+      for (const article of latest) {
+        if (related.length >= limit) break;
+        if (article.slug === post.slug) continue;
+        if (related.some((r) => r.slug === article.slug)) continue;
+        related.push(article);
+      }
+    } catch (error) {
+      errorHandler.handleError(error as Error, {
+        service: "article-aggregator",
+        method: "getRelatedArticles",
+        type: "related_posts_fallback_error",
+      });
+    }
+  }
+
+  return related.slice(0, limit);
+}
+
 export async function getFeaturedArticles(
   options: { limit?: number; includeExternal?: boolean } = {},
 ): Promise<ArticleArchiveType[]> {
@@ -275,6 +381,7 @@ export async function getFeaturedArticles(
       filter: "featured:true",
       order: "published_at DESC",
       limit,
+      include: "tags",
     });
 
     if (ghostPosts) {

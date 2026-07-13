@@ -4,7 +4,7 @@
  * Ghost CMS が日本語タイトルを UTF-8 バイトのハイフン区切り hex に変換するため、
  * 日本語スラッグは100文字を大幅に超える場合がある（例: 141文字）
  */
-export function isSlug(slug: string | undefined): boolean {
+export function isSlug(slug: string | undefined): slug is string {
   return (
     !!slug &&
     typeof slug === "string" &&
