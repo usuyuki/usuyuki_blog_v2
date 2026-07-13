@@ -57,7 +57,8 @@ document.addEventListener("astro:page-load", () => {
       // ※本文冒頭のインライン目次（.toc-modal 内ではない .article-toc.inline）は
       // 自身のスクロールバーを持たず、scrollIntoViewを呼ぶと画面全体がスクロールして戻されてしまうため除外
       if (isActive) {
-        const isBodyInline = link.closest(".article-toc.inline") && !link.closest(".toc-modal");
+        const isBodyInline =
+          link.closest(".article-toc.inline") && !link.closest(".toc-modal");
         if (!isBodyInline) {
           link.scrollIntoView({ block: "nearest" });
         }
