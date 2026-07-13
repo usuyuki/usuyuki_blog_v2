@@ -1,4 +1,26 @@
-import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
+import type {
+  ArticleArchiveType,
+  ArticleTagType,
+} from "~/types/ArticleArchiveType";
+
+// Ghost APIのtags配列に入りうる最小限の形(visibility/name/slugのみ使用)
+type GhostTagLike = {
+  visibility?: string | null;
+  name?: string | null;
+  slug?: string | null;
+};
+
+/**
+ * Ghost記事のtagsから公開タグ(visibility: "public")だけを抽出し、
+ * {name, slug} の形に正規化して返す。tags未指定時は空配列。
+ */
+export function getPublicTags(
+  tags: GhostTagLike[] | null | undefined,
+): ArticleTagType[] {
+  return (tags ?? [])
+    .filter((tag) => tag.visibility === "public")
+    .map((tag) => ({ name: tag.name || "", slug: tag.slug || "" }));
+}
 
 /**
  * 記事セルのリンク先を返す(内部記事は/slug、外部記事はexternalUrl)
@@ -51,3 +73,12 @@ export function sourceBadgeBackground(sourceColor?: string): string {
   }
   return "var(--color-ink)";
 }
+
+/**
+ * 画像読み込み失敗時のonerrorハンドラ文字列。
+ * imgタグの直後の要素(プレースホルダーdiv)を表示に切り替える。
+ * ArticleCell.astro/HeroSection.astroで共用し、実装のドリフトを防ぐ。
+ * 前提: imgタグの直後のsibling要素がプレースホルダーであること。
+ */
+export const IMAGE_FALLBACK_ONERROR =
+  "this.style.display='none';this.nextElementSibling.style.display='block'";

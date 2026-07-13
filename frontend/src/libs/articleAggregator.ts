@@ -273,13 +273,17 @@ export async function getLatestArticles(
 const ALL_ARTICLES_CACHE_KEY = "aggregated_all_articles:v2";
 
 // 全記事をキャッシュ付きで取得する(一覧ページ・前後記事ナビで共用)
+// forceRefresh=trueのときはキャッシュを無視して最新データを取得し直す
 export async function getAllArticlesCached(
   includeExternal = true,
+  forceRefresh = false,
 ): Promise<ArticleArchiveType[]> {
   const cacheKey = `${ALL_ARTICLES_CACHE_KEY}:${includeExternal ? "all" : "ghost"}`;
-  const cached = cache.get<ArticleArchiveType[]>(cacheKey);
-  if (cached) {
-    return cached;
+  if (!forceRefresh) {
+    const cached = cache.get<ArticleArchiveType[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
   }
 
   const articles = await getLatestArticles({
@@ -293,31 +297,52 @@ export async function getAllArticlesCached(
   return articles;
 }
 
+// 記事詳細用: 前後記事・関連記事の両方が使うGhost全記事リストを取得する。
+// キャッシュに指定slugが見つからない場合(公開直後でキャッシュがまだ古いなど)は
+// 一度だけキャッシュを無視して再取得し、公開直後の記事で前後記事ナビ・関連記事の
+// 補完リストの両方が古いスナップショットのまま不整合になるのを防ぐ。
+// [slug].astroで1回だけ呼び出し、結果をgetAdjacentArticles/getRelatedArticlesの
+// 両方に渡すことで、鮮度チェックを1箇所に集約しつつ二重フェッチも避ける。
+export async function getAllGhostArticlesForArticlePage(
+  slug: string,
+): Promise<ArticleArchiveType[]> {
+  const ghostArticles = await getAllArticlesCached(false);
+  if (ghostArticles.some((article) => article.slug === slug)) {
+    return ghostArticles;
+  }
+  return getAllArticlesCached(false, true);
+}
+
 // 記事詳細用: 指定slugの前後の記事を返す
 // prev = 1つ古い記事、next = 1つ新しい記事。外部記事(Qiita/Zenn等)はナビに含めない
-export async function getAdjacentArticles(slug: string): Promise<{
+// allGhostArticlesはgetAllGhostArticlesForArticlePageで取得した(鮮度確認済みの)配列を渡すこと
+export async function getAdjacentArticles(
+  slug: string,
+  allGhostArticles: ArticleArchiveType[],
+): Promise<{
   prev: ArticleArchiveType | null;
   next: ArticleArchiveType | null;
 }> {
-  const ghostArticles = await getAllArticlesCached(false);
   // リストは新しい順なので、index+1が古い記事、index-1が新しい記事
-  const index = ghostArticles.findIndex((article) => article.slug === slug);
+  const index = allGhostArticles.findIndex((article) => article.slug === slug);
   if (index === -1) {
     return { prev: null, next: null };
   }
   return {
-    prev: ghostArticles[index + 1] ?? null,
-    next: index > 0 ? ghostArticles[index - 1] : null,
+    prev: allGhostArticles[index + 1] ?? null,
+    next: index > 0 ? allGhostArticles[index - 1] : null,
   };
 }
 
 // 記事詳細用: タグが共通するGhost記事を関連記事として取得する
 // タグなし・該当不足のときは最新記事(自分以外)で補完する
+// allGhostArticlesを渡すと、タグ一致検索・補完の両方でGhostへのライブフェッチを省略し、
+// 渡されたリストをin-memoryでフィルタする(呼び出し元が既に全記事リストを取得済みの場合用)
 export async function getRelatedArticles(
   post: { slug: string; tags?: ArticleTagType[] },
-  options: { limit?: number } = {},
+  options: { limit?: number; allGhostArticles?: ArticleArchiveType[] } = {},
 ): Promise<ArticleArchiveType[]> {
-  const { limit = 3 } = options;
+  const { limit = 3, allGhostArticles } = options;
   const tagSlugs = (post.tags ?? [])
     .map((tag) => tag.slug)
     .filter((tagSlug) => tagSlug !== "");
@@ -325,33 +350,48 @@ export async function getRelatedArticles(
   const related: ArticleArchiveType[] = [];
 
   if (tagSlugs.length > 0) {
-    try {
-      const posts = await ghostApiWithRetry.posts.browse({
-        filter: `tags:[${tagSlugs.join(",")}]+slug:-${post.slug}`,
-        order: "published_at DESC",
-        limit,
-        include: "tags",
-      });
-      if (posts) {
-        related.push(...posts.slice(0, limit));
+    if (allGhostArticles) {
+      // 全記事リストが渡されている場合はin-memoryでタグ一致フィルタする(Ghostへのライブフェッチ回避)
+      const tagSlugSet = new Set(tagSlugs);
+      for (const article of allGhostArticles) {
+        if (related.length >= limit) break;
+        if (article.slug === post.slug) continue;
+        if (article.tags?.some((tag) => tagSlugSet.has(tag.slug))) {
+          related.push(article);
+        }
       }
-    } catch (error) {
-      errorHandler.handleError(error as Error, {
-        service: "article-aggregator",
-        method: "getRelatedArticles",
-        type: "related_posts_error",
-      });
+    } else {
+      try {
+        const posts = await ghostApiWithRetry.posts.browse({
+          filter: `tags:[${tagSlugs.join(",")}]+slug:-${post.slug}`,
+          order: "published_at DESC",
+          limit,
+          include: "tags",
+        });
+        if (posts) {
+          related.push(...posts.slice(0, limit));
+        }
+      } catch (error) {
+        errorHandler.handleError(error as Error, {
+          service: "article-aggregator",
+          method: "getRelatedArticles",
+          type: "related_posts_error",
+        });
+      }
     }
   }
 
   // タグ一致だけで埋まらない場合は最新記事で補完
   if (related.length < limit) {
     try {
-      const latest = await getLatestArticles({
-        includeExternal: false,
-        // 自分自身とタグ一致分が除外されても足りるように多めに取る
-        limit: limit + related.length + 1,
-      });
+      // 呼び出し元が既に全記事リストを取得済みならそれを使い、Ghostへの再フェッチを避ける
+      const latest =
+        allGhostArticles ??
+        (await getLatestArticles({
+          includeExternal: false,
+          // 自分自身とタグ一致分が除外されても足りるように多めに取る
+          limit: limit + related.length + 1,
+        }));
       for (const article of latest) {
         if (related.length >= limit) break;
         if (article.slug === post.slug) continue;

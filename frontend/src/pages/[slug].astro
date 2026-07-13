@@ -14,10 +14,12 @@ import { getFrontendUrl } from "~/libs/env";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import {
   getAdjacentArticles,
+  getAllGhostArticlesForArticlePage,
   getRelatedArticles,
 } from "~/libs/articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { addHeadingIds } from "~/libs/helper/addHeadingIds";
+import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
@@ -58,15 +60,17 @@ if (!post) {
 }
 
 // 公開タグのみ表示・関連記事検索に使う
-const publicTags =
-  post.tags
-    ?.filter((tag) => tag.visibility === "public")
-    .map((tag) => ({ name: tag.name || "", slug: tag.slug || "" })) ?? [];
+const publicTags = getPublicTags(post.tags);
+
+// 前後記事・関連記事の両方が使うGhost全記事リストを一度だけ取得する。
+// この時点でslugの鮮度チェック(公開直後のキャッシュミス時は強制再取得)まで
+// 済ませておくことで、後続の2関数が同じ鮮度のスナップショットを参照できる。
+const allGhostArticles = await getAllGhostArticlesForArticlePage(slug);
 
 // 前後記事と関連記事を並列取得
 const [adjacent, relatedArticles] = await Promise.all([
-  getAdjacentArticles(slug),
-  getRelatedArticles({ slug, tags: publicTags }),
+  getAdjacentArticles(slug, allGhostArticles),
+  getRelatedArticles({ slug, tags: publicTags }, { allGhostArticles }),
 ]);
 
 astroLogger.requestLog(Astro.request, { status: 200 });
@@ -200,7 +204,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		font-family: var(--font-en);
 		font-size: 0.72rem;
 		letter-spacing: 0.16em;
-		color: #888;
+		color: var(--color-muted);
 		white-space: nowrap;
 	}
 	.article-hero {
@@ -241,6 +245,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		border-top: var(--bw) solid var(--color-ink);
 	}
 
+	/* 記事本文+サイドバー(目次/リアクション)の2カラムを1カラムに畳む幅。--breakpoint-lg(1024px)相当 */
 	@media (max-width: 1020px) {
 		.article-layout {
 			grid-template-columns: 1fr;

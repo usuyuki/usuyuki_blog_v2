@@ -18,6 +18,12 @@ const { variant = "list", class: className = "" } = Astro.props;
 		border-top: var(--bw) solid var(--color-ink);
 		border-left: var(--bw) solid var(--color-ink);
 	}
+	/*
+	 * 以下のブレークポイントはtailwind.cssの--breakpoint-*とは独立した値。
+	 * セル内コンテンツ(サムネ16:9+タイトル+タグ)が窮屈にならない最小幅を列数ごとに
+	 * 逆算した値のため、共通トークンに丸めると列がつぶれて可読性が落ちる。
+	 * 列数を増減する場合は各バリアントごとに実機で確認しながら調整すること。
+	 */
 	.latest {
 		grid-template-columns: repeat(4, 1fr);
 	}

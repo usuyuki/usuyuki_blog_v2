@@ -1,4 +1,6 @@
 ---
+import { SITE_TITLE_EN, SOCIAL_LINKS } from "~/consts";
+
 // サイト内リンク
 const siteMapLinks = [
   { label: "このブログについて", href: "/aboutThisBlog" },
@@ -6,19 +8,11 @@ const siteMapLinks = [
   { label: "リアクション", href: "/reactions" },
   { label: "RSS", href: "/rss.xml" },
 ];
-
-// 外部リンク
-const externalLinks = [
-  { label: "X", href: "https://x.com/usuyuki26" },
-  { label: "Misskey", href: "https://m5y.usuyuki.net/@usuyuki" },
-  { label: "GitHub", href: "https://github.com/usuyuki" },
-  { label: "ポートフォリオ", href: "https://usuyuki.net" },
-];
 ---
 
 <footer class="site-footer">
 	<div class="container">
-		<p class="footer-huge">Usuyuki Blog<span class="dot">.</span></p>
+		<p class="footer-huge">{SITE_TITLE_EN}<span class="dot">.</span></p>
 		<div class="footer-grid">
 			<p class="footer-tag">急須で入れたような何かを、ゆるゆると注いでいくブログです。</p>
 			<div class="footer-links">
@@ -38,7 +32,7 @@ const externalLinks = [
 					<h2>Links</h2>
 					<ul>
 						{
-							externalLinks.map((link) => (
+							SOCIAL_LINKS.map((link) => (
 								<li>
 									<a href={link.href} target="_blank" rel="noopener noreferrer">
 										{link.label}
@@ -59,7 +53,7 @@ const externalLinks = [
 <style>
 	.site-footer {
 		background: var(--color-ink);
-		color: #eee;
+		color: var(--color-ink-text);
 		padding: 56px 0 32px;
 		margin-top: auto;
 	}
@@ -71,7 +65,7 @@ const externalLinks = [
 		letter-spacing: 0.01em;
 		text-transform: uppercase;
 		color: var(--color-paper);
-		border-bottom: var(--bw) solid #444;
+		border-bottom: var(--bw) solid var(--color-ink-border);
 		padding-bottom: 32px;
 		margin-bottom: 32px;
 	}
@@ -87,7 +81,7 @@ const externalLinks = [
 	}
 	.footer-tag {
 		font-size: 0.85rem;
-		color: #aaa;
+		color: var(--color-ink-muted);
 		max-width: 320px;
 	}
 	.footer-links {
@@ -100,7 +94,7 @@ const externalLinks = [
 		font-size: 0.7rem;
 		font-weight: 700;
 		letter-spacing: 0.24em;
-		color: #999;
+		color: var(--color-ink-muted-2);
 		margin-bottom: 14px;
 		text-transform: uppercase;
 	}
@@ -109,7 +103,7 @@ const externalLinks = [
 	}
 	.footer-links a {
 		font-size: 0.86rem;
-		color: #ccc;
+		color: var(--color-ink-faint);
 	}
 	.footer-links a:hover {
 		color: var(--color-paper);
@@ -117,12 +111,12 @@ const externalLinks = [
 		text-underline-offset: 4px;
 	}
 	.footer-copy {
-		border-top: 1px solid #333;
+		border-top: 1px solid var(--color-ink-border);
 		padding-top: 20px;
 		font-family: var(--font-en);
 		font-size: 0.72rem;
 		letter-spacing: 0.18em;
-		color: #777;
+		color: var(--color-ink-dim);
 		display: flex;
 		justify-content: space-between;
 		flex-wrap: wrap;

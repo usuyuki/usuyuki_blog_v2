@@ -1,10 +1,14 @@
 ---
+import { SITE_URL } from "~/consts";
+
 interface Props {
   placeholder?: string;
   className?: string;
 }
 
 const { placeholder = "検索...", className = "" } = Astro.props;
+// サイト内検索のスコープはSITE_URLのホスト名から導出する(ドメイン移行時に自動追従させるため)
+const searchHostname = new URL(SITE_URL).hostname;
 ---
 
 <form
@@ -14,12 +18,12 @@ const { placeholder = "検索...", className = "" } = Astro.props;
 	target="_blank"
 	role="search"
 >
-	<input type="hidden" name="sitesearch" value="blog.usuyuki.net" />
+	<input type="hidden" name="sitesearch" value={searchHostname} />
 	<input
 		type="text"
 		name="q"
 		placeholder={placeholder}
-		class="min-w-0 flex-1 bg-paper px-3 py-1.5 text-sm text-ink placeholder:text-[#999] outline-none"
+		class="min-w-0 flex-1 bg-paper px-3 py-1.5 text-sm text-ink placeholder:text-[var(--color-muted)] outline-none"
 		required
 	/>
 	<button

@@ -2,7 +2,11 @@
 import ArticleLabel from "~/components/atom/article/ArticleLabel.astro";
 import HashTagList from "~/components/atom/tag/HashTagList.astro";
 import { SITE_SUB_TITLE } from "~/consts";
-import { articleHref, viewTransitionSlug } from "~/libs/helper/articleCell";
+import {
+  articleHref,
+  IMAGE_FALLBACK_ONERROR,
+  viewTransitionSlug,
+} from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { iso8601TimeToDate } from "~/libs/helper/iso8601TimeToDate";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
@@ -46,16 +50,24 @@ const vtSlug = viewTransitionSlug(article);
 			>
 				{
 					article.feature_image ? (
-						<img
-							class="hero-visual"
-							src={optimizeGhostImageUrl(article.feature_image, { width: 1600, height: 686 })}
-							alt=""
-							width={1600}
-							height={686}
-							loading="eager"
-							fetchpriority="high"
-							transition:name={`image-${vtSlug}`}
-						/>
+						<Fragment>
+							<img
+								class="hero-visual"
+								src={optimizeGhostImageUrl(article.feature_image, { width: 1600, height: 686 })}
+								alt=""
+								width={1600}
+								height={686}
+								loading="eager"
+								fetchpriority="high"
+								transition:name={`image-${vtSlug}`}
+								onerror={IMAGE_FALLBACK_ONERROR}
+							/>
+							<div
+								class="hero-visual hero-visual-placeholder"
+								style="display: none"
+								aria-hidden="true"
+							/>
+						</Fragment>
 					) : (
 						<div class="hero-visual hero-visual-placeholder" aria-hidden="true" />
 					)
@@ -111,7 +123,7 @@ const vtSlug = viewTransitionSlug(article);
 		font-family: var(--font-en);
 		font-size: 0.7rem;
 		letter-spacing: 0.24em;
-		color: #999;
+		color: var(--color-muted);
 	}
 	.hero-main {
 		position: relative;
@@ -161,7 +173,7 @@ const vtSlug = viewTransitionSlug(article);
 	}
 	.hero-excerpt {
 		font-size: 0.88rem;
-		color: #555;
+		color: var(--color-muted);
 		margin-bottom: 14px;
 		display: -webkit-box;
 		-webkit-box-orient: vertical;
@@ -186,6 +198,7 @@ const vtSlug = viewTransitionSlug(article);
 		content: " →";
 	}
 
+	/* Hero画像を21:9→4:3に切り替える幅。--breakpoint-sm(640px)では文字が窮屈になるため独自値を使用 */
 	@media (max-width: 720px) {
 		.hero-grid {
 			grid-template-columns: 44px 1fr;

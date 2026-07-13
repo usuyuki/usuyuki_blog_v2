@@ -6,7 +6,22 @@
   --color-paper: #ffffff;
   --color-gray: #f4f3f0;
   --color-orange: #ff5c00;
-  --color-orange-deep: #d94a00;
+  /* 明背景上の補助テキスト(日付・キャプション・placeholderなど) */
+  --color-muted: #888888;
+  /* 明背景上のやや濃いめの補助テキスト(引用文など、本文に近い重みを持たせたい箇所) */
+  --color-muted-dark: #555555;
+  /* 明背景上の薄い装飾要素(パンくずの区切り文字など、mutedよりさらに控えめにしたい箇所) */
+  --color-faint: #cccccc;
+  /* 明背景上の薄い罫線・区切り線 */
+  --color-border-light: #dddddd;
+  /* 暗背景(SiteFooterなど)上の明るいグレー階調。明るい順に text > faint > muted > muted-2 */
+  --color-ink-text: #eeeeee;
+  --color-ink-faint: #cccccc;
+  --color-ink-muted: #aaaaaa;
+  --color-ink-muted-2: #999999;
+  --color-ink-dim: #777777;
+  /* 暗背景(SiteFooterなど)上の薄い罫線・区切り線 */
+  --color-ink-border: #3a3a3a;
   /* 巨大英字見出し用(Webフォントなし、システムサンセリフの太字で構成) */
   --font-display:
     "Helvetica Neue", Helvetica, Arial, "Hiragino Sans", "Noto Sans JP",
@@ -18,7 +33,4 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
-  --font-family-sans:
-    Helvetica, Arial, "Noto Sans JP", "Noto Sans CJK JP", "Hiragino Sans",
-    "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
 }

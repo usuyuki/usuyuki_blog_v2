@@ -104,13 +104,13 @@ The frontend follows Atomic Design principles:
 
 ## Key Files and Directories
 
-- `frontend/src/consts.ts` - Site configuration constants
+- `frontend/src/consts.ts` - Site configuration constants(`SITE_TITLE_EN`: ヘッダー/フッター共用の英字ブランド表記、`SOCIAL_LINKS`: SNS・外部プロフィールリンクの一覧。console banner(`libs/console/snsLinkProvider.ts`)も含め表記揺れを避けるためこれらを唯一の情報源とする)
 - `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching (posts.browse は `include: "tags"` で公開タグも変換)
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
-- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached` / `getAdjacentArticles`(前後記事、外部記事は除外) / `getRelatedArticles`(タグベース関連記事) / `getFeaturedArticles`)
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
 - `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
-- `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替のヘルパー
+- `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
 - `frontend/src/libs/qiitaClient.ts` - Qiita API v2 client with pagination and caching (full article history)
 - `frontend/src/libs/config.ts` - Configuration management for external integrations

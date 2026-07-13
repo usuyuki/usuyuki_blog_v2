@@ -1,6 +1,6 @@
 ---
 import SearchForm from "~/components/molecule/search/SearchForm.astro";
-import { SITE_SUB_TITLE } from "~/consts";
+import { SITE_SUB_TITLE, SITE_TITLE_EN } from "~/consts";
 
 // グローバルナビの項目
 const navItems = [
@@ -24,7 +24,7 @@ const isCurrent = (href: string): boolean => {
 	<div class="container header-inner">
 		<a class="brand" href="/">
 			<span class="brand-square" aria-hidden="true"></span>
-			<span class="brand-mark">USUYUKI BLOG</span>
+			<span class="brand-mark">{SITE_TITLE_EN.toUpperCase()}</span>
 			<span class="brand-sub">{SITE_SUB_TITLE}</span>
 		</a>
 		<button
@@ -91,7 +91,7 @@ const isCurrent = (href: string): boolean => {
 	}
 	.brand-sub {
 		font-size: 0.68rem;
-		color: #777;
+		color: var(--color-muted);
 		white-space: nowrap;
 	}
 	.global-nav ul {
@@ -110,7 +110,7 @@ const isCurrent = (href: string): boolean => {
 		font-weight: 700;
 		font-size: 0.78rem;
 		letter-spacing: 0.18em;
-		border-left: 1px solid #ddd;
+		border-left: 1px solid var(--color-border-light);
 		transition:
 			background 0.15s,
 			color 0.15s;
@@ -123,14 +123,15 @@ const isCurrent = (href: string): boolean => {
 	.nav-search {
 		align-items: center;
 		padding: 0 16px;
-		border-left: 1px solid #ddd;
-		border-right: 1px solid #ddd;
+		border-left: 1px solid var(--color-border-light);
+		border-right: 1px solid var(--color-border-light);
 		width: 240px;
 	}
 	.nav-toggle {
 		display: none;
 	}
 
+	/* グローバルナビの項目数が入り切らずハンバーガーメニューに切り替える幅。--breakpoint-lg(1024px)ではナビが窮屈になるため独自値を使用 */
 	@media (max-width: 860px) {
 		.brand-sub {
 			display: none;
@@ -156,14 +157,14 @@ const isCurrent = (href: string): boolean => {
 			width: 100%;
 			padding: 16px 24px;
 			border-left: none;
-			border-top: 1px solid #ddd;
+			border-top: 1px solid var(--color-border-light);
 		}
 		.nav-search {
 			width: 100%;
 			padding: 16px 24px;
 			border-left: none;
 			border-right: none;
-			border-top: 1px solid #ddd;
+			border-top: 1px solid var(--color-border-light);
 		}
 		.nav-toggle {
 			display: inline-flex;
@@ -175,7 +176,7 @@ const isCurrent = (href: string): boolean => {
 			padding: 0 18px;
 			background: none;
 			border: none;
-			border-left: 1px solid #ddd;
+			border-left: 1px solid var(--color-border-light);
 			cursor: pointer;
 		}
 		.nav-toggle span {

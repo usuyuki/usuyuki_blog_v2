@@ -26,12 +26,17 @@ import { getRelatedArticles } from "../articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { cache } from "~/libs/cache";
 
-function makeArticle(slug: string, publishedAt: string): ArticleArchiveType {
+function makeArticle(
+  slug: string,
+  publishedAt: string,
+  tags: { name: string; slug: string }[] = [],
+): ArticleArchiveType {
   return {
     slug,
     published_at: publishedAt,
     title: `記事 ${slug}`,
     isExternal: false,
+    tags,
   };
 }
 
@@ -146,5 +151,52 @@ describe("getRelatedArticles", () => {
     const articles = await getRelatedArticles(currentPost);
 
     expect(articles).toEqual([]);
+  });
+
+  it("正常系: allGhostArticlesを渡すとタグ一致・補完の両方をin-memoryで処理しGhost APIを一切呼び出さない", async () => {
+    const allGhostArticles = [
+      makeArticle("current-post", "2026-06-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      makeArticle("related-1", "2026-01-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      makeArticle("fallback-1", "2025-06-01T00:00:00.000+09:00"),
+      makeArticle("fallback-2", "2025-01-01T00:00:00.000+09:00"),
+    ];
+
+    const articles = await getRelatedArticles(currentPost, {
+      allGhostArticles,
+    });
+
+    expect(articles.map((a) => a.slug)).toEqual([
+      "related-1",
+      "fallback-1",
+      "fallback-2",
+    ]);
+    // allGhostArticlesが渡された場合はタグ一致検索もin-memoryで完結し、Ghostへのライブフェッチは一切発生しない
+    expect(vi.mocked(ghostApiWithRetry.posts.browse)).not.toHaveBeenCalled();
+  });
+
+  it("正常系: allGhostArticlesを渡してもタグ一致が見つからなければ最新記事(渡されたリスト順)で補完する", async () => {
+    const allGhostArticles = [
+      makeArticle("current-post", "2026-06-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      makeArticle("fallback-1", "2025-06-01T00:00:00.000+09:00"),
+      makeArticle("fallback-2", "2025-01-01T00:00:00.000+09:00"),
+      makeArticle("fallback-3", "2024-01-01T00:00:00.000+09:00"),
+    ];
+
+    const articles = await getRelatedArticles(currentPost, {
+      allGhostArticles,
+    });
+
+    expect(articles.map((a) => a.slug)).toEqual([
+      "fallback-1",
+      "fallback-2",
+      "fallback-3",
+    ]);
+    expect(vi.mocked(ghostApiWithRetry.posts.browse)).not.toHaveBeenCalled();
   });
 });

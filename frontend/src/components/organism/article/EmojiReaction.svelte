@@ -335,12 +335,12 @@
 		--border-color: var(--color-ink);
 		--button-active-background: color-mix(in srgb, var(--color-orange) 15%, var(--color-paper));
 		--button-hover-background: var(--color-gray);
-		--category-font-color: #555;
+		--category-font-color: var(--color-muted);
 		--emoji-padding: 0.4rem;
 		--indicator-color: var(--color-orange);
 		--input-border-color: var(--color-ink);
 		--input-font-color: var(--color-ink);
-		--input-placeholder-color: #999;
+		--input-placeholder-color: var(--color-muted);
 		--outline-color: var(--color-orange);
 		--skintone-border-radius: 0;
 	}

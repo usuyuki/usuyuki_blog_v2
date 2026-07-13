@@ -36,13 +36,13 @@ const { years, currentYear, sort } = Astro.props;
 		font-size: 0.8rem;
 		letter-spacing: 0.14em;
 		padding: 14px 22px;
-		border-right: 1px solid #ddd;
+		border-right: 1px solid var(--color-border-light);
 		transition:
 			background 0.15s,
 			color 0.15s;
 	}
 	.year-tabs a:first-child {
-		border-left: 1px solid #ddd;
+		border-left: 1px solid var(--color-border-light);
 	}
 	.year-tabs a:hover {
 		background: var(--color-gray);

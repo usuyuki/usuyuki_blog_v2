@@ -4,7 +4,37 @@ import {
   viewTransitionSlug,
   thumbGradient,
   sourceBadgeBackground,
+  getPublicTags,
 } from "../articleCell";
+
+describe("getPublicTags", () => {
+  it("正常系: visibilityがpublicのタグだけを{name, slug}に正規化して返す", () => {
+    const tags = [
+      { visibility: "public", name: "アニメ", slug: "anime" },
+      { visibility: "internal", name: "下書き用メモ", slug: "draft-memo" },
+      { visibility: "public", name: "おでかけ", slug: "odekake" },
+    ];
+    expect(getPublicTags(tags)).toEqual([
+      { name: "アニメ", slug: "anime" },
+      { name: "おでかけ", slug: "odekake" },
+    ]);
+  });
+
+  it("正常系: name/slugがnull/undefinedの場合は空文字にフォールバックする", () => {
+    const tags = [{ visibility: "public", name: null, slug: undefined }];
+    expect(getPublicTags(tags)).toEqual([{ name: "", slug: "" }]);
+  });
+
+  it("異常系: tagsがnull/undefinedのときは空配列を返す", () => {
+    expect(getPublicTags(null)).toEqual([]);
+    expect(getPublicTags(undefined)).toEqual([]);
+  });
+
+  it("異常系: 公開タグが1つもない場合は空配列を返す", () => {
+    const tags = [{ visibility: "internal", name: "非公開", slug: "hidden" }];
+    expect(getPublicTags(tags)).toEqual([]);
+  });
+});
 
 describe("articleHref", () => {
   const cases: {

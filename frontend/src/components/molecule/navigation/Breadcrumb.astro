@@ -26,7 +26,7 @@ const { items } = Astro.props;
 
 <style>
 	.breadcrumb {
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px solid var(--color-border-light);
 	}
 	.breadcrumb ol {
 		list-style: none;
@@ -37,12 +37,12 @@ const { items } = Astro.props;
 		font-family: var(--font-en);
 		font-size: 0.72rem;
 		letter-spacing: 0.12em;
-		color: #888;
+		color: var(--color-muted);
 	}
 	.breadcrumb li:not(:last-child)::after {
 		content: "/";
 		margin-left: 8px;
-		color: #ccc;
+		color: var(--color-faint);
 	}
 	.breadcrumb a:hover {
 		color: var(--color-ink);
