@@ -54,8 +54,13 @@ document.addEventListener("astro:page-load", () => {
       const isActive = link.getAttribute("href") === `#${id}`;
       link.classList.toggle("active", isActive);
       // 目次が長くスクロール可能な場合、アクティブ項目が隠れていたら自動追従させる
+      // ※本文冒頭のインライン目次（.toc-modal 内ではない .article-toc.inline）は
+      // 自身のスクロールバーを持たず、scrollIntoViewを呼ぶと画面全体がスクロールして戻されてしまうため除外
       if (isActive) {
-        link.scrollIntoView({ block: "nearest" });
+        const isBodyInline = link.closest(".article-toc.inline") && !link.closest(".toc-modal");
+        if (!isBodyInline) {
+          link.scrollIntoView({ block: "nearest" });
+        }
       }
     }
   };
