@@ -66,8 +66,8 @@ astroLogger.requestLog(Astro.request, { status: 200 });
 			{
 				items.length > 0 ? (
 					<ArticleCellGrid variant="list" class="list-grid">
-						{items.map((article) => (
-							<ArticleCell article={article} headingLevel="h2" />
+						{items.map((article, index) => (
+							<ArticleCell article={article} headingLevel="h2" eager={index === 0} />
 						))}
 					</ArticleCellGrid>
 				) : (
@@ -85,15 +85,11 @@ astroLogger.requestLog(Astro.request, { status: 200 });
 </IndexLayout>
 
 <style>
-	.filter-bar {
-		border-bottom: var(--bw) solid var(--color-ink);
-		overflow-x: auto;
-	}
 	.filter-inner {
 		display: flex;
 		align-items: stretch;
 		justify-content: space-between;
-		min-width: max-content;
+		flex-wrap: wrap;
 	}
 	.list-section {
 		padding-bottom: 72px;

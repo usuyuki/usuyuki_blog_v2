@@ -1,43 +1,34 @@
 ---
 import type { TOCType } from "~/types/TOCType";
 
-// 記事の目次。sidebar: PC右カラム用(スクロールスパイ対象) / inline: モバイル用
+// 記事の目次。sidebar: PC右カラム用(スクロールスパイ対象) / inline: モバイル用(本文冒頭details内)
+// withHeading: h2見出し(INDEX/灰色背景+下罫線)を出すか。モーダル用に見た目をsidebarと揃えたいがid重複は避けたい時に使う
 interface Props {
   tocList: TOCType[];
   variant?: "sidebar" | "inline";
+  id?: string;
+  withHeading?: boolean;
 }
-const { tocList, variant = "sidebar" } = Astro.props;
+const {
+  tocList,
+  variant = "sidebar",
+  id,
+  withHeading = variant === "sidebar",
+} = Astro.props;
+const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 ---
 
 {
 	tocList.length > 0 && (
-		<nav
-			class:list={["article-toc", variant]}
-			id={variant === "sidebar" ? "toc-sidebar" : undefined}
-			aria-label="目次"
-		>
-			{
-				variant === "sidebar" ? (
-					<Fragment>
-						<h2>INDEX</h2>
-						<ol>
-							{tocList.map((toc) => (
-								<li class={`level-${toc.heading}`}>
-									<a href={`#${toc.id}`}>{toc.title}</a>
-								</li>
-							))}
-						</ol>
-					</Fragment>
-				) : (
-					<ol>
-						{tocList.map((toc) => (
-							<li class={`level-${toc.heading}`}>
-								<a href={`#${toc.id}`}>{toc.title}</a>
-							</li>
-						))}
-					</ol>
-				)
-			}
+		<nav class:list={["article-toc", variant]} id={navId} aria-label="目次">
+			{withHeading && <h2>INDEX</h2>}
+			<ol>
+				{tocList.map((toc) => (
+					<li class={`level-${toc.heading}`}>
+						<a href={`#${toc.id}`}>{toc.title}</a>
+					</li>
+				))}
+			</ol>
 		</nav>
 	)
 }

@@ -62,6 +62,7 @@ const isCurrent = (href: string): boolean => {
 		position: sticky;
 		top: 0;
 		z-index: 100;
+		isolation: isolate;
 		background: var(--color-paper);
 		border-bottom: var(--bw) solid var(--color-ink);
 	}
@@ -140,19 +141,26 @@ const isCurrent = (href: string): boolean => {
 			position: fixed;
 			inset: var(--heder-height) 0 auto 0;
 			z-index: 90;
+			display: grid;
+			grid-template-rows: 0fr;
+			max-height: calc(100vh - var(--heder-height));
 			background: var(--color-paper);
 			border-bottom: var(--bw) solid var(--color-ink);
-			transform: translateY(-130%);
-			transition: transform 0.25s ease;
 			visibility: hidden;
+			overflow-y: auto;
+			transition:
+				grid-template-rows 0.25s ease,
+				visibility 0.25s;
 		}
 		.global-nav.open {
-			transform: translateY(0);
+			grid-template-rows: 1fr;
 			visibility: visible;
 		}
 		.global-nav ul {
 			flex-direction: column;
 			height: auto;
+			min-height: 0;
+			overflow: hidden;
 		}
 		.global-nav li > a {
 			width: 100%;

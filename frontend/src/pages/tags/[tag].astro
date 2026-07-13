@@ -63,8 +63,8 @@ const headMeta: HeadMetaType = {
 			{
 				posts.length > 0 ? (
 					<ArticleCellGrid variant="list" class="tag-grid">
-						{posts.map((article) => (
-							<ArticleCell article={article} headingLevel="h2" />
+						{posts.map((article, index) => (
+							<ArticleCell article={article} headingLevel="h2" eager={index === 0} />
 						))}
 					</ArticleCellGrid>
 				) : (

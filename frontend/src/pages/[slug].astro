@@ -19,6 +19,7 @@ import {
 } from "~/libs/articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { addHeadingIds } from "~/libs/helper/addHeadingIds";
+import { addTargetBlankToLinks } from "~/libs/helper/addTargetBlankToLinks";
 import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
@@ -85,10 +86,12 @@ const headMeta = {
 
 const isWpArticle = judgeWpArticle(post.html || "");
 // WP記事は見出しにidがないため、テキストからidを生成して付与する
-const processedHtml = isWpArticle
+const headingProcessedHtml = isWpArticle
   ? addHeadingIds(post.html || "")
   : post.html || "";
-const tocList: TOCType[] = generateTOC(processedHtml);
+const tocList: TOCType[] = generateTOC(headingProcessedHtml);
+// 本文内リンクは全て新しいタブで開く
+const processedHtml = addTargetBlankToLinks(headingProcessedHtml);
 
 const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 ---
@@ -103,7 +106,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 	/>
 
 	<!-- 記事ヘッダー -->
-	<header class="article-header">
+	<header class="article-header" id="article-header">
 		<div class="container">
 			<div class="article-header-inner">
 				<div class="article-label-row">
@@ -139,20 +142,26 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		<div class="article-layout">
 			<div class="article-main">
 				{
-					/* WordPress記事は本文内に目次があるためインライン目次は出さない */
+					/* WordPress記事は本文内に目次があるため本文冒頭のインライン目次(details)だけ出さない。
+					   フローティングボタン・モーダルはWordPress記事でも出し、常に目次へアクセスできるようにする */
 					!isWpArticle && tocList.length > 0 && (
+						<details class="toc-inline" id="toc-inline-wrapper">
+							<summary>INDEX / 目次</summary>
+							<ArticleToc tocList={tocList} variant="inline" />
+						</details>
+					)
+				}
+				{
+					tocList.length > 0 && (
 						<Fragment>
-							<details class="toc-inline" id="toc-inline-wrapper">
-								<summary>INDEX / 目次</summary>
-								<ArticleToc tocList={tocList} variant="inline" />
-							</details>
 							{
-								/* 本文冒頭の目次(toc-inline)がスクロールで見切れたらモバイルで表示するフローティングボタン */
+								/* 本文冒頭の目次(toc-inline、WordPress記事では記事ヘッダー)がスクロールで見切れたらモバイルで表示するフローティングボタン */
 							}
 							<button
 								type="button"
 								class="toc-float-button"
 								id="toc-float-button"
+								data-toc-observe-target={isWpArticle ? "header" : "inline"}
 								aria-label="目次を開く"
 								aria-haspopup="dialog"
 								aria-controls="toc-modal"
@@ -268,11 +277,20 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 	.toc-inline {
 		display: none;
 	}
+	.toc-float-button {
+		display: none;
+	}
+	.toc-modal {
+		display: none;
+	}
 	.mobile-reaction {
 		display: none;
 	}
 	.article-footer {
 		border-top: var(--bw) solid var(--color-ink);
+	}
+	.article-footer :global(.share-bar) {
+		margin-bottom: 32px;
 	}
 
 	/* 記事本文+サイドバー(目次/リアクション)の2カラムを1カラムに畳む幅。--breakpoint-lg(1024px)相当 */
@@ -364,6 +382,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			transform: translateY(0) scale(1);
 		}
 		.toc-modal {
+			display: block;
 			pointer-events: none;
 			position: fixed;
 			inset: 0;
@@ -403,11 +422,12 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			align-items: center;
 			justify-content: space-between;
 			font-family: var(--font-en);
-			font-weight: 900;
-			font-size: 0.82rem;
-			letter-spacing: 0.16em;
-			padding: 22px 20px 18px;
-			border-bottom: 3px solid var(--color-orange);
+			font-weight: 700;
+			font-size: 0.72rem;
+			letter-spacing: 0.22em;
+			padding: 12px 12px 12px 18px;
+			border-bottom: var(--bw) solid var(--color-ink);
+			background: var(--color-gray);
 		}
 		.toc-modal-close {
 			display: flex;
@@ -427,6 +447,9 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		}
 		.toc-modal :global(.article-toc.inline) {
 			border: none;
+		}
+		.toc-modal :global(.article-toc.inline ol) {
+			padding-top: 12px;
 		}
 		.toc-modal :global(.article-toc.inline a.active) {
 			position: relative;

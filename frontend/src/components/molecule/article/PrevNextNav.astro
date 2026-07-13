@@ -100,20 +100,31 @@ const thumbStyle = (article: ArticleArchiveType) =>
 		font-weight: 700;
 		font-size: 0.7rem;
 		letter-spacing: 0.22em;
-		color: var(--color-muted);
+		color: var(--color-ink);
+		opacity: 0.6;
 	}
 	.pn-title {
 		font-weight: 700;
 		font-size: 0.92rem;
 		line-height: 1.6;
+		color: var(--color-ink);
 	}
 	@media (max-width: 640px) {
 		.prev-next {
 			grid-template-columns: 1fr;
 		}
+		.prev-next a {
+			padding: 24px 20px;
+		}
+		.prev-next .prev {
+			justify-content: flex-start;
+			padding-right: 15%;
+		}
 		.prev-next .next {
 			border-left: none;
 			border-top: var(--bw) solid var(--color-ink);
+			justify-content: flex-end;
+			padding-left: 15%;
 		}
 		.pn-empty {
 			display: none;

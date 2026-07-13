@@ -40,22 +40,23 @@ document.addEventListener("astro:page-load", () => {
     );
   }
 
-  // サイドバー目次のスクロールスパイ(現在位置の見出しを黒反転)
-  const sidebarToc = document.getElementById("toc-sidebar");
-  if (!sidebarToc) return;
-
+  // 目次のスクロールスパイ(現在位置の見出しを黒反転)。サイドバー・モバイルモーダルの両方が対象
   // h1-h6のみ対象、spanなどは除外
   const articleHeadings = Array.from(
     document.querySelectorAll<HTMLElement>(
       "article.blog-content h1[id], article.blog-content h2[id], article.blog-content h3[id], article.blog-content h4[id], article.blog-content h5[id], article.blog-content h6[id]",
     ),
   );
-  const sidebarLinks = Array.from(sidebarToc.querySelectorAll("a[href^='#']"));
-  if (articleHeadings.length === 0 || sidebarLinks.length === 0) return;
+  if (articleHeadings.length === 0 || allTocLinks.length === 0) return;
 
   const setActive = (id: string) => {
-    for (const link of sidebarLinks) {
-      link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
+    for (const link of allTocLinks) {
+      const isActive = link.getAttribute("href") === `#${id}`;
+      link.classList.toggle("active", isActive);
+      // 目次が長くスクロール可能な場合、アクティブ項目が隠れていたら自動追従させる
+      if (isActive) {
+        link.scrollIntoView({ block: "nearest" });
+      }
     }
   };
 
@@ -95,16 +96,25 @@ document.addEventListener("astro:page-load", () => {
     { once: true },
   );
 
-  const tocInline = document.getElementById("toc-inline-wrapper");
   const floatButton = document.getElementById("toc-float-button");
   const modal = document.getElementById("toc-modal");
   const modalBackdrop = document.getElementById("toc-modal-backdrop");
   const modalClose = document.getElementById("toc-modal-close");
-  if (!tocInline || !floatButton || !modal || !modalBackdrop || !modalClose) {
+  if (!floatButton || !modal || !modalBackdrop || !modalClose) {
     return;
   }
 
-  // 本文冒頭の目次が画面上端より上にスクロールしたらボタンを表示する
+  // 監視対象: 通常は本文冒頭の目次(toc-inline)、WordPress記事は本文内に独自目次があるため記事ヘッダーを見る
+  const observeTargetId =
+    floatButton.dataset.tocObserveTarget === "header"
+      ? "article-header"
+      : "toc-inline-wrapper";
+  const observeTarget = document.getElementById(observeTargetId);
+  if (!observeTarget) {
+    return;
+  }
+
+  // 監視対象が画面上端より上にスクロールしたらボタンを表示する
   const observer = new IntersectionObserver(
     ([entry]) => {
       floatButton.classList.toggle(
@@ -116,7 +126,7 @@ document.addEventListener("astro:page-load", () => {
     },
     { threshold: 0 },
   );
-  observer.observe(tocInline);
+  observer.observe(observeTarget);
   document.addEventListener(
     "astro:before-preparation",
     () => observer.disconnect(),

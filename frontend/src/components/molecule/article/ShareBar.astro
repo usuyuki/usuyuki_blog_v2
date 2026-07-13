@@ -105,9 +105,14 @@ const shareLinks = [
 		color: var(--color-paper);
 	}
 	@media (max-width: 640px) {
+		.share-bar {
+			justify-content: flex-start;
+		}
 		.share-bar a,
 		.share-bar button {
-			padding: 14px 16px;
+			flex: 1 1 33.333%;
+			justify-content: center;
+			padding: 14px 12px;
 		}
 		.share-bar .label {
 			width: 100%;

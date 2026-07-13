@@ -28,22 +28,28 @@ const { years, currentYear, sort } = Astro.props;
 
 <style>
 	.year-tabs {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+		flex: 1 1 320px;
+		width: 100%;
+		min-width: 280px;
+		border-left: var(--bw) solid var(--color-ink);
 	}
 	.year-tabs a {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		font-family: var(--font-en);
 		font-weight: 700;
 		font-size: 0.8rem;
 		letter-spacing: 0.14em;
-		padding: 14px 22px;
-		border-right: 1px solid var(--color-border-light);
+		padding: 14px 12px;
+		white-space: nowrap;
+		border-right: var(--bw) solid var(--color-ink);
+		border-bottom: var(--bw) solid var(--color-ink);
 		transition:
 			background 0.15s,
 			color 0.15s;
-	}
-	.year-tabs a:first-child {
-		border-left: 1px solid var(--color-border-light);
 	}
 	.year-tabs a:hover {
 		background: var(--color-gray);
