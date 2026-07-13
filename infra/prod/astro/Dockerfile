@@ -4,9 +4,8 @@ RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm
 WORKDIR /frontend
 
-# Copy package files (patches are required by pnpm install via patchedDependencies)
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
-COPY patches ./patches
 
 # Install dependencies (includes prisma generate via @prisma/client postinstall if schema exists)
 RUN pnpm install --frozen-lockfile
