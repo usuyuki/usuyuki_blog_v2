@@ -99,8 +99,8 @@ document.addEventListener("astro:page-load", () => {
   const floatButton = document.getElementById("toc-float-button");
   const modal = document.getElementById("toc-modal");
   const modalBackdrop = document.getElementById("toc-modal-backdrop");
-  const modalClose = document.getElementById("toc-modal-close");
-  if (!floatButton || !modal || !modalBackdrop || !modalClose) {
+  const modalLabel = document.getElementById("toc-modal-label");
+  if (!floatButton || !modal || !modalBackdrop || !modalLabel) {
     return;
   }
 
@@ -146,7 +146,7 @@ document.addEventListener("astro:page-load", () => {
 
   floatButton.addEventListener("click", openModal, { signal });
   modalBackdrop.addEventListener("click", closeModal, { signal });
-  modalClose.addEventListener("click", closeModal, { signal });
+  modalLabel.addEventListener("click", closeModal, { signal });
 
   // モーダル内の目次リンクをクリックしたら遷移前に閉じる
   const modalTocLinks = modal.querySelectorAll(".article-toc a[href^='#']");

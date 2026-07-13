@@ -145,7 +145,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 					/* WordPress記事は本文内に目次があるため本文冒頭のインライン目次(details)だけ出さない。
 					   フローティングボタン・モーダルはWordPress記事でも出し、常に目次へアクセスできるようにする */
 					!isWpArticle && tocList.length > 0 && (
-						<details class="toc-inline" id="toc-inline-wrapper">
+						<details class="toc-inline" id="toc-inline-wrapper" open>
 							<summary>INDEX / 目次</summary>
 							<ArticleToc tocList={tocList} variant="inline" />
 						</details>
@@ -171,12 +171,15 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 							<div class="toc-modal" id="toc-modal" role="dialog" aria-modal="true" aria-label="目次">
 								<div class="toc-modal-backdrop" id="toc-modal-backdrop" />
 								<div class="toc-modal-panel">
-									<div class="toc-modal-header">
-										<span>INDEX / 目次</span>
-										<button type="button" class="toc-modal-close" id="toc-modal-close" aria-label="目次を閉じる">
-											×
-										</button>
-									</div>
+									<button
+										type="button"
+										class="toc-modal-header"
+										id="toc-modal-label"
+										aria-label="目次を閉じる"
+									>
+										<span class="toc-modal-back-arrow" aria-hidden="true">&lt;</span>
+										INDEX
+									</button>
 									<ArticleToc tocList={tocList} variant="inline" />
 								</div>
 							</div>
@@ -385,7 +388,10 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			display: block;
 			pointer-events: none;
 			position: fixed;
-			inset: 0;
+			top: var(--heder-height);
+			right: 0;
+			bottom: 0;
+			left: 0;
 			z-index: 50;
 		}
 		.toc-modal.open {
@@ -408,7 +414,8 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			left: 0;
 			bottom: 0;
 			width: min(320px, 84vw);
-			overflow-y: auto;
+			display: flex;
+			flex-direction: column;
 			background: var(--color-paper);
 			box-shadow: 12px 0 32px rgb(20 20 20 / 18%);
 			transform: translateX(-100%);
@@ -417,33 +424,33 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		.toc-modal.open .toc-modal-panel {
 			transform: translateX(0);
 		}
+		.toc-modal-panel :global(.article-toc.inline) {
+			flex: 1;
+			overflow-y: auto;
+		}
 		.toc-modal-header {
 			display: flex;
 			align-items: center;
-			justify-content: space-between;
+			gap: 8px;
+			flex: none;
+			width: 100%;
+			border: none;
 			font-family: var(--font-en);
 			font-weight: 700;
 			font-size: 0.72rem;
 			letter-spacing: 0.22em;
-			padding: 12px 12px 12px 18px;
+			padding: 14px 18px;
 			border-bottom: var(--bw) solid var(--color-ink);
 			background: var(--color-gray);
-		}
-		.toc-modal-close {
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			width: 30px;
-			height: 30px;
-			border-radius: 50%;
-			font-size: 1.1rem;
-			line-height: 1;
 			color: var(--color-ink);
 			cursor: pointer;
 			transition: background 0.15s;
 		}
-		.toc-modal-close:hover {
-			background: var(--color-gray);
+		.toc-modal-header:hover {
+			background: var(--color-border-light);
+		}
+		.toc-modal-back-arrow {
+			font-size: 0.9rem;
 		}
 		.toc-modal :global(.article-toc.inline) {
 			border: none;
