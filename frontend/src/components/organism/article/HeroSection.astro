@@ -135,6 +135,7 @@ const vtSlug = viewTransitionSlug(article);
 			repeating-linear-gradient(-45deg, transparent 0 34px, rgba(255, 255, 255, 0.5) 34px 36px),
 			linear-gradient(120deg, #e9e7e3 0%, #b6b2ac 100%);
 	}
+	/* 通常時は影で浮かせておき、ホバーで押し込まれて影が消える */
 	.hero-titlebox {
 		position: relative;
 		margin: -72px 0 0 auto;
@@ -142,13 +143,15 @@ const vtSlug = viewTransitionSlug(article);
 		background: var(--color-paper);
 		border: var(--bw) solid var(--color-ink);
 		padding: 28px 32px 30px;
+		transform: translate(-6px, -6px);
+		box-shadow: 6px 6px 0 var(--color-ink);
 		transition:
 			transform 0.2s ease,
 			box-shadow 0.2s ease;
 	}
 	.hero-cover:hover .hero-titlebox {
-		transform: translate(-6px, -6px);
-		box-shadow: 6px 6px 0 var(--color-ink);
+		transform: translate(0, 0);
+		box-shadow: 0 0 0 var(--color-ink);
 	}
 	.hero-title {
 		font-size: clamp(1.35rem, 2.8vw, 1.85rem);
