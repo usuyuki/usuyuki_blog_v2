@@ -1,11 +1,14 @@
-settings:
-  onlyBuiltDependencies:
-    - esbuild
-    - sharp
-    - "@prisma/engines"
-    - prisma
-    - "@prisma/client"
-  strictDepBuilds: true
-  minimumReleaseAge: 1440
-  blockExoticSubdeps: true
-  trustPolicy: no-downgrade
+# pnpm 11: 設定はトップレベルに置く（settings: 配下ではない）
+# allowBuilds はリストではなくマップ形式（パッケージ名 → true/false）
+allowBuilds:
+  esbuild: true
+  sharp: true
+  "@prisma/engines": true
+  prisma: true
+  "@prisma/client": true
+strictDepBuilds: true
+minimumReleaseAge: 1440
+blockExoticSubdeps: true
+# trustPolicy: no-downgrade はchokidar@4.0.3(Vite/Astroの依存)を誤検知でブロックするため
+# デフォルトのoffのままにする
+

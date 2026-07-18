@@ -38,6 +38,6 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:${{ github.sha }}
             ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:latest
           labels: latest
-          cache-from: type=gha,scope=astro-build
-          cache-to: type=gha,mode=max,scope=astro-build
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:buildcache
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/usuyuki_blog_v2_astro:buildcache,mode=max
 
