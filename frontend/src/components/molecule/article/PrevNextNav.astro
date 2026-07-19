@@ -4,7 +4,6 @@ import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 // 前後記事ナビ(prev = 1つ古い記事、next = 1つ新しい記事)
-// 配置は左=NEXT(新しい記事・左寄せ)、右=PREV(古い記事・右寄せ)。スマホでは上=NEXT(左ズレ)、下=PREV(右ズレ)
 interface Props {
   prev: ArticleArchiveType | null;
   next: ArticleArchiveType | null;
@@ -21,29 +20,29 @@ const thumbStyle = (article: ArticleArchiveType) =>
 {
 	(prev || next) && (
 		<nav class="prev-next" aria-label="前後の記事">
-			{next ? (
-				<div class="pn-wrapper next-wrapper">
-					<a class="next" href={`/${next.slug}`} style={thumbStyle(next)}>
+			{prev ? (
+				<div class="pn-wrapper prev-wrapper">
+					<a class="prev" href={`/${prev.slug}`} style={thumbStyle(prev)}>
 						<span class="pn-body">
-							<span class="pn-label">← NEXT</span>
-							<span class="pn-title">{next.title}</span>
+							<span class="pn-label">← PREV</span>
+							<span class="pn-title">{prev.title}</span>
 						</span>
 					</a>
 				</div>
 			) : (
 				<span class="pn-empty" />
 			)}
-			{prev ? (
-				<div class="pn-wrapper prev-wrapper">
-					<a class="prev" href={`/${prev.slug}`} style={thumbStyle(prev)}>
+			{next ? (
+				<div class="pn-wrapper next-wrapper">
+					<a class="next" href={`/${next.slug}`} style={thumbStyle(next)}>
 						<span class="pn-body">
-							<span class="pn-label">PREV →</span>
-							<span class="pn-title">{prev.title}</span>
+							<span class="pn-label">NEXT →</span>
+							<span class="pn-title">{next.title}</span>
 						</span>
 					</a>
 				</div>
 			) : (
-				<span class="pn-empty prev" />
+				<span class="pn-empty next" />
 			)}
 		</nav>
 	)
@@ -89,10 +88,10 @@ const thumbStyle = (article: ArticleArchiveType) =>
 		text-underline-offset: 5px;
 		text-decoration-thickness: 2px;
 	}
-	.prev-next .pn-wrapper.prev-wrapper {
+	.prev-next .pn-wrapper.next-wrapper {
 		border-left: var(--bw) solid var(--color-ink);
 	}
-	.prev-next .prev {
+	.prev-next .next {
 		text-align: right;
 		justify-content: flex-end;
 	}
@@ -135,18 +134,18 @@ const thumbStyle = (article: ArticleArchiveType) =>
 		.prev-next a {
 			padding: 24px 20px;
 		}
-		.prev-next .next {
+		.prev-next .prev {
 			justify-content: flex-start;
 			padding-right: 15%;
 			padding-left: 44px;
 			margin-left: -24px;
 			margin-right: 24px;
 		}
-		.prev-next .pn-wrapper.prev-wrapper {
+		.prev-next .pn-wrapper.next-wrapper {
 			border-left: none;
 			border-top: var(--bw) solid var(--color-ink);
 		}
-		.prev-next .prev {
+		.prev-next .next {
 			justify-content: flex-end;
 			padding-left: 15%;
 			padding-right: 44px;
@@ -158,3 +157,5 @@ const thumbStyle = (article: ArticleArchiveType) =>
 		}
 	}
 </style>
+
+<!-- watch-test -->
