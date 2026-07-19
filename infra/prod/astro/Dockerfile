@@ -5,7 +5,9 @@ RUN npm install -g pnpm
 WORKDIR /frontend
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yamlも先にコピーしないとallowBuilds等の設定が効かず、
+# pnpm 11のstrictDepBuilds(デフォルトtrue)で未承認ビルドスクリプトのため失敗する
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
 # Install dependencies (includes prisma generate via @prisma/client postinstall if schema exists)
 RUN pnpm install --frozen-lockfile
