@@ -15,13 +15,16 @@ export default defineConfig({
     server: {
       watch: {
         // MacのDocker Desktopはバインドマウント越しにinotifyイベントが届かないためポーリングで検知する。
-        // CHOKIDAR_USEPOLLING環境変数はプロセス内の全chokidar(unstorage等)をポーリング化して
-        // libuvスレッドプールを飽和させdevサーバーが起動不能になるため使わず、
-        // viteのwatcherに限定して有効化し、監視不要なディレクトリを明示的に除外する
+        // CHOKIDAR_USEPOLLING環境変数はプロセス内の全chokidarをポーリング化してしまい
+        // libuvスレッドプールが飽和してdevサーバーが起動不能になるため、viteのwatcherに限定する。
+        // chokidar v4はglob文字列のignoredを解釈しないため、関数で確実にnode_modules等を除外する
         usePolling: true,
-        interval: 300,
-        binaryInterval: 1000,
-        ignored: ["**/node_modules/**", "**/.git/**", "**/.astro/**", "**/dist/**"],
+        interval: 1000,
+        ignored: (path) =>
+          path.includes("/node_modules/") ||
+          path.includes("/.git/") ||
+          path.includes("/dist/") ||
+          path.includes("/.astro/"),
       },
     },
     resolve: {
