@@ -12,6 +12,24 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        // MacのDocker Desktopはバインドマウント越しにinotifyイベントが届かないためポーリングで検知する。
+        // CHOKIDAR_USEPOLLING環境変数はプロセス内の全chokidarをポーリング化してしまい
+        // libuvスレッドプールが飽和してdevサーバーが起動不能になるため、viteのwatcherに限定する。
+        // 特に/frontend/.pnpm-store(5万ファイル超)はviteのデフォルト除外に含まれず、
+        // ポーリングさせると起動不能になるため必ず除外する。glob文字列はchokidarの
+        // バージョンにより解釈されないことがあるため関数で確実に除外する
+        usePolling: true,
+        interval: 1000,
+        ignored: (path) =>
+          path.includes("/node_modules/") ||
+          path.includes("/.pnpm-store/") ||
+          path.includes("/.git/") ||
+          path.includes("/dist/") ||
+          path.includes("/.astro/"),
+      },
+    },
     resolve: {
       alias: {
         // tsconfig.jsonにも定義

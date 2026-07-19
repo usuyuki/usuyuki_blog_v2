@@ -48,8 +48,10 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
-      # MacのDocker DesktopはinotifyイベントがホストからVMに伝播しないためポーリングで代替
-      CHOKIDAR_USEPOLLING: "true"
+      # ファイル変更検知のポーリングはCHOKIDAR_USEPOLLING環境変数ではなく
+      # astro.config.mjsのvite.server.watchで設定する。
+      # 環境変数だとプロセス内の全chokidar(unstorage等)がnode_modulesまで
+      # ポーリングしてlibuvスレッドプールが飽和し、devサーバーが起動しなくなる
     user: "1000:1000"
     depends_on:
       - loki
