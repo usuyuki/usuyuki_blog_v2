@@ -48,8 +48,8 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
-      # MacのDocker DesktopはinotifyイベントがホストからVMに伝播しないためポーリングで代替
-      CHOKIDAR_USEPOLLING: "true"
+      # CHOKIDAR_USEPOLLING=true はポーリングがlibuvスレッドプールを飽和させ
+      # devサーバーが起動不能になるため廃止(VirtioFSはinotifyイベント伝播に対応済み)
     user: "1000:1000"
     depends_on:
       - loki
