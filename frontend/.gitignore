@@ -26,3 +26,6 @@ pnpm-debug.log*
 playwright-report/
 
 public/emoji-data-ja.json
+
+# Playwright
+test-results/

@@ -119,6 +119,7 @@ The frontend follows Atomic Design principles:
 - `frontend/src/pages/` - Astro pages and routes (`/archive` は `?year=&sort=&page=` のSSRクエリパラメータ方式。旧 `/archive/[year]`・`/archive/[year]/[month]` は301で `/archive?year=` へリダイレクト。`/tags` はタグ一覧ページで、ヘッダーのTAGSナビのリンク先)
 - `frontend/src/styles/` - CSS files including Ghost content styling (`blog/blogCommon.css` が記事本文タイポグラフィ)
 - `wire/` - 新デザインのワイヤーフレーム(HTML3枚、デザインの原典)
+- `frontend/e2e/` - Playwright E2Eテスト(3ブラウザの表示検査)と`mock-ghost/`(Ghost Content APIモックサーバー+fixture)。設定は`frontend/playwright.config.ts`
 - `compose.yml` - Development Docker configuration
 - `compose-prod.yml` - Production Docker configuration
 
@@ -208,6 +209,24 @@ docker compose exec astro pnpm test:run
 
 # Run tests with UI
 docker compose exec astro pnpm test:ui
+```
+
+### E2E Testing (Playwright)
+**Playwright** で chromium / firefox / webkit の3ブラウザの表示崩れ（横スクロール・主要要素の欠落・未捕捉JSエラー）を検査する。
+
+- 構成: `frontend/e2e/mock-ghost/server.mjs`（Ghost Content APIモック）とビルド済みSSRサーバー（`dist/server/entry.mjs`）を `playwright.config.ts` の `webServer` が自動起動する。実際のGhost・DB・外部APIには接続しない
+- fixture: `frontend/e2e/mock-ghost/fixtures.mjs`（12記事・3タグの固定データ）。specファイルがslugやタグ名を参照しているため、fixtureを変更したらspecも合わせて更新する
+- CI: `.github/workflows/e2e.yml`（PRごとに実行。ブラウザバイナリは `~/.cache/ms-playwright` をPlaywrightバージョンでキャッシュ）
+- `make 1` にE2Eは含まれない（ブラウザバイナリが必要なため）
+
+```bash
+# 初回のみ: コンテナ内にブラウザをインストール（apt実行のためroot）
+docker compose exec -u root astro pnpm exec playwright install --with-deps chromium firefox webkit
+
+# ビルドしてからE2Eを実行（ブラウザが/root/.cache配下にあるためrootで実行）
+docker compose exec astro pnpm build
+docker compose exec -u root astro pnpm test:e2e
+docker compose exec -u root astro pnpm test:e2e --project=chromium  # 1ブラウザのみ
 ```
 
 ### Writing Tests
