@@ -86,6 +86,7 @@ const imageWidth = feature ? 1200 : 600;
 		<Heading class="cell-title" transition:name={`title-${contextPrefix}${vtSlug}`}>
 			{article.title}
 		</Heading>
+		{feature && article.excerpt && <p class="cell-excerpt">{article.excerpt}</p>}
 		{article.tags && article.tags.length > 0 && <HashTagList tags={article.tags.slice(0, 3)} />}
 	</div>
 </a>
@@ -154,6 +155,17 @@ const imageWidth = feature ? 1200 : 600;
 	.feature .cell-title {
 		font-size: clamp(1.1rem, 2vw, 1.4rem);
 		font-weight: 900;
+		flex: none;
+	}
+	.cell-excerpt {
+		font-size: 0.85rem;
+		color: var(--color-muted);
+		line-height: 1.65;
+		flex: 1;
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
 	}
 	.article-cell:hover .cell-title {
 		text-decoration: underline;
@@ -169,6 +181,9 @@ const imageWidth = feature ? 1200 : 600;
 		.feature .cell-title {
 			font-size: 0.95rem;
 			font-weight: 700;
+		}
+		.cell-excerpt {
+			display: none;
 		}
 	}
 </style>
