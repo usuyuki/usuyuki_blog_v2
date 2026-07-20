@@ -6,13 +6,25 @@ import { GA_MEASUREMENT_ID } from "~/consts";
 <link rel="preconnect" href="https://www.googletagmanager.com" />
 <link rel="preconnect" href="https://www.google-analytics.com" />
 
-<!-- Google Analytics with Partytown -->
-<script is:inline type="text/partytown" src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
-<script is:inline type="text/partytown" define:vars={{ GA_MEASUREMENT_ID }}>
+<!--
+  Google Analytics with Partytown
+  is:inline + define:vars だとAstroがIIFEでラップして出力する際に
+  type="text/partytown" 属性が失われ、Partytownに処理されず
+  メインスレッドで即時実行されてしまう(=計測されない)。
+  そのためdefine:varsを使わず値を直接文字列展開し、
+  gtag.js本体の読み込みも同じscript内で行うことで
+  1つのtype="text/partytown" scriptに統合する。
+-->
+<script is:inline type="text/partytown" set:html={`
 	window.dataLayer = window.dataLayer || [];
 	function gtag() {
 		dataLayer.push(arguments);
 	}
 	gtag('js', new Date());
-	gtag('config', GA_MEASUREMENT_ID);
-</script>
+	gtag('config', '${GA_MEASUREMENT_ID}');
+
+	var gtagScript = document.createElement('script');
+	gtagScript.type = 'text/partytown';
+	gtagScript.src = 'https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}';
+	document.head.appendChild(gtagScript);
+`} />
