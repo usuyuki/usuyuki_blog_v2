@@ -1,7 +1,11 @@
 ---
 import PageHead from "~/components/atom/section/PageHead.astro";
 import TagWall from "~/components/organism/tag/TagWall.astro";
-import { SITE_URL } from "~/consts";
+import {
+  DEFAULT_OGP_IMAGE_HEIGHT,
+  DEFAULT_OGP_IMAGE_WIDTH,
+  SITE_URL,
+} from "~/consts";
 import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import type { HeadMetaType } from "~/types/HeadMetaType";
@@ -24,6 +28,8 @@ const headMeta: HeadMetaType = {
   slug: "/tags",
   description: "うすゆきブログのタグ一覧です。タグから記事を探せます。",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
 };
 ---
 

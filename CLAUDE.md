@@ -110,6 +110,7 @@ The frontend follows Atomic Design principles:
 - `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
+- `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
 - `frontend/src/libs/qiitaClient.ts` - Qiita API v2 client with pagination and caching (full article history)
 - `frontend/src/libs/config.ts` - Configuration management for external integrations

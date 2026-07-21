@@ -24,6 +24,7 @@ import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
+import { getImageDimensions } from "~/libs/helper/getImageDimensions";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
@@ -91,12 +92,18 @@ const [adjacent, relatedArticles] = await Promise.all([
 
 astroLogger.requestLog(Astro.request, { status: 200 });
 
+const ogImage = createProxyImageUrl(post.feature_image || "");
+// Misskeyなどのプレビュー生成がog:image:width/heightを見て画像有無を判定するため取得する
+const ogImageDimensions = await getImageDimensions(ogImage);
+
 const headMeta = {
   title: post.title || "",
   slug: post.slug,
   // excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
   description: (post.excerpt || "").replace(/\r?\n/g, "").slice(0, 150),
-  ogImage: createProxyImageUrl(post.feature_image || ""),
+  ogImage,
+  ogImageWidth: ogImageDimensions?.width,
+  ogImageHeight: ogImageDimensions?.height,
 };
 
 const isWpArticle = judgeWpArticle(post.html || "");

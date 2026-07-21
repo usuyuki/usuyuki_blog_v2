@@ -1,5 +1,9 @@
 ---
-import { SITE_URL } from "~/consts";
+import {
+  DEFAULT_OGP_IMAGE_HEIGHT,
+  DEFAULT_OGP_IMAGE_WIDTH,
+  SITE_URL,
+} from "~/consts";
 import PageLayout from "~/layouts/extends/PageLayout.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
@@ -11,6 +15,8 @@ const headMeta: HeadMetaType = {
   slug: "/404",
   description: "このページは存在しません",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
 };
 ---
 

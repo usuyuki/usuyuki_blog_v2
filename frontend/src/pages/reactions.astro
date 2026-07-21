@@ -1,6 +1,10 @@
 ---
 import PageHead from "~/components/atom/section/PageHead.astro";
-import { SITE_URL } from "~/consts";
+import {
+  DEFAULT_OGP_IMAGE_HEIGHT,
+  DEFAULT_OGP_IMAGE_WIDTH,
+  SITE_URL,
+} from "~/consts";
 import PageLayout from "~/layouts/extends/PageLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { thumbGradient } from "~/libs/helper/articleCell";
@@ -16,6 +20,8 @@ const headMeta: HeadMetaType = {
   slug: "/reactions",
   description: "リアクション数の多い記事のランキングです。",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
 };
 
 let ranked: {

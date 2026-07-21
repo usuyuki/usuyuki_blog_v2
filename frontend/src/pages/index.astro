@@ -3,7 +3,11 @@ import HeroSection from "~/components/organism/article/HeroSection.astro";
 import LatestGrid from "~/components/organism/article/LatestGrid.astro";
 import PickupSection from "~/components/organism/article/PickupSection.astro";
 import TagWall from "~/components/organism/tag/TagWall.astro";
-import { SITE_URL } from "~/consts";
+import {
+  DEFAULT_OGP_IMAGE_HEIGHT,
+  DEFAULT_OGP_IMAGE_WIDTH,
+  SITE_URL,
+} from "~/consts";
 import { getLatestArticles } from "~/libs/articleAggregator";
 import IndexLayout from "~/layouts/extends/IndexLayout.astro";
 import type { HeadMetaType } from "~/types/HeadMetaType";
@@ -14,6 +18,8 @@ const headMeta: HeadMetaType = {
   slug: "",
   description: "「急須で入れたようななにか」のトップページです",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
 };
 
 // Heroに1件、Latestグリッドに残り9件を使う(feature 2x2 + 8セルで4列×3行が埋まる)

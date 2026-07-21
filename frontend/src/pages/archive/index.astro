@@ -5,7 +5,11 @@ import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGri
 import PaginationNav from "~/components/molecule/navigation/PaginationNav.astro";
 import SortSelect from "~/components/molecule/navigation/SortSelect.astro";
 import YearTabs from "~/components/molecule/navigation/YearTabs.astro";
-import { SITE_URL } from "~/consts";
+import {
+  DEFAULT_OGP_IMAGE_HEIGHT,
+  DEFAULT_OGP_IMAGE_WIDTH,
+  SITE_URL,
+} from "~/consts";
 import IndexLayout from "~/layouts/extends/IndexLayout.astro";
 import { getAllArticlesCached } from "~/libs/articleAggregator";
 import {
@@ -46,6 +50,8 @@ const headMeta: HeadMetaType = {
       ? `うすゆきブログ${year}年の記事一覧です`
       : "うすゆきブログの全記事一覧です",
   ogImage: `${SITE_URL}/images/ogp/ogp.png`,
+  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
+  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
 };
 
 astroLogger.requestLog(Astro.request, { status: 200 });
