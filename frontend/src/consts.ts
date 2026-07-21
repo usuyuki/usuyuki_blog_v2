@@ -13,6 +13,13 @@ export const SITE_DESCRIPTION = "うすゆきのブログです";
 // Google Analytics
 export const GA_MEASUREMENT_ID = "G-ZB2SYBTNQQ";
 
+// 固定OGP画像(images/ogp/ogp.png)のURLと実寸。og:image/width/heightに使う。
+// トップ・404・タグ一覧など固定画像を使う全ページ、および記事詳細でfeature_imageが
+// 無い場合のフォールバックで共用する
+export const DEFAULT_OGP_IMAGE_WIDTH = 1200;
+export const DEFAULT_OGP_IMAGE_HEIGHT = 630;
+export const DEFAULT_OGP_IMAGE_URL = `${SITE_URL}/images/ogp/ogp.png`;
+
 // SNS・外部プロフィールリンク(フッターなどで共用)
 export const SOCIAL_LINKS = [
   { label: "X", href: "https://x.com/usuyuki26" },

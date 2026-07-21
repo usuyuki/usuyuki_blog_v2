@@ -24,6 +24,8 @@ import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
+import { getImageDimensions } from "~/libs/helper/getImageDimensions";
+import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import astroLogger from "~/libs/astroLogger";
 import { LOG_TYPES } from "~/libs/logTypes";
@@ -78,25 +80,40 @@ if (!post) {
 // 公開タグのみ表示・関連記事検索に使う
 const publicTags = getPublicTags(post.tags);
 
-// 前後記事・関連記事の両方が使うGhost全記事リストを一度だけ取得する。
+// feature_imageが無い記事はog:imageが空文字になりtwitter:card(summary_large_image)の
+// プレビュー生成が壊れるため、固定OGP画像にフォールバックする
+const ogImage = post.feature_image
+  ? createProxyImageUrl(post.feature_image)
+  : undefined;
+
+// 前後記事・関連記事の取得、および(feature_imageがある場合の)OGP画像サイズ取得は
+// 互いに依存関係が無いためまとめて並列実行する。
 // この時点でslugの鮮度チェック(公開直後のキャッシュミス時は強制再取得)まで
-// 済ませておくことで、後続の2関数が同じ鮮度のスナップショットを参照できる。
+// 済ませておくことで、前後記事・関連記事の2関数が同じ鮮度のスナップショットを参照できる。
 const allGhostArticles = await getAllGhostArticlesForArticlePage(slug);
 
-// 前後記事と関連記事を並列取得
-const [adjacent, relatedArticles] = await Promise.all([
+const [adjacent, relatedArticles, ogImageDimensions] = await Promise.all([
   getAdjacentArticles(slug, allGhostArticles),
   getRelatedArticles({ slug, tags: publicTags }, { allGhostArticles }),
+  ogImage ? getImageDimensions(ogImage) : Promise.resolve(null),
 ]);
 
 astroLogger.requestLog(Astro.request, { status: 200 });
 
+// feature_imageが無い、またはサイズ取得に失敗した場合はwidth/height不明のog:imageを
+// 出すより固定OGP画像にフォールバックする方が安全(summary_large_imageは画像必須のため)
 const headMeta = {
   title: post.title || "",
   slug: post.slug,
   // excerptの名に反して指定しないと全部出てくるので、改行して150字で切る。
   description: (post.excerpt || "").replace(/\r?\n/g, "").slice(0, 150),
-  ogImage: createProxyImageUrl(post.feature_image || ""),
+  ...(ogImage && ogImageDimensions
+    ? {
+        ogImage,
+        ogImageWidth: ogImageDimensions.width,
+        ogImageHeight: ogImageDimensions.height,
+      }
+    : buildFixedOgpMeta()),
 };
 
 const isWpArticle = judgeWpArticle(post.html || "");
