@@ -50,6 +50,16 @@ export default defineConfig({
       },
     }),
   ],
+  // ClientRouter(View Transitions)利用時、既定のprefetch戦略は"hover"でmouseenter依存のため
+  // タッチ操作しかないスマホでは一切prefetchされず、タップ後にHTML取得を待ってから
+  // startViewTransitionが始まりアニメーションがカクつく。"tap"はtouchstart/mousedownで
+  // 即座にprefetchを開始するためモバイルでも遷移先HTMLの先読みが効くようにする。
+  // prefetchAllを指定しないとdefaultStrategyはdata-astro-prefetch属性を明示した
+  // リンクにしか適用されず(サイト内にその属性を持つリンクが無いため)実質無効になるので必須
+  prefetch: {
+    defaultStrategy: "tap",
+    prefetchAll: true,
+  },
   server: {
     port: 1000,
     host: "0.0.0.0",

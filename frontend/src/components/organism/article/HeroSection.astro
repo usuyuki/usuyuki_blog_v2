@@ -53,10 +53,12 @@ const vtSlug = viewTransitionSlug(article);
 						<Fragment>
 							<img
 								class="hero-visual"
-								src={optimizeGhostImageUrl(article.feature_image, { width: 1600, height: 686 })}
+								src={optimizeGhostImageUrl(article.feature_image, { width: 1200, height: 514 })}
+								srcset={`${optimizeGhostImageUrl(article.feature_image, { width: 1200, height: 514 })} 1200w, ${optimizeGhostImageUrl(article.feature_image, { width: 2400, height: 1028 })} 2400w`}
+								sizes="(max-width: 720px) 100vw, 1112px"
 								alt=""
-								width={1600}
-								height={686}
+								width={1200}
+								height={514}
 								loading="eager"
 								fetchpriority="high"
 								transition:name={`image-${vtSlug}`}
