@@ -12,6 +12,7 @@ import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import type { ArticleArchiveType } from "~/types/ArticleArchiveType";
 
 // 罫線グリッド用の記事セル。feature=trueで2x2の大セルになる
+// transition=trueで記事詳細ページとのView Transitionsをつなぐ(サムネ・タイトルをクロスフェード)
 interface Props {
   article: ArticleArchiveType;
   feature?: boolean;
@@ -19,6 +20,7 @@ interface Props {
   contextPrefix?: string;
   eager?: boolean;
   reveal?: boolean;
+  transition?: boolean;
 }
 const {
   article,
@@ -27,6 +29,7 @@ const {
   contextPrefix = "",
   eager = false,
   reveal = false,
+  transition = false,
 } = Astro.props;
 
 const href = articleHref(article);
@@ -48,19 +51,34 @@ const imageWidth = feature ? 1200 : 600;
 		{
 			article.feature_image ? (
 				<Fragment>
-					<img
-						src={optimizeGhostImageUrl(article.feature_image, {
-							width: imageWidth,
-							height: Math.round((imageWidth / 16) * 9),
-						})}
-						alt=""
-						width={imageWidth}
-						height={Math.round((imageWidth / 16) * 9)}
-						loading={eager ? "eager" : "lazy"}
-						fetchpriority={eager ? "high" : "auto"}
-						transition:name={`image-${contextPrefix}${vtSlug}`}
-						onerror={IMAGE_FALLBACK_ONERROR}
-					/>
+					{transition ? (
+						<img
+							src={optimizeGhostImageUrl(article.feature_image, {
+								width: imageWidth,
+								height: Math.round((imageWidth / 16) * 9),
+							})}
+							alt=""
+							width={imageWidth}
+							height={Math.round((imageWidth / 16) * 9)}
+							loading={eager ? "eager" : "lazy"}
+							fetchpriority={eager ? "high" : "auto"}
+							transition:name={`image-${contextPrefix}${vtSlug}`}
+							onerror={IMAGE_FALLBACK_ONERROR}
+						/>
+					) : (
+						<img
+							src={optimizeGhostImageUrl(article.feature_image, {
+								width: imageWidth,
+								height: Math.round((imageWidth / 16) * 9),
+							})}
+							alt=""
+							width={imageWidth}
+							height={Math.round((imageWidth / 16) * 9)}
+							loading={eager ? "eager" : "lazy"}
+							fetchpriority={eager ? "high" : "auto"}
+							onerror={IMAGE_FALLBACK_ONERROR}
+						/>
+					)}
 					<div
 						class="thumb-placeholder"
 						style={`background: ${gradient}; display: none`}
@@ -83,9 +101,15 @@ const imageWidth = feature ? 1200 : 600;
 				)
 			}
 		</span>
-		<Heading class="cell-title" transition:name={`title-${contextPrefix}${vtSlug}`}>
-			{article.title}
-		</Heading>
+		{transition ? (
+			<Heading class="cell-title" transition:name={`title-${contextPrefix}${vtSlug}`}>
+				{article.title}
+			</Heading>
+		) : (
+			<Heading class="cell-title">
+				{article.title}
+			</Heading>
+		)}
 		{feature && article.excerpt && <p class="cell-excerpt">{article.excerpt}</p>}
 		{article.tags && article.tags.length > 0 && <HashTagList tags={article.tags.slice(0, 3)} />}
 	</div>

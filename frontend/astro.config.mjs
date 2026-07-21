@@ -50,6 +50,13 @@ export default defineConfig({
       },
     }),
   ],
+  // ClientRouter(View Transitions)利用時、既定のprefetch戦略は"hover"でmouseenter依存のため
+  // タッチ操作しかないスマホでは一切prefetchされず、タップ後にHTML取得を待ってから
+  // startViewTransitionが始まりアニメーションがカクつく。"tap"はtouchstart/mousedownで
+  // 即座にprefetchを開始するためモバイルでも遷移先HTMLの先読みが効くようにする
+  prefetch: {
+    defaultStrategy: "tap",
+  },
   server: {
     port: 1000,
     host: "0.0.0.0",

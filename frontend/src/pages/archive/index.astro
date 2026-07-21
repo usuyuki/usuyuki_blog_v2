@@ -67,7 +67,12 @@ astroLogger.requestLog(Astro.request, { status: 200 });
 				items.length > 0 ? (
 					<ArticleCellGrid variant="list" class="list-grid">
 						{items.map((article, index) => (
-							<ArticleCell article={article} headingLevel="h2" eager={index === 0} />
+							<ArticleCell
+								article={article}
+								headingLevel="h2"
+								eager={index === 0}
+								transition={true}
+							/>
 						))}
 					</ArticleCellGrid>
 				) : (
