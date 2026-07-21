@@ -3,13 +3,9 @@ import PageHead from "~/components/atom/section/PageHead.astro";
 import ArticleCell from "~/components/molecule/articleArchive/ArticleCell.astro";
 import ArticleCellGrid from "~/components/molecule/articleArchive/ArticleCellGrid.astro";
 import TagWall from "~/components/organism/tag/TagWall.astro";
-import {
-  DEFAULT_OGP_IMAGE_HEIGHT,
-  DEFAULT_OGP_IMAGE_WIDTH,
-  SITE_URL,
-} from "~/consts";
 import ArchiveLayout from "~/layouts/extends/ArchiveLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
 import { isSlug } from "~/libs/validation/isSlug";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
@@ -47,9 +43,7 @@ const headMeta: HeadMetaType = {
   slug: `/tag/${tagSlug}`,
   description:
     tag.description ?? `うすゆきブログの${tag.name}タグの記事一覧です。`,
-  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
-  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
-  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
+  ...buildFixedOgpMeta(),
 };
 ---
 

@@ -1,10 +1,6 @@
 ---
-import {
-  DEFAULT_OGP_IMAGE_HEIGHT,
-  DEFAULT_OGP_IMAGE_WIDTH,
-  SITE_URL,
-} from "~/consts";
 import PageLayout from "~/layouts/extends/PageLayout.astro";
+import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
 import type { HeadMetaType } from "~/types/HeadMetaType";
 
 // 静的に描画して良いところ
@@ -14,9 +10,7 @@ const headMeta: HeadMetaType = {
   title: "404",
   slug: "/404",
   description: "このページは存在しません",
-  ogImage: `${SITE_URL}/images/ogp/ogp.png`,
-  ogImageWidth: DEFAULT_OGP_IMAGE_WIDTH,
-  ogImageHeight: DEFAULT_OGP_IMAGE_HEIGHT,
+  ...buildFixedOgpMeta(),
 };
 ---
 

@@ -10,10 +10,15 @@ export type ImageDimensions = {
 // 同一URLへの同時呼び出しがfetch/sharpを1回だけ実行するよう共有する進行中Promise
 const inFlightRequests = new Map<string, Promise<ImageDimensions | null>>();
 
+// 画像ホストが無応答/極端に遅い場合にSSR全体がハングしないための上限
+const FETCH_TIMEOUT_MS = 5000;
+
 async function fetchImageDimensions(
   imageUrl: string,
 ): Promise<ImageDimensions | null> {
-  const response = await fetch(imageUrl);
+  const response = await fetch(imageUrl, {
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.status}`);
   }

@@ -138,4 +138,34 @@ describe("getImageDimensions", () => {
 
     expect(global.fetch).toHaveBeenCalledTimes(2);
   });
+
+  it("異常系: fetchがタイムアウトで例外を投げるとSSRをハングさせずnullを返す", async () => {
+    vi.mocked(cache.get).mockReturnValue(null);
+    vi.mocked(global.fetch).mockRejectedValue(
+      new DOMException(
+        "The operation was aborted due to timeout",
+        "TimeoutError",
+      ),
+    );
+
+    const result = await getImageDimensions("https://example.com/slow.jpg");
+
+    expect(result).toBeNull();
+  });
+
+  it("正常系: fetch呼び出しにタイムアウト用のAbortSignalが渡される", async () => {
+    vi.mocked(cache.get).mockReturnValue(null);
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      arrayBuffer: async () => new ArrayBuffer(8),
+    } as Response);
+    metadataMock.mockResolvedValue({ width: 1200, height: 630 });
+
+    await getImageDimensions("https://example.com/image.jpg");
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://example.com/image.jpg",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
 });
