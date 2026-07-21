@@ -100,7 +100,7 @@ The frontend follows Atomic Design principles:
 - **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)
 - **記事セル**: `molecule/articleArchive/ArticleCell.astro`(+`ArticleCellGrid.astro`)をトップ/一覧/タグ/関連記事で共用。外部記事(Qiita/Zenn)はソース名バッジ付きで外部リンク。`transition` propで記事詳細ページとのView Transitions連携(サムネ・タイトルのクロスフェード)を個別に有効化できる(`transition:name`は値をundefinedにしても要素の自動生成名が残ってしまうため、Astroコンパイラの制約でJSX側の分岐で出し分けている)
 - **クライアントスクリプト**: `src/scripts/globalNav.ts`(ハンバーガー)/ `reveal.ts`(スクロール出現)/ `tocSidebar.ts`(目次スクロールスパイ)。すべて `astro:page-load` で初期化(ClientRouter対応)
-- **View Transitions / prefetch**: `astro.config.mjs` で `prefetch.defaultStrategy: "tap"` を指定。既定の `"hover"` は `mouseenter` 依存でスマホのタッチ操作では発火せず、ページ遷移時に毎回HTML取得を待ってから `startViewTransition` が始まりアニメーションがカクつくため、`touchstart`/`mousedown` で即座にprefetchする `"tap"` に変更している
+- **View Transitions / prefetch**: `astro.config.mjs` で `prefetch.defaultStrategy: "tap"` と `prefetch.prefetchAll: true` を指定。既定の `"hover"` は `mouseenter` 依存でスマホのタッチ操作では発火せず、ページ遷移時に毎回HTML取得を待ってから `startViewTransition` が始まりアニメーションがカクつくため、`touchstart`/`mousedown` で即座にprefetchする `"tap"` に変更している。`prefetchAll: true` が無いと `defaultStrategy` は `data-astro-prefetch` 属性を明示したリンクにしか適用されず(サイト内にその属性を持つリンクは無い)実質無効になるため必須
 
 ## Key Files and Directories
 
