@@ -54,13 +54,22 @@ document.addEventListener("astro:page-load", () => {
       const isActive = link.getAttribute("href") === `#${id}`;
       link.classList.toggle("active", isActive);
       // 目次が長くスクロール可能な場合、アクティブ項目が隠れていたら自動追従させる
-      // ※本文冒頭のインライン目次（.toc-modal 内ではない .article-toc.inline）は
-      // 自身のスクロールバーを持たず、scrollIntoViewを呼ぶと画面全体がスクロールして戻されてしまうため除外
+      // ※Element.scrollIntoView()は自身のスクロールコンテナだけでなく祖先(window)の
+      // スクロール位置まで巻き込むことがあり、body { scroll-behavior: smooth }と重なって
+      // 本文スクロール中にページ全体が引き戻される不具合があったため、
+      // 目次コンテナ自身のscrollTopだけを直接計算して操作する
       if (isActive) {
-        const isBodyInline =
-          link.closest(".article-toc.inline") && !link.closest(".toc-modal");
-        if (!isBodyInline) {
-          link.scrollIntoView({ block: "nearest" });
+        const scrollContainer = link.closest(
+          ".article-toc.sidebar ol",
+        ) as HTMLElement | null;
+        if (scrollContainer && link instanceof HTMLElement) {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const linkRect = link.getBoundingClientRect();
+          if (linkRect.top < containerRect.top) {
+            scrollContainer.scrollTop -= containerRect.top - linkRect.top;
+          } else if (linkRect.bottom > containerRect.bottom) {
+            scrollContainer.scrollTop += linkRect.bottom - containerRect.bottom;
+          }
         }
       }
     }
