@@ -459,6 +459,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		.toc-modal-panel :global(.article-toc.inline) {
 			flex: 1;
 			overflow-y: auto;
+			overscroll-behavior: contain;
 		}
 		.toc-modal-header {
 			display: flex;

@@ -92,9 +92,12 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 		padding-left: 42px;
 	}
 	/* サイドバー用: 高さを超えたらスクロール */
+	/* overscroll-behavior: containでスクロール連鎖を止め、body { scroll-behavior: smooth }が
+	   このコンテナ内のscrollTop操作に巻き込まれてページ全体が引き戻される問題を防ぐ */
 	.article-toc.sidebar ol {
 		max-height: calc(100vh - 260px);
 		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 	/* インライン用(details内): 外枠はsummary側の枠線のみで表現するため、navの枠線は出さない */
 	.article-toc.inline {

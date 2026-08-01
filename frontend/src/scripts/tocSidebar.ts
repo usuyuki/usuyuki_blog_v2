@@ -49,6 +49,24 @@ document.addEventListener("astro:page-load", () => {
   );
   if (articleHeadings.length === 0 || allTocLinks.length === 0) return;
 
+  // linkの祖先のうち実際にスクロール可能な要素を探す(サイドバーは`.article-toc.sidebar ol`、
+  // モバイルモーダルは`.article-toc.inline`自体がスクロールコンテナで構造が異なるため、
+  // クラス名ではなく実際のoverflow設定で判定する)
+  const findScrollableAncestor = (el: HTMLElement): HTMLElement | null => {
+    let node = el.parentElement;
+    while (node && node !== document.body) {
+      const { overflowY } = getComputedStyle(node);
+      if (
+        (overflowY === "auto" || overflowY === "scroll") &&
+        node.scrollHeight > node.clientHeight
+      ) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  };
+
   const setActive = (id: string) => {
     for (const link of allTocLinks) {
       const isActive = link.getAttribute("href") === `#${id}`;
@@ -58,16 +76,15 @@ document.addEventListener("astro:page-load", () => {
       // スクロール位置まで巻き込むことがあり、body { scroll-behavior: smooth }と重なって
       // 本文スクロール中にページ全体が引き戻される不具合があったため、
       // 目次コンテナ自身のscrollTopだけを直接計算して操作する
-      if (isActive) {
-        const scrollContainer = link.closest(
-          ".article-toc.sidebar ol",
-        ) as HTMLElement | null;
-        if (scrollContainer && link instanceof HTMLElement) {
+      if (isActive && link instanceof HTMLElement) {
+        const scrollContainer = findScrollableAncestor(link);
+        if (scrollContainer) {
           const containerRect = scrollContainer.getBoundingClientRect();
           const linkRect = link.getBoundingClientRect();
           if (linkRect.top < containerRect.top) {
             scrollContainer.scrollTop -= containerRect.top - linkRect.top;
-          } else if (linkRect.bottom > containerRect.bottom) {
+          }
+          if (linkRect.bottom > containerRect.bottom) {
             scrollContainer.scrollTop += linkRect.bottom - containerRect.bottom;
           }
         }
