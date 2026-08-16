@@ -84,15 +84,14 @@ describe("getAdjacentArticles", () => {
     },
   ];
 
-  it.each(cases)("$name", async ({
-    slug,
-    expectedPrevSlug,
-    expectedNextSlug,
-  }) => {
-    const { prev, next } = await getAdjacentArticles(slug, ghostArticles);
-    expect(prev?.slug ?? null).toBe(expectedPrevSlug);
-    expect(next?.slug ?? null).toBe(expectedNextSlug);
-  });
+  it.each(cases)(
+    "$name",
+    async ({ slug, expectedPrevSlug, expectedNextSlug }) => {
+      const { prev, next } = await getAdjacentArticles(slug, ghostArticles);
+      expect(prev?.slug ?? null).toBe(expectedPrevSlug);
+      expect(next?.slug ?? null).toBe(expectedNextSlug);
+    },
+  );
 });
 
 describe("getAllGhostArticlesForArticlePage", () => {
