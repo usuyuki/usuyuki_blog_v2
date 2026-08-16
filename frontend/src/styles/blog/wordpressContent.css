@@ -7,6 +7,9 @@
 }
 .wp-block-code {
   background-color: #e4e4e4;
+  /* .blog-content pre の共通スタイル(黒背景想定の明るい文字色)を、
+     この明るい背景色に合わせて上書きする */
+  color: var(--color-ink);
   padding: 12px;
 }
 /* 引用 */
