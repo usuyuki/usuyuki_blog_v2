@@ -25,6 +25,7 @@ Astro 7 + Tailwind CSS 4 + Svelte 5
 - デザイントークン: `--color-ink: #141414` / `--color-paper: #fff` / `--color-gray: #f4f3f0` / `--color-orange: #ff5c00`(`frontend/src/styles/tailwind.css` の `@theme` で定義)
 - 2px罫線(`--bw`)・角丸なし・巨大英字タイポ(Webフォントなし、システムサンセリフ)
 - 記事一覧は `/archive?year=2024&sort=oldest&page=2` 形式のSSRクエリパラメータ(年別・月別アーカイブURLは301でリダイレクト)
+- 記事本文のコードブロックはSSR時に[Shiki](https://shiki.style/)でシンタックスハイライト、`mermaid`言語指定のコードブロックはクライアントサイドで[mermaid.js](https://mermaid.js.org/)により図として描画([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
 
 ## 記事ソース
 

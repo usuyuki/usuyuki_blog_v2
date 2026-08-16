@@ -20,7 +20,7 @@ This is a blog application with two main components:
 
 The project uses a Docker-based development and deployment setup:
 - Frontend runs on **Astro 7** (`astro@7.0.7`) with **Tailwind CSS 4** and **Svelte 5**
-- **Dependency layout**: `dependencies` in `frontend/package.json` contains ONLY packages imported at runtime by the SSR bundle (`@astrojs/rss`, `@prisma/adapter-mariadb`, `@prisma/client`, `@tryghost/content-api`, `jsdom`, `sharp`, `winston`). Everything used only at build time (astro itself, adapters, integrations, tailwindcss, svelte, emoji-picker-element, etc.) lives in `devDependencies` so the production image can drop them with `pnpm prune --prod`. When adding a package, decide based on whether the built server (`dist/server`) imports it at runtime.
+- **Dependency layout**: `dependencies` in `frontend/package.json` contains ONLY packages imported at runtime by the SSR bundle (`@astrojs/rss`, `@prisma/adapter-mariadb`, `@prisma/client`, `@tryghost/content-api`, `jsdom`, `sharp`, `shiki`, `winston`). Everything used only at build time (astro itself, adapters, integrations, tailwindcss, svelte, emoji-picker-element, mermaid(クライアントバンドルにのみ含まれる), etc.) lives in `devDependencies` so the production image can drop them with `pnpm prune --prod`. When adding a package, decide based on whether the built server (`dist/server`) imports it at runtime.
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
@@ -99,7 +99,7 @@ The frontend follows Atomic Design principles:
 - **レイアウト**: `main` はフルブリード。各セクションが内側に `.container` を持つ
 - **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)
 - **記事セル**: `molecule/articleArchive/ArticleCell.astro`(+`ArticleCellGrid.astro`)をトップ/一覧/タグ/関連記事で共用。外部記事(Qiita/Zenn)はソース名バッジ付きで外部リンク。`transition` propで記事詳細ページとのView Transitions連携(サムネ・タイトルのクロスフェード)を個別に有効化できる(`transition:name`は値をundefinedにしても要素の自動生成名が残ってしまうため、Astroコンパイラの制約でJSX側の分岐で出し分けている)
-- **クライアントスクリプト**: `src/scripts/globalNav.ts`(ハンバーガー)/ `reveal.ts`(スクロール出現)/ `tocSidebar.ts`(目次スクロールスパイ)。すべて `astro:page-load` で初期化(ClientRouter対応)
+- **クライアントスクリプト**: `src/scripts/globalNav.ts`(ハンバーガー)/ `reveal.ts`(スクロール出現)/ `tocSidebar.ts`(目次スクロールスパイ)/ `mermaidRenderer.ts`(記事本文の`.mermaid`ブロックを[mermaid.js](https://mermaid.js.org/)で描画。ブロックが無い記事ではmermaid.js自体を動的importしない)。すべて `astro:page-load` で初期化(ClientRouter対応)
 - **View Transitions / prefetch**: `astro.config.mjs` で `prefetch.defaultStrategy: "tap"` と `prefetch.prefetchAll: true` を指定。既定の `"hover"` は `mouseenter` 依存でスマホのタッチ操作では発火せず、ページ遷移時に毎回HTML取得を待ってから `startViewTransition` が始まりアニメーションがカクつくため、`touchstart`/`mousedown` で即座にprefetchする `"tap"` に変更している。`prefetchAll: true` が無いと `defaultStrategy` は `data-astro-prefetch` 属性を明示したリンクにしか適用されず(サイト内にその属性を持つリンクは無い)実質無効になるため必須
 
 ## Key Files and Directories
@@ -112,6 +112,8 @@ The frontend follows Atomic Design principles:
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ、fetchは5秒でタイムアウト)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
+- `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
+- `frontend/src/libs/helper/shikiTheme.ts` - `--color-ink`/`--color-orange`等の既存デザイントークンに合わせたカスタムShikiテーマ(`usuyuki-editorial`)
 - `frontend/src/libs/helper/ogpMeta.ts` - `buildFixedOgpMeta()`で固定OGP画像(`images/ogp/ogp.png`)のog:image/width/heightをまとめて返す。トップ・404・タグ一覧など固定画像を使う全ページ、および記事詳細で`feature_image`が無い/サイズ取得に失敗した場合のフォールバックで共用
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
 - `frontend/src/libs/qiitaClient.ts` - Qiita API v2 client with pagination and caching (full article history)

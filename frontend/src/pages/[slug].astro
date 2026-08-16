@@ -23,6 +23,7 @@ import { addTargetBlankToLinks } from "~/libs/helper/addTargetBlankToLinks";
 import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
+import { highlightCodeBlocks } from "~/libs/helper/highlightCodeBlocks";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
 import { getImageDimensions } from "~/libs/helper/getImageDimensions";
 import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
@@ -123,7 +124,9 @@ const headingProcessedHtml = isWpArticle
   : post.html || "";
 const tocList: TOCType[] = generateTOC(headingProcessedHtml);
 // 本文内リンクは全て新しいタブで開く
-const processedHtml = addTargetBlankToLinks(headingProcessedHtml);
+const linkProcessedHtml = addTargetBlankToLinks(headingProcessedHtml);
+// コードブロックをシンタックスハイライト、mermaidブロックをクライアント描画用マークアップに変換
+const processedHtml = await highlightCodeBlocks(linkProcessedHtml);
 
 const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 ---
@@ -244,6 +247,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 	<RelatedArticles articles={relatedArticles} />
 
 	<script src="../scripts/tocSidebar.ts"></script>
+	<script src="../scripts/mermaidRenderer.ts"></script>
 </ArticleLayout>
 
 <style>
