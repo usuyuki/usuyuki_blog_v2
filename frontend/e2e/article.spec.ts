@@ -23,6 +23,22 @@ test.describe("記事詳細ページ", () => {
     expect(errors, "未捕捉のJSエラーが発生しています").toEqual([]);
   });
 
+  test("コードブロックがシンタックスハイライトされる", async ({ page }) => {
+    await page.goto("/e2e-post-1");
+    const codeBlock = page.locator("article.blog-content pre.shiki");
+    await expect(codeBlock).toBeVisible();
+    await expect(codeBlock).toContainText("func");
+  });
+
+  test("mermaidブロックがSVG図として描画される", async ({ page }) => {
+    const errors = collectPageErrors(page);
+    await page.goto("/e2e-post-1");
+    const mermaidBlock = page.locator("article.blog-content pre.mermaid");
+    await expect(mermaidBlock).toBeVisible();
+    await expect(mermaidBlock.locator("svg")).toBeVisible();
+    expect(errors, "未捕捉のJSエラーが発生しています").toEqual([]);
+  });
+
   test("前後記事ナビゲーションが表示される", async ({ page }) => {
     await page.goto("/e2e-post-2");
     const prevNext = page.locator("nav.prev-next");

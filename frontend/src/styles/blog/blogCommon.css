@@ -122,6 +122,37 @@
     color: inherit;
   }
 
+  /* Shikiが出力するハイライト済みブロック。背景色は既にShikiのカスタムテーマ
+     (usuyukiEditorialShikiTheme)で--color-inkと同じ#141414に設定済みのため、
+     ここではpre共通のレイアウト(パディング・スクロール)だけ上書きする */
+  .blog-content pre.shiki {
+    padding: 20px 24px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.7;
+  }
+  .blog-content pre.shiki code {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  /* mermaid図: 描画前はコード文字列、mermaid.js実行後は内部にSVGが挿入される。
+     他のコードブロックと違い黒背景反転はせず、罫線で囲うだけに留める */
+  .blog-content pre.mermaid {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: var(--bw) solid var(--color-ink);
+    padding: 20px 24px;
+    overflow-x: auto;
+    display: flex;
+    justify-content: center;
+  }
+  .blog-content pre.mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+
   /* 埋め込み・表・区切り線 */
   .blog-content > iframe {
     margin-left: auto;

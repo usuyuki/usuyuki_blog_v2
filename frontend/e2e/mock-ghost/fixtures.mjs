@@ -44,6 +44,11 @@ const RICH_HTML = `
 <h2 id="section-2">次の見出し</h2>
 <ul><li>リスト項目1</li><li>リスト項目2</li></ul>
 <p>長めの文章もいれておきます。急須で入れたようななにかを綴っていくブログのテストです。</p>
+<pre><code class="language-go">func main() {
+	fmt.Println("hello")
+}</code></pre>
+<pre><code class="language-mermaid">graph TD;
+  A[開始] --&gt; B[終了];</code></pre>
 `;
 
 function buildPost(n, { year, month, featured, tags: postTags }) {

@@ -213,20 +213,23 @@ describe("paginate", () => {
     },
   ];
 
-  it.each(cases)("$name", ({
-    page,
-    perPage,
-    expectedFirst,
-    expectedLength,
-    expectedCurrentPage,
-    expectedTotalPages,
-  }) => {
-    const result = paginate(items, page, perPage);
-    expect(result.items[0]).toBe(expectedFirst);
-    expect(result.items).toHaveLength(expectedLength);
-    expect(result.currentPage).toBe(expectedCurrentPage);
-    expect(result.totalPages).toBe(expectedTotalPages);
-  });
+  it.each(cases)(
+    "$name",
+    ({
+      page,
+      perPage,
+      expectedFirst,
+      expectedLength,
+      expectedCurrentPage,
+      expectedTotalPages,
+    }) => {
+      const result = paginate(items, page, perPage);
+      expect(result.items[0]).toBe(expectedFirst);
+      expect(result.items).toHaveLength(expectedLength);
+      expect(result.currentPage).toBe(expectedCurrentPage);
+      expect(result.totalPages).toBe(expectedTotalPages);
+    },
+  );
 
   it("正常系: 空配列でもtotalPagesは1になる", () => {
     const result = paginate([], 1, 24);
