@@ -53,4 +53,17 @@ describe("highlightCodeBlocks", () => {
     expect(result).toContain("&lt;tag&gt;");
     expect(result).not.toContain('class="shiki');
   });
+
+  it.each([
+    { lang: "c++", label: "language-c++" },
+    { lang: "c#", label: "language-c#" },
+    { lang: "f#", label: "language-f#" },
+  ])("正常系: $label のように+や#を含む言語指定でも切り詰められずShikiでハイライトされる", async ({
+    lang,
+  }) => {
+    const html = `<pre><code class="language-${lang}">code</code></pre>`;
+    const result = await highlightCodeBlocks(html);
+    expect(result).toContain('class="shiki');
+    expect(result).not.toBe(html);
+  });
 });

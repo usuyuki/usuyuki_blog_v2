@@ -25,5 +25,11 @@ document.addEventListener("astro:page-load", async () => {
     },
   });
 
-  await mermaid.run({ nodes: Array.from(mermaidBlocks) });
+  try {
+    await mermaid.run({ nodes: Array.from(mermaidBlocks) });
+  } catch (error) {
+    // mermaid.run()は記法エラーのある図があると最終的に例外を再スローするため、
+    // 他の正常な図の描画やページ全体を巻き込まないようここで吸収する
+    console.error("[mermaidRenderer] failed to render mermaid diagrams", error);
+  }
 });

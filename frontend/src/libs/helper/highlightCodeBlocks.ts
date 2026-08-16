@@ -34,7 +34,9 @@ export const highlightCodeBlocks = async (html: string): Promise<string> => {
     const pre = code.parentElement;
     if (!pre) continue;
 
-    const langMatch = code.className.match(/language-([\w-]+)/);
+    // Shikiは"c++"/"c#"/"f#"のように+/#を含む言語IDをbundledLanguagesに持つため、
+    // 通常の\wでは切り詰められてしまうこれらの記号も許容する
+    const langMatch = code.className.match(/language-([\w+#-]+)/);
     const lang = langMatch?.[1];
     if (!lang) continue;
 
