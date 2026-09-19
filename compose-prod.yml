@@ -24,6 +24,19 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # Content APIが応答を返せる(= HTTPサーバとルーティングが起動済み)ことを確認する。
+      # キーは検証しないので401でも良く、"HTTP応答が返ること"だけを合格条件にする。
+      # localhostはIPv6解決で接続拒否になるため127.0.0.1を明示する
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null --server-response 'http://127.0.0.1:2368/ghost/api/content/posts/?key=healthcheck&limit=1' 2>&1 | grep -q 'HTTP/'",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 40s
     labels:
       - "logging=promtail"
     networks:
@@ -54,9 +67,13 @@ services:
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
     user: "1000:1000"
     depends_on:
-      - ghost
-      - loki
-      - db
+      # Ghostより先にastroが起動すると記事取得に失敗するため、healthyになるまで待つ
+      ghost:
+        condition: service_healthy
+      loki:
+        condition: service_started
+      db:
+        condition: service_healthy
     labels:
       - "logging=promtail"
     networks:

@@ -27,6 +27,15 @@ Astro 7 + Tailwind CSS 4 + Svelte 5
 - 記事一覧は `/archive?year=2024&sort=oldest&page=2` 形式のSSRクエリパラメータ(年別・月別アーカイブURLは301でリダイレクト)
 - 記事本文のコードブロックはSSR時に[Shiki](https://shiki.style/)でシンタックスハイライト、`mermaid`言語指定のコードブロックはクライアントサイドで[mermaid.js](https://mermaid.js.org/)により図として描画([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
 
+## 起動順序
+
+astro が Ghost より先に起動すると記事を取得できないまま立ち上がるため、次の2段構えで防いでいます。
+
+| 層 | 仕組み |
+|---|---|
+| Docker | `ghost` の `healthcheck` が Content API の応答を確認し、`astro` は `condition: service_healthy` で待機します |
+| アプリ | Ghost の取得に失敗した回の記事一覧はキャッシュせず、次のリクエストで取得し直します |
+
 ## 記事ソース
 
 Ghost 記事に加えて、外部サービスの記事をまとめて表示できます。
