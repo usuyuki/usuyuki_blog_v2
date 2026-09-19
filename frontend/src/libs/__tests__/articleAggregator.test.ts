@@ -55,7 +55,7 @@ describe("ArticleAggregator", () => {
   });
 
   describe("getLatestArticles", () => {
-    it("should fetch and combine Ghost and RSS articles", async () => {
+    it("正常系: Ghost記事とRSS記事の両方を取得して結合する", async () => {
       // Mock Ghost API response
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
         mockGhostPost,
@@ -81,7 +81,7 @@ describe("ArticleAggregator", () => {
       expect(typeof articles[1].published_at).toBe("string");
     });
 
-    it("should handle Ghost API failure gracefully", async () => {
+    it("異常系: Ghost APIが例外を投げるとGhost記事は欠落しRSS記事のみが返る", async () => {
       // Mock Ghost API to throw error
       vi.mocked(ghostApiWithRetry.posts.browse).mockRejectedValue(
         new Error("Rate limit exceeded"),
@@ -100,7 +100,7 @@ describe("ArticleAggregator", () => {
       expect(articles[0].title).toBe("RSS Post Title");
     });
 
-    it("should exclude external articles when includeExternal is false", async () => {
+    it("正常系: includeExternalがfalseのとき外部記事を含めない", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
         mockGhostPost,
       ]);
@@ -115,7 +115,7 @@ describe("ArticleAggregator", () => {
       expect(vi.mocked(fetchMultipleRSS)).not.toHaveBeenCalled();
     });
 
-    it("should sort articles by published date (newest first)", async () => {
+    it("正常系: 公開日の新しい順に記事をソートする", async () => {
       const olderGhostPost = {
         ...mockGhostPost,
         published_at: "2023-12-10T10:00:00.000Z",
@@ -142,7 +142,7 @@ describe("ArticleAggregator", () => {
       expect(articles[1].title).toBe("Older Ghost Post");
     });
 
-    it("should respect the limit parameter", async () => {
+    it("正常系: limitで指定した件数まで記事を絞り込む", async () => {
       const ghostPosts = Array.from({ length: 5 }, (_, i) => ({
         ...mockGhostPost,
         slug: `ghost-post-${i}`,
@@ -160,7 +160,7 @@ describe("ArticleAggregator", () => {
       expect(articles).toHaveLength(3);
     });
 
-    it("should convert RSS items to articles correctly", async () => {
+    it("正常系: RSSアイテムを外部記事として正しく変換する", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
       vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
@@ -178,7 +178,7 @@ describe("ArticleAggregator", () => {
       expect(rssArticle.externalUrl).toBe(mockRSSItem.link);
     });
 
-    it("should convert Ghost posts to articles correctly", async () => {
+    it("正常系: Ghost記事を内部記事として正しく変換する", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([
         mockGhostPost,
       ]);
@@ -197,7 +197,7 @@ describe("ArticleAggregator", () => {
       expect(ghostArticle.isExternal).toBe(false);
     });
 
-    it("should handle mixed date formats in sorting correctly", async () => {
+    it("正常系: 文字列とオブジェクトが混在した日付形式でも正しくソートする", async () => {
       // Create articles with different date formats
       const oldGhostPost = {
         ...mockGhostPost,
@@ -231,7 +231,7 @@ describe("ArticleAggregator", () => {
       expect(typeof articles[1].published_at).toBe("string");
     });
 
-    it("should handle invalid dates gracefully", async () => {
+    it("異常系: 不正な日付形式を含む記事があってもソートが破綻せず全件返る", async () => {
       const invalidDateGhostPost = {
         ...mockGhostPost,
         published_at: "invalid-date",
@@ -273,7 +273,7 @@ describe("ArticleAggregator", () => {
       });
     });
 
-    it("should call fetchQiitaItems when qiitaUserId is set", async () => {
+    it("正常系: qiitaUserIdが設定されているときQiita APIを呼び出す", async () => {
       mockExternalBlogs.length = 0;
       mockExternalBlogs.push({ name: "Qiita", qiitaUserId: "myuser" });
 
@@ -300,7 +300,7 @@ describe("ArticleAggregator", () => {
       expect(articles.some((a) => a.title === "Qiita Article")).toBe(true);
     });
 
-    it("should not call fetchQiitaItems when only rssUrl is set", async () => {
+    it("正常系: rssUrlのみ設定されているときQiita APIを呼び出さない", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
       vi.mocked(fetchMultipleRSS).mockResolvedValue([mockRSSItem]);
 
@@ -316,7 +316,7 @@ describe("ArticleAggregator", () => {
   });
 
   describe("getFeaturedArticles", () => {
-    it("should fetch featured Ghost articles only", async () => {
+    it("正常系: featuredフィルタでピックアップ記事のみを取得する", async () => {
       const featuredPost = {
         ...mockGhostPost,
         title: "Featured Post",
@@ -342,7 +342,7 @@ describe("ArticleAggregator", () => {
       });
     });
 
-    it("should handle Ghost API failure for featured articles", async () => {
+    it("異常系: ピックアップ記事取得でGhost APIが例外を投げると空配列を返す", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockRejectedValue(
         new Error("API Error"),
       );
@@ -354,7 +354,7 @@ describe("ArticleAggregator", () => {
       expect(articles).toHaveLength(0);
     });
 
-    it("should return empty array when no featured posts", async () => {
+    it("正常系: ピックアップ記事が0件のとき空配列を返す", async () => {
       vi.mocked(ghostApiWithRetry.posts.browse).mockResolvedValue([]);
 
       const articles = await getFeaturedArticles({

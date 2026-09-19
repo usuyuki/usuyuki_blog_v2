@@ -107,7 +107,7 @@ The frontend follows Atomic Design principles:
 - `frontend/src/consts.ts` - Site configuration constants(`SITE_TITLE_EN`: ヘッダー/フッター共用の英字ブランド表記、`SOCIAL_LINKS`: SNS・外部プロフィールリンクの一覧。console banner(`libs/console/snsLinkProvider.ts`)も含め表記揺れを避けるためこれらを唯一の情報源とする)
 - `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching (posts.browse は `include: "tags"` で公開タグも変換)
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
-- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得。Ghostへの問い合わせが失敗した結果はキャッシュしない — Docker再起動直後などGhostが未起動でも外部記事(RSS/Qiita)だけは取得できてしまい、Ghost記事が欠けた不完全な結果を1時間キャッシュすると記事が表示されなくなるため) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
 - `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
@@ -127,6 +127,16 @@ The frontend follows Atomic Design principles:
 - `frontend/e2e/` - Playwright E2Eテスト(3ブラウザの表示検査)と`mock-ghost/`(Ghost Content APIモックサーバー+fixture)。設定は`frontend/playwright.config.ts`
 - `compose.yml` - Development Docker configuration
 - `compose-prod.yml` - Production Docker configuration
+
+### 起動順序 (Ghost → astro)
+astroがGhostより先に起動すると記事を取得できないまま立ち上がってしまうため、2段構えで防いでいる。
+
+| 層 | 仕組み |
+| --- | --- |
+| Docker | `ghost`サービスに`healthcheck`(Content APIへwgetし、HTTP応答が返ることを確認。キーは検証しないので401でも合格)を定義し、`astro`の`depends_on`を`ghost: condition: service_healthy`にして待機させる |
+| アプリ | `getAllArticlesCached`はGhostへの問い合わせが失敗した回の結果をキャッシュしない。外部記事(RSS/Qiita)だけは取得できてしまうため、Ghost記事が欠けた結果を1時間キャッシュすると記事が出ないまま固定される |
+
+healthcheckの`test`は`localhost`ではなく`127.0.0.1`を使う(`localhost`はIPv6に解決され接続拒否になる)。
 
 ### Monitoring Configuration
 - `grafana/` - Grafana configuration and dashboards
@@ -279,9 +289,9 @@ The application uses multiple layers of caching for performance:
 ### In-Memory Application Cache
 - **Location**: `frontend/src/libs/cache.ts`
 - **Scope**: In-memory cache that persists during container runtime
-- **Used by**: 記事一覧ページ・前後記事ナビ (`getAllArticlesCached`、キー `aggregated_all_articles:v2:*`), Ghost client, RSS client, Qiita API client
+- **Used by**: 記事一覧ページ・前後記事ナビ (`getAllArticlesCached`、キー `aggregated_all_articles:v3:*`), Ghost client, RSS client, Qiita API client
 - **Cache Duration**: 
-  - Aggregated articles: 1 hour (`ONE_HOUR_MS`)
+  - Aggregated articles: 1 hour (`ONE_HOUR_MS`)。ただしGhostの取得に失敗した回はキャッシュをスキップする
   - Ghost API responses: 1 hour (configurable per endpoint)
   - RSS feed responses: 1 hour
   - Qiita API responses: 1 hour (cache key: `qiita_api:{userId}`)

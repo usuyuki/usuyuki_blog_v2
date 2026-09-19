@@ -40,6 +40,15 @@ export function convertGhostToArticle(post: PostOrPage): ArticleArchiveType {
   };
 }
 
+// Ghost記事の取得可否を呼び出し元に伝えるための内部戻り値型。
+// Ghostが未起動・接続不能でも外部記事(RSS/Qiita)だけは取得できてしまうため、
+// 「記事が0件ではないが Ghost だけ落ちている」状態をキャッシュ層で区別する必要がある。
+type AggregatedArticles = {
+  articles: ArticleArchiveType[];
+  // Ghostへの問い合わせが成功したか。falseならGhost側の記事が欠落している
+  ghostAvailable: boolean;
+};
+
 export async function getLatestArticles(
   options: {
     limit?: number;
@@ -47,9 +56,23 @@ export async function getLatestArticles(
     unlimited?: boolean;
   } = {},
 ): Promise<ArticleArchiveType[]> {
+  const { articles } = await aggregateArticles(options);
+  return articles;
+}
+
+// getLatestArticlesの実体。Ghostの取得可否も併せて返す
+async function aggregateArticles(
+  options: {
+    limit?: number;
+    includeExternal?: boolean;
+    unlimited?: boolean;
+  } = {},
+): Promise<AggregatedArticles> {
   const { limit = 10, includeExternal = true, unlimited = false } = options;
 
   const articles: ArticleArchiveType[] = [];
+  // Ghostへの問い合わせが1度でも失敗(null返却・例外)したらfalseにする
+  let ghostAvailable = true;
 
   // Ghost記事の取得（ページネーション対応で全記事を取得）
   try {
@@ -81,7 +104,22 @@ export async function getLatestArticles(
         include: "tags",
       });
 
-      if (!ghostPosts || ghostPosts.length === 0) {
+      // nullはリトライを尽くしても取得できなかった(Ghost未起動・接続不能など)ことを意味し、
+      // 空配列は最終ページに到達しただけなので、両者を区別して扱う
+      if (ghostPosts === null) {
+        ghostAvailable = false;
+        astroLogger.warn(
+          `Ghost posts fetch failed on page ${page}, treating Ghost as unavailable`,
+          {
+            service: "article-aggregator",
+            page,
+            totalFetched: allGhostPosts.length,
+          },
+        );
+        break;
+      }
+
+      if (ghostPosts.length === 0) {
         // これ以上記事がない場合は終了
         astroLogger.info(
           `No more posts found on page ${page}, stopping pagination`,
@@ -134,6 +172,7 @@ export async function getLatestArticles(
       );
     }
   } catch (error) {
+    ghostAvailable = false;
     astroLogger.warn(
       "Ghost posts unavailable (rate limit or error), showing RSS content only",
       {
@@ -266,11 +305,11 @@ export async function getLatestArticles(
         : null,
   });
 
-  return finalArticles;
+  return { articles: finalArticles, ghostAvailable };
 }
 
 // 全件リストのキャッシュキー(集約ロジックを変えたらバージョンを上げて無効化する)
-const ALL_ARTICLES_CACHE_KEY = "aggregated_all_articles:v2";
+const ALL_ARTICLES_CACHE_KEY = "aggregated_all_articles:v3";
 
 // 全記事をキャッシュ付きで取得する(一覧ページ・前後記事ナビで共用)
 // forceRefresh=trueのときはキャッシュを無視して最新データを取得し直す
@@ -286,10 +325,27 @@ export async function getAllArticlesCached(
     }
   }
 
-  const articles = await getLatestArticles({
+  const { articles, ghostAvailable } = await aggregateArticles({
     includeExternal,
     unlimited: true,
   });
+
+  // Ghostが取得できていない結果はキャッシュしない。
+  // 外部記事(RSS/Qiita)だけは取得できるため articles.length > 0 になってしまい、
+  // Docker再起動直後などGhostがまだ起動しきっていないタイミングの不完全な結果を
+  // 1時間キャッシュしてしまうとブログ記事が表示されないままになる。
+  if (!ghostAvailable) {
+    astroLogger.warn(
+      "Skipping cache for aggregated articles because Ghost was unavailable",
+      {
+        service: "article-aggregator",
+        cacheKey,
+        articleCount: articles.length,
+      },
+    );
+    return articles;
+  }
+
   // 取得失敗などで空のときはキャッシュせず、次のリクエストで再取得させる
   if (articles.length > 0) {
     cache.set(cacheKey, articles, ONE_HOUR_MS);
