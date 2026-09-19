@@ -7,28 +7,33 @@ updates:
       timezone: "Asia/Tokyo"
     groups:
       npm-dependencies:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
 
   - package-ecosystem: "docker"
-    directory: "/infra"
+    # directoryは再帰的に探索されないため、Dockerfileのあるディレクトリを個別に列挙する
+    directories:
+      - "/infra/prod/astro"
+      - "/infra/dev/astro"
     schedule:
       interval: "monthly"
       timezone: "Asia/Tokyo"
     groups:
       docker-dependencies:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
 
   - package-ecosystem: "github-actions"
-    directory: "/.github"
+    # github-actionsエコシステムのdirectoryはワークフローの置き場(.github/workflows)ではなく
+    # リポジトリルートを指定する。"/.github"だと.github/.github/workflows/を探して何も検出されない
+    directory: "/"
     schedule:
       interval: "monthly"
       timezone: "Asia/Tokyo"
     groups:
       github-actions:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
