@@ -23,7 +23,9 @@ updates:
           - "*"
 
   - package-ecosystem: "github-actions"
-    directory: "/.github"
+    # github-actionsエコシステムのdirectoryはワークフローの置き場(.github/workflows)ではなく
+    # リポジトリルートを指定する。"/.github"だと.github/.github/workflows/を探して何も検出されない
+    directory: "/"
     schedule:
       interval: "monthly"
       timezone: "Asia/Tokyo"
