@@ -7,7 +7,7 @@ updates:
       timezone: "Asia/Tokyo"
     groups:
       npm-dependencies:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
 
@@ -21,7 +21,7 @@ updates:
       timezone: "Asia/Tokyo"
     groups:
       docker-dependencies:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
 
@@ -34,6 +34,6 @@ updates:
       timezone: "Asia/Tokyo"
     groups:
       github-actions:
-        applies-to: all
+        applies-to: version-updates
         patterns:
           - "*"
