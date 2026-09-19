@@ -12,7 +12,10 @@ updates:
           - "*"
 
   - package-ecosystem: "docker"
-    directory: "/infra"
+    # directoryは再帰的に探索されないため、Dockerfileのあるディレクトリを個別に列挙する
+    directories:
+      - "/infra/prod/astro"
+      - "/infra/dev/astro"
     schedule:
       interval: "monthly"
       timezone: "Asia/Tokyo"
