@@ -12,6 +12,11 @@ document.addEventListener("astro:page-load", async () => {
 
   mermaid.initialize({
     startOnLoad: false,
+    // mermaid 12でデフォルトのレイアウトエンジンがdagreからELKに変わり、
+    // 既存記事の図の見た目が変化してしまうため、従来どおりdagreを明示する
+    layout: "dagre",
+    // mermaid 12ではデフォルトのlookがneoに変わるため、従来のclassicを明示する
+    look: "classic",
     theme: "base",
     themeVariables: {
       // エディトリアルデザイン(ink/paper基調)に合わせた最小限の配色。ダークモードは無いため固定値
