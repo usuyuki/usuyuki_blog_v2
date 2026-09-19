@@ -1,5 +1,5 @@
 # Build stage
-FROM node:24-slim AS build
+FROM node:25-slim AS build
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm
 WORKDIR /frontend
@@ -39,7 +39,7 @@ RUN pnpm prune --prod --ignore-scripts \
         node_modules/.bin/tsserver
 
 # Production stage
-FROM node:24-slim AS prod
+FROM node:25-slim AS prod
 
 # Install OpenSSL for Prisma runtime
 RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
