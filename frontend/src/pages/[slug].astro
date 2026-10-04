@@ -212,7 +212,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 										id="toc-modal-label"
 										aria-label="目次を閉じる"
 									>
-										<span class="toc-modal-back-arrow" aria-hidden="true">&lt;</span>
+										<span class="toc-modal-back-arrow" aria-hidden="true">&gt;</span>
 										INDEX
 									</button>
 									<ArticleToc tocList={tocList} variant="inline" />
@@ -387,7 +387,8 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			width: 80%;
 			border-top: 1px dashed var(--color-ink-border);
 		}
-		/* 本文冒頭の目次(toc-inline)がスクロールで見切れた時だけ.visibleが付き表示される */
+		/* 本文冒頭の目次(toc-inline)がスクロールで見切れた時だけ.visibleが付き表示される。
+		   右手の親指で押しやすいよう画面右側に置き、目次パネルも右端から開く */
 		.toc-float-button {
 			display: flex;
 			align-items: center;
@@ -396,7 +397,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 			visibility: hidden;
 			position: fixed;
 			top: calc(var(--heder-height) + 20px);
-			left: 20px;
+			right: 20px;
 			z-index: 40;
 			font-family: var(--font-en);
 			font-weight: 700;
@@ -461,14 +462,14 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		.toc-modal-panel {
 			position: absolute;
 			top: 0;
-			left: 0;
+			right: 0;
 			bottom: 0;
 			width: min(320px, 84vw);
 			display: flex;
 			flex-direction: column;
 			background: var(--color-paper);
-			box-shadow: 12px 0 32px rgb(20 20 20 / 18%);
-			transform: translateX(-100%);
+			box-shadow: -12px 0 32px rgb(20 20 20 / 18%);
+			transform: translateX(100%);
 			transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
 		}
 		.toc-modal.open .toc-modal-panel {

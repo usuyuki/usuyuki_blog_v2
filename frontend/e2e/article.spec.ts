@@ -138,6 +138,35 @@ test.describe("記事詳細ページ", () => {
     expect(sideHeight).toBeLessThanOrEqual(600 - 60 - 80);
   });
 
+  test("正常系: スマホではINDEXボタンが画面右側に出て、目次パネルが右端から開く", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/e2e-post-1");
+
+    // 本文冒頭の目次が見切れるまでスクロールするとフローティングボタンが出る
+    await page.evaluate(() => {
+      const inline = document.getElementById("toc-inline-wrapper");
+      if (inline) window.scrollTo(0, inline.getBoundingClientRect().bottom + window.scrollY + 10);
+    });
+    const floatButton = page.locator("#toc-float-button");
+    await expect(floatButton).toHaveClass(/visible/);
+    const buttonBox = await floatButton.boundingBox();
+    expect(buttonBox).not.toBeNull();
+    // ボタンの中心が画面の右半分にある
+    expect((buttonBox?.x ?? 0) + (buttonBox?.width ?? 0) / 2).toBeGreaterThan(390 / 2);
+
+    await floatButton.click();
+    const panel = page.locator(".toc-modal-panel");
+    // スライドインのアニメーション完了後、パネルの右端が画面右端に揃う
+    await expect
+      .poll(async () => {
+        const box = await panel.boundingBox();
+        return box ? Math.round(box.x + box.width) : null;
+      })
+      .toBe(390);
+  });
+
   test("存在しない記事は404を返す", async ({ page }) => {
     const response = await page.goto("/no-such-post-xyz");
     expect(response?.status()).toBe(404);
