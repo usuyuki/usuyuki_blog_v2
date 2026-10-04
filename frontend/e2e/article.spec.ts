@@ -147,14 +147,20 @@ test.describe("記事詳細ページ", () => {
     // 本文冒頭の目次が見切れるまでスクロールするとフローティングボタンが出る
     await page.evaluate(() => {
       const inline = document.getElementById("toc-inline-wrapper");
-      if (inline) window.scrollTo(0, inline.getBoundingClientRect().bottom + window.scrollY + 10);
+      if (inline)
+        window.scrollTo(
+          0,
+          inline.getBoundingClientRect().bottom + window.scrollY + 10,
+        );
     });
     const floatButton = page.locator("#toc-float-button");
     await expect(floatButton).toHaveClass(/visible/);
     const buttonBox = await floatButton.boundingBox();
     expect(buttonBox).not.toBeNull();
     // ボタンの中心が画面の右半分にある
-    expect((buttonBox?.x ?? 0) + (buttonBox?.width ?? 0) / 2).toBeGreaterThan(390 / 2);
+    expect((buttonBox?.x ?? 0) + (buttonBox?.width ?? 0) / 2).toBeGreaterThan(
+      390 / 2,
+    );
 
     await floatButton.click();
     const panel = page.locator(".toc-modal-panel");
