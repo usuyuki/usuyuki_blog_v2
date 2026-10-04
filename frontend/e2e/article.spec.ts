@@ -96,6 +96,48 @@ test.describe("記事詳細ページ", () => {
     expect(sideHeight).toBeLessThanOrEqual(720 - 60 - 80);
   });
 
+  test("正常系: 目次が長くリアクションが3行以上あっても、折りたたみ時のリアクション欄が画面内に収まる", async ({
+    page,
+  }) => {
+    // E2E環境のリアクションAPIは空を返すため、3行以上(「もっと見る」が出る量)のリアクションを返すようモックする
+    const emojis = Array.from({ length: 30 }, (_, i) =>
+      String.fromCodePoint(0x1f600 + i),
+    );
+    await page.route("**/api/reactions/**", (route) =>
+      route.fulfill({
+        json: {
+          reactions: emojis.map((emoji) => ({
+            emoji,
+            count: 1,
+            reacted: false,
+          })),
+        },
+      }),
+    );
+    // 高さ600pxでは、リアクション一覧に割り当てられる高さ(約57px)が折りたたみ時の2行分(112px)より小さい
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await page.goto("/e2e-post-1");
+
+    const sidebar = page.locator(".article-side-sticky");
+    const tocList = sidebar.locator("#toc-sidebar ol");
+    await expect(tocList).toBeVisible();
+    await tocList.evaluate((ol) => {
+      for (let i = 0; i < 60; i++) {
+        const li = document.createElement("li");
+        li.className = "level-2";
+        li.innerHTML = `<a href="#section-1">ダミー見出し${i}</a>`;
+        ol.appendChild(li);
+      }
+    });
+    // 折りたたみ状態(「もっと見る」が出ている)で検証する
+    await expect(sidebar.getByText("もっと見る ▼")).toBeVisible();
+
+    const sideHeight = await sidebar.evaluate(
+      (el) => el.getBoundingClientRect().height,
+    );
+    expect(sideHeight).toBeLessThanOrEqual(600 - 60 - 80);
+  });
+
   test("存在しない記事は404を返す", async ({ page }) => {
     const response = await page.goto("/no-such-post-xyz");
     expect(response?.status()).toBe(404);
