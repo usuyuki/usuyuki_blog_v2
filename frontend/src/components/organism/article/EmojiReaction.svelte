@@ -214,13 +214,17 @@
 		{#if reactions.length > 0}
 			<p class="text-xs font-semibold text-gray-400 mb-2 tracking-wide">記事への反応</p>
 			<!-- collapsed 時は overflow-hidden で 2行分にクリップ。
-			     scrollable=true（PCサイドバー）かつ展開時のみ overflow-y-auto で 4行分を上限にスクロール。
-			     max-h-28(112px) = 2行(96px) + py-2(16px)、max-h-52(208px) ≈ 4行分 -->
+			     scrollable=true（PCサイドバー）かつ展開時のみ overflow-y-auto でスクロール。
+			     上限は配置側が --reaction-list-max-height で渡す(サイドバーでは画面高さの35%から算出)。未指定なら4行分(13rem)。
+			     ※ピッカーがクリップされないよう、overflowは親ではなくこの一覧部分にだけ掛ける
+			     max-h-28(112px) = 2行(96px) + py-2(16px)、13rem(208px) ≈ 4行分 -->
 			<div
 				class:overflow-hidden={collapsed || !scrollable}
 				class:max-h-28={collapsed}
 				class:overflow-y-auto={!collapsed && scrollable}
-				class:max-h-52={!collapsed && scrollable}
+				style:max-height={!collapsed && scrollable
+					? "max(var(--reaction-list-max-height, 13rem), 3.5rem)"
+					: undefined}
 			>
 			<!-- 内側: アニメーション(scale 1.3)用に4辺 8px のバッファ確保。
 				 px-2/py-2 (8px) > scale(1.3) の視覚的はみ出し幅(~6.5px) なのでクリップされない。

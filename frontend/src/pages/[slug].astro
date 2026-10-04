@@ -306,12 +306,26 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 	.article-main {
 		min-width: 0;
 	}
+	/* サイドバーは画面の高さ(ヘッダー+上下余白を除く)を目次65%/リアクション35%で分け合う。
+	   目次が長いとリアクションが画面外に押し出されて見えなくなるため、各領域に上限を設けて
+	   超えた分はそれぞれの内部でスクロールさせる(目次はArticleToc、リアクションはEmojiReaction側) */
 	.article-side-sticky {
+		--side-gap: 24px;
+		--side-height: calc(100dvh - var(--heder-height) - 80px);
+		--toc-max-height: calc(var(--side-height) * 0.65);
+		/* 「記事への反応」ラベル(約28px)と➕ボタン行(52px)を除いた、リアクション一覧に使える高さ */
+		--reaction-list-max-height: calc(
+			var(--side-height) * 0.35 - var(--side-gap) - 80px
+		);
 		position: sticky;
 		top: calc(var(--heder-height) + 40px);
 		display: flex;
 		flex-direction: column;
-		gap: 24px;
+		gap: var(--side-gap);
+	}
+	/* 目次が無い記事はリアクションがサイドバーの高さを全て使える */
+	.article-side-sticky:not(:has(.article-toc)) {
+		--reaction-list-max-height: calc(var(--side-height) - 80px);
 	}
 	.toc-inline {
 		display: none;

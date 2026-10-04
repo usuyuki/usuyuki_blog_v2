@@ -63,6 +63,39 @@ test.describe("記事詳細ページ", () => {
     ).toBeVisible();
   });
 
+  test("正常系: 目次が長くてもサイドバーのリアクション欄が画面内に収まり、目次はスクロールできる", async ({
+    page,
+  }) => {
+    // サイドバー(1020px以上)が表示される幅で、高さは低めにして目次があふれやすくする
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto("/e2e-post-1");
+    const tocList = page.locator("#toc-sidebar ol");
+    await expect(tocList).toBeVisible();
+
+    // fixtureの見出しは2件しかないため、目次項目をDOM上で水増しして長い目次を再現する
+    await tocList.evaluate((ol) => {
+      for (let i = 0; i < 60; i++) {
+        const li = document.createElement("li");
+        li.className = "level-2";
+        li.innerHTML = `<a href="#section-1">ダミー見出し${i}</a>`;
+        ol.appendChild(li);
+      }
+    });
+
+    // 目次はあふれた分を内部スクロールで表示する
+    const isTocScrollable = await tocList.evaluate(
+      (ol) => ol.scrollHeight > ol.clientHeight,
+    );
+    expect(isTocScrollable).toBe(true);
+
+    // sticky固定時(top: ヘッダー60px+40px)にリアクション欄まで画面内に収まるよう、
+    // サイドバー全体の高さが「ビューポート高さ-ヘッダー-上下余白(80px)」以内に収まっている
+    const sideHeight = await page
+      .locator(".article-side-sticky")
+      .evaluate((el) => el.getBoundingClientRect().height);
+    expect(sideHeight).toBeLessThanOrEqual(720 - 60 - 80);
+  });
+
   test("存在しない記事は404を返す", async ({ page }) => {
     const response = await page.goto("/no-such-post-xyz");
     expect(response?.status()).toBe(404);

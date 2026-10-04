@@ -91,11 +91,19 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 	.article-toc .level-6 a {
 		padding-left: 42px;
 	}
-	/* サイドバー用: 高さを超えたらスクロール */
+	/* サイドバー用: nav全体(INDEX見出し含む)を--toc-max-height以内に収め、超えた分はol内でスクロール。
+	   --toc-max-heightは配置側(記事ページのサイドバー)がリアクション欄との配分を決めて渡す */
+	.article-toc.sidebar {
+		display: flex;
+		flex-direction: column;
+		max-height: var(--toc-max-height, calc(100vh - 260px));
+	}
+	/* min-height: 0 でflexアイテムの縮小を許可し、navのmax-heightに合わせてolを縮める */
 	/* overscroll-behavior: containでスクロール連鎖を止め、body { scroll-behavior: smooth }が
 	   このコンテナ内のscrollTop操作に巻き込まれてページ全体が引き戻される問題を防ぐ */
 	.article-toc.sidebar ol {
-		max-height: calc(100vh - 260px);
+		flex: 1 1 auto;
+		min-height: 0;
 		overflow-y: auto;
 		overscroll-behavior: contain;
 	}
