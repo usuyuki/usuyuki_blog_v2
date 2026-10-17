@@ -53,6 +53,13 @@ export function getGhostFrontUrl(): string {
   return url;
 }
 
+// 記事詳細ページの ?debug= による手動キャッシュクリア用トークン。未設定なら機能を無効にする
+export function getCacheClearToken(): string | undefined {
+  return isServer()
+    ? process.env.CACHE_CLEAR_TOKEN
+    : import.meta.env.CACHE_CLEAR_TOKEN;
+}
+
 export function getNsfwBlocklist(): Set<string> {
   const raw = isServer()
     ? process.env.REACTIONS_NSFW_BLOCKLIST

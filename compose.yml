@@ -61,6 +61,8 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
+      # 記事詳細ページの ?debug=<値> で全キャッシュを手動クリアするためのトークン(未設定なら無効)
+      CACHE_CLEAR_TOKEN: ${CACHE_CLEAR_TOKEN:-}
       # ファイル変更検知のポーリングはCHOKIDAR_USEPOLLING環境変数ではなく
       # astro.config.mjsのvite.server.watchで設定する。
       # 環境変数だとプロセス内の全chokidar(unstorage等)がnode_modulesまで

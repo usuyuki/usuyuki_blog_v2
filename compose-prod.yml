@@ -65,6 +65,8 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
+      # 記事詳細ページの ?debug=<値> で全キャッシュを手動クリアするためのトークン(未設定なら無効)
+      CACHE_CLEAR_TOKEN: ${CACHE_CLEAR_TOKEN:-}
     user: "1000:1000"
     depends_on:
       # Ghostより先にastroが起動すると記事取得に失敗するため、healthyになるまで待つ

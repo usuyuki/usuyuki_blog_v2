@@ -55,6 +55,23 @@ Ghost 記事に加えて、外部サービスの記事をまとめて表示で�
 ]
 ```
 
+## 手動キャッシュクリア
+
+記事詳細ページに `?debug=<CACHE_CLEAR_TOKEN>` を付けてアクセスすると、全インメモリキャッシュを消去します。トークンは `.env` の `CACHE_CLEAR_TOKEN` で指定します(compose経由でastroに渡る)。未設定なら機能は無効です。
+
+```bash
+openssl rand -hex 32  # トークン生成例
+```
+
+## 絵文字リアクションの保護
+
+| 対策 | 内容 |
+|------|------|
+| slug検証 | `POST/GET /api/reactions/<slug>` は `isSlug()` を満たさないslugを400で拒否 |
+| 記事存在確認 | POSTは公開済みGhost記事のslugのみ受け付け、それ以外は404(記事一覧が取得できないときは503) |
+| レート制限 | POSTはIP単位で1分30回まで(超過は429)。IPはCloudflareの `CF-Connecting-IP` を優先 |
+| NQL組み立て | `/reactions` はDB由来のslugを `isSlug()` で絞り込んでからGhostのフィルタを組み立てる |
+
 ## テスト
 
 | 種別 | ツール | 実行方法 |

@@ -4,6 +4,7 @@ import PageLayout from "~/layouts/extends/PageLayout.astro";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
 import { thumbGradient } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
+import { buildGhostSlugFilter } from "~/libs/helper/ghostSlugFilter";
 import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
 import { optimizeGhostImageUrl } from "~/libs/helper/optimizeGhostImages";
 import { getAllSlugReactions } from "~/libs/reactionClient";
@@ -29,14 +30,15 @@ try {
   const slugReactions = await getAllSlugReactions();
 
   // Ghost から記事情報をまとめて取得
-  const slugs = slugReactions.map((r) => r.slug);
+  // DB由来のslugにNQLメタ文字が混入していてもクエリを書き換えられないよう、有効なslugだけで組み立てる
+  const slugFilter = buildGhostSlugFilter(slugReactions.map((r) => r.slug));
   const posts =
-    slugs.length > 0
+    slugFilter !== null
       ? ((await ghostApiWithRetry.posts.browse(
           {
-            filter: `slug:[${slugs.join(",")}]`,
+            filter: slugFilter,
             fields: "slug,title,feature_image,published_at",
-            limit: slugs.length,
+            limit: slugReactions.length,
           },
           3,
           Astro.request,
