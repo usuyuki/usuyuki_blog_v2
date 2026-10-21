@@ -24,9 +24,10 @@ The project uses a Docker-based development and deployment setup:
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
-  - **Loki 3.6**: Log aggregation system (port 3100)
-  - **Grafana 12.4**: Metrics visualization and alerting dashboard (port 1002 in dev)
-  - **Alloy**: Unified telemetry collector for Docker container logs (port 12345)
+  - **Loki 3** (`grafana/loki:3`): Log aggregation system (port 3100)
+  - **Grafana 12** (`grafana/grafana:12.4`): Metrics visualization and alerting dashboard (port 1002 in dev)
+  - **Alloy** (`grafana/alloy:latest`): Unified telemetry collector for Docker container logs (port 12345)
+  - タグの選び方は下記「Docker イメージタグの方針」を参照
 
 ## Development Commands
 
@@ -78,9 +79,24 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull grafana/loki:3 && docker pull grafana/grafana:12.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d
 ```
+
+### Docker イメージタグの方針
+`compose.yml` / `compose-prod.yml` のイメージは**メジャーバージョンだけをタグで指定する**(例: `grafana/loki:3`、`ghost:6-alpine`)。マイナー・パッチバージョンの指定はできる限り避け、`docker pull` するだけでセキュリティ修正などの非破壊的な更新が取り込まれるようにする。一方でメジャーアップデートは破壊的変更を含みうるため、タグを書き換えて明示的に上げる。
+
+メジャータグが配布されていないなど、方針どおりにできないイメージは以下の例外とする。
+
+| イメージ | タグ | 理由 |
+| --- | --- | --- |
+| `grafana/grafana` | `12.4` | `12` のようなメジャータグが配布されていないため、12系の最終マイナーを指定 |
+| `grafana/alloy` | `latest` | メジャータグ自体が無い(現行はv1) |
+| `cloudflare/cloudflared` | `latest` | 日付ベースのバージョンでメジャーの概念が無い |
+| `mysql` | `8.4` | 8系のLTSリリース。データを持つため明示的に固定する |
+| `ghcr.io/usuyuki/usuyuki_blog_v2_astro` | `latest` | 自前ビルドのイメージでCI/CDが常に最新を出す |
+
+`docker compose up -d` だけではキャッシュ済みイメージは再取得されないため、更新時は上記Production updateの `docker pull` を必ず実行する。イメージやタグを変えたら、そのコマンドの pull 対象も合わせて更新する。
 
 ## Component Architecture
 
