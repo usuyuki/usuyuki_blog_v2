@@ -96,7 +96,7 @@ services:
 
   tunnel:
     restart: always
-    image: cloudflare/cloudflared
+    image: cloudflare/cloudflared:latest
     command: tunnel run
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN}
@@ -107,7 +107,7 @@ services:
       - app-network
 
   loki:
-    image: grafana/loki:3.6.19
+    image: grafana/loki:3
     restart: always
     volumes:
       - ./loki/loki-config.yml:/etc/loki/local-config.yaml
@@ -117,7 +117,7 @@ services:
       - app-network
 
   grafana:
-    image: grafana/grafana:12.4.13
+    image: grafana/grafana:12.4
     restart: always
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}

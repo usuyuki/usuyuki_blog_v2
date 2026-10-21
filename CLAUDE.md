@@ -24,9 +24,10 @@ The project uses a Docker-based development and deployment setup:
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
-  - **Loki 3.6**: Log aggregation system (port 3100)
-  - **Grafana 12.4**: Metrics visualization and alerting dashboard (port 1002 in dev)
-  - **Alloy**: Unified telemetry collector for Docker container logs (port 12345)
+  - **Loki 3** (`grafana/loki:3`): Log aggregation system (port 3100)
+  - **Grafana 12** (`grafana/grafana:12.4`): Metrics visualization and alerting dashboard (port 1002 in dev)
+  - **Alloy** (`grafana/alloy:latest`): Unified telemetry collector for Docker container logs (port 12345)
+  - イメージタグはメジャーバージョン固定+パッチ自動追従の方針。ただしGrafanaは`12`のようなメジャータグを配布していないため最終マイナーの`12.4`、Alloyはメジャータグ自体が無いため`latest`(現行v1)、cloudflaredは日付ベースのバージョンのため`latest`を使う。`up -d`だけではキャッシュ済みイメージが再取得されないので、更新時は下記Production updateの`docker pull`を必ず実行する
 
 ## Development Commands
 
@@ -78,7 +79,7 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:6-alpine && docker pull cloudflare/cloudflared && docker pull mysql:8.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull grafana/loki:3 && docker pull grafana/grafana:12.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d
 ```
 
