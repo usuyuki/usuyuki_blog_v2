@@ -19,13 +19,13 @@ This is a blog application with two main components:
 ## Architecture
 
 The project uses a Docker-based development and deployment setup:
-- Frontend runs on **Astro 7** (`astro@7.3.5`) with **Tailwind CSS 4** and **Svelte 5**
+- Frontend runs on **Node.js 26** (`node:26-slim`) + **Astro 7** (`astro@7.3.5`) with **Tailwind CSS 4** and **Svelte 5**
 - **Dependency layout**: `dependencies` in `frontend/package.json` contains ONLY packages imported at runtime by the SSR bundle (`@astrojs/rss`, `@prisma/adapter-mariadb`, `@prisma/client`, `@tryghost/content-api`, `jsdom`, `sharp`, `shiki`, `winston`). Everything used only at build time (astro itself, adapters, integrations, tailwindcss, svelte, emoji-picker-element, mermaid(クライアントバンドルにのみ含まれる), etc.) lives in `devDependencies` so the production image can drop them with `pnpm prune --prod`. When adding a package, decide based on whether the built server (`dist/server`) imports it at runtime.
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
 - **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
-  - **Loki 3.5**: Log aggregation system (port 3100)
-  - **Grafana 12.1**: Metrics visualization and alerting dashboard (port 1002 in dev)
+  - **Loki 3.6**: Log aggregation system (port 3100)
+  - **Grafana 12.4**: Metrics visualization and alerting dashboard (port 1002 in dev)
   - **Alloy**: Unified telemetry collector for Docker container logs (port 12345)
 
 ## Development Commands
