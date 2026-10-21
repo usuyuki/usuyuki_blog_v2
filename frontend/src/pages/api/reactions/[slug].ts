@@ -5,8 +5,10 @@ import {
   validateEmoji,
 } from "~/libs/reactionClient";
 import errorHandler from "~/libs/errorHandler";
-import { getAllArticlesCached } from "~/libs/articleAggregator";
-import { resolveClientIp } from "~/libs/helper/clientIp";
+import { checkPublishedGhostSlug } from "~/libs/articleAggregator";
+import astroLogger from "~/libs/astroLogger";
+import { isCfConnectingIpTrusted } from "~/libs/env";
+import { resolveClientIp, toRateLimitKey } from "~/libs/helper/clientIp";
 import { createFixedWindowRateLimiter } from "~/libs/rateLimiter";
 import { isSlug } from "~/libs/validation/isSlug";
 
@@ -23,6 +25,20 @@ function jsonResponse(body: object, status: number): Response {
     status,
     headers: { "Content-Type": "application/json" },
   });
+}
+
+// レート制限のキーを決める。IPv6は/64単位にまとめる(toRateLimitKey参照)。
+// アダプタの不具合などでIPが取れない場合に全員を1つの枠にまとめると、1人が使い切っただけで
+// 全員がリアクションできなくなるため、cookieのclientId単位で制限する(cookieは作り直せるので制限としては弱い)
+function buildRateLimitKey(
+  clientIp: string | null,
+  cookies: Parameters<APIRoute>[0]["cookies"],
+): string {
+  if (clientIp !== null) return `ip:${toRateLimitKey(clientIp)}`;
+  astroLogger.warn("Client IP is unavailable, falling back to client id", {
+    route: "/api/reactions/[slug]",
+  });
+  return `client:${getOrCreateClientId(cookies)}`;
 }
 
 function getOrCreateClientId(
@@ -77,11 +93,12 @@ export const POST: APIRoute = async (context) => {
   if (!isSlug(slug)) {
     return jsonResponse({ error: "Invalid slug" }, 400);
   }
-  const clientIp = resolveClientIp(
-    request.headers.get("cf-connecting-ip"),
-    () => context.clientAddress,
-  );
-  if (!reactionPostLimiter.tryConsume(clientIp)) {
+  const clientIp = resolveClientIp({
+    cfConnectingIp: request.headers.get("cf-connecting-ip"),
+    trustCfConnectingIp: isCfConnectingIpTrusted(),
+    getClientAddress: () => context.clientAddress,
+  });
+  if (!reactionPostLimiter.tryConsume(buildRateLimitKey(clientIp, cookies))) {
     return jsonResponse({ error: "Too many requests" }, 429);
   }
   let body: { emoji?: string };
@@ -102,12 +119,12 @@ export const POST: APIRoute = async (context) => {
   }
   try {
     // 公開済みGhost記事以外のslugへの書き込みを拒否する(架空slugでテーブルやランキングを埋められるのを防ぐ)。
-    // 公開直後の記事も、記事ページ表示時にgetAllGhostArticlesForArticlePageがキャッシュを更新済みのため見つかる
-    const ghostArticles = await getAllArticlesCached(false);
-    if (ghostArticles.length === 0) {
+    // 鮮度の保証とGhostへの再取得間隔の制御はcheckPublishedGhostSlug側で行う
+    const status = await checkPublishedGhostSlug(slug);
+    if (status === "unavailable") {
       return jsonResponse({ error: "Article list is unavailable" }, 503);
     }
-    if (!ghostArticles.some((article) => article.slug === slug)) {
+    if (status === "not_found") {
       return jsonResponse({ error: "Article not found" }, 404);
     }
     const clientId = getOrCreateClientId(cookies);

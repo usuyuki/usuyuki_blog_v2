@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { mockGetAllArticlesCached, mockToggleReaction } = vi.hoisted(() => ({
-  mockGetAllArticlesCached: vi.fn(),
+const { mockCheckPublishedGhostSlug, mockToggleReaction } = vi.hoisted(() => ({
+  mockCheckPublishedGhostSlug: vi.fn(),
   mockToggleReaction: vi.fn(async () => "added"),
 }));
 
@@ -12,7 +12,13 @@ vi.mock("~/libs/reactionClient", () => ({
 }));
 
 vi.mock("~/libs/articleAggregator", () => ({
-  getAllArticlesCached: mockGetAllArticlesCached,
+  checkPublishedGhostSlug: mockCheckPublishedGhostSlug,
+}));
+
+vi.mock("~/libs/astroLogger", () => ({
+  default: {
+    warn: vi.fn(),
+  },
 }));
 
 vi.mock("~/libs/errorHandler", () => ({
@@ -29,11 +35,14 @@ function buildContext({
   method,
   body,
   ip = "203.0.113.1",
+  clientAddress = "172.18.0.5",
 }: {
   slug: string | undefined;
   method: "GET" | "POST";
   body?: string;
   ip?: string;
+  // nullのときはアダプタがclientAddressに対応していない状況を再現して例外を投げる
+  clientAddress?: string | null;
 }) {
   return {
     params: { slug },
@@ -41,7 +50,12 @@ function buildContext({
       get: vi.fn(() => ({ value: "test-client-id" })),
       set: vi.fn(),
     },
-    clientAddress: "172.18.0.5",
+    get clientAddress(): string {
+      if (clientAddress === null) {
+        throw new Error("clientAddress is not available");
+      }
+      return clientAddress;
+    },
     request: new Request(`http://localhost/api/reactions/${slug ?? ""}`, {
       method,
       headers: {
@@ -57,10 +71,14 @@ describe("Reactions API", () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
-    mockGetAllArticlesCached.mockResolvedValue([
-      { slug: "test-post" },
-      { slug: "other-post" },
-    ]);
+    vi.stubEnv("TRUST_CF_CONNECTING_IP", "true");
+    mockCheckPublishedGhostSlug.mockImplementation(async (slug: string) =>
+      ["test-post", "other-post"].includes(slug) ? "published" : "not_found",
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   describe("GET", () => {
@@ -102,8 +120,8 @@ describe("Reactions API", () => {
       name: string;
       slug: string | undefined;
       body: string;
-      // 指定時はGhostの公開記事一覧をこの値に差し替える(空配列=取得失敗)
-      articles?: { slug: string }[];
+      // 指定時は公開記事の判定結果をこの値に差し替える
+      publishedStatus?: "published" | "not_found" | "unavailable";
       wantStatus: number;
       wantToggled: boolean;
     }[] = [
@@ -153,7 +171,7 @@ describe("Reactions API", () => {
         name: "異常系: Ghostから記事一覧を取得できないと存在確認できないので503になる",
         slug: "test-post",
         body: JSON.stringify({ emoji: "👍" }),
-        articles: [],
+        publishedStatus: "unavailable",
         wantStatus: 503,
         wantToggled: false,
       },
@@ -161,8 +179,8 @@ describe("Reactions API", () => {
 
     for (const tt of tests) {
       it(tt.name, async () => {
-        if (tt.articles)
-          mockGetAllArticlesCached.mockResolvedValue(tt.articles);
+        if (tt.publishedStatus)
+          mockCheckPublishedGhostSlug.mockResolvedValue(tt.publishedStatus);
         const { POST } = await import("../reactions/[slug]");
         const res = await (POST as Handler)(
           buildContext({ slug: tt.slug, method: "POST", body: tt.body }),
@@ -174,34 +192,80 @@ describe("Reactions API", () => {
       });
     }
 
-    it("異常系: 同一IPから上限を超えてPOSTするとレート制限に掛かるので429になる", async () => {
-      const { POST, REACTION_POST_RATE_LIMIT } = await import(
-        "../reactions/[slug]"
-      );
-      const post = () =>
-        (POST as Handler)(
-          buildContext({
-            slug: "test-post",
-            method: "POST",
-            body: JSON.stringify({ emoji: "👍" }),
-            ip: "198.51.100.7",
-          }),
-        );
-      for (let i = 0; i < REACTION_POST_RATE_LIMIT; i++) {
-        expect((await post()).status).toBe(200);
-      }
-      expect((await post()).status).toBe(429);
+    describe("レート制限", () => {
+      // 同じ送信元から上限回数POSTした後、別の送信元から1回POSTしたときのステータスを検証する
+      const tests: {
+        name: string;
+        trustCfConnectingIp: boolean;
+        // 上限まで送る送信元
+        first: { ip: string; clientAddress?: string | null };
+        // 上限到達後に送る送信元
+        second: { ip: string; clientAddress?: string | null };
+        wantSecondStatus: number;
+      }[] = [
+        {
+          name: "異常系: 同一IPから上限を超えてPOSTするとレート制限に掛かるので429になる",
+          trustCfConnectingIp: true,
+          first: { ip: "198.51.100.7" },
+          second: { ip: "198.51.100.7" },
+          wantSecondStatus: 429,
+        },
+        {
+          name: "正常系: 別IPは上限に達したIPの影響を受けない",
+          trustCfConnectingIp: true,
+          first: { ip: "198.51.100.7" },
+          second: { ip: "198.51.100.8" },
+          wantSecondStatus: 200,
+        },
+        {
+          name: "異常系: 同じIPv6 /64内でアドレスを替えてPOSTしても同じ利用者として数えるので429になる",
+          trustCfConnectingIp: true,
+          first: { ip: "2001:db8:1:2::1" },
+          second: { ip: "2001:db8:1:2:ffff:ffff:ffff:ffff" },
+          wantSecondStatus: 429,
+        },
+        {
+          name: "異常系: CF-Connecting-IPを信用しない設定でヘッダーを替えても接続元アドレスで数えるので429になる",
+          trustCfConnectingIp: false,
+          first: { ip: "198.51.100.7", clientAddress: "192.0.2.10" },
+          second: { ip: "198.51.100.8", clientAddress: "192.0.2.10" },
+          wantSecondStatus: 429,
+        },
+        {
+          name: "正常系: IPが取得できない場合は全員で1つの枠を共有せず、clientIdごとに数える",
+          trustCfConnectingIp: false,
+          first: { ip: "198.51.100.7", clientAddress: null },
+          second: { ip: "198.51.100.7", clientAddress: null },
+          // buildContextのcookieは常に同じclientIdを返すため、同じ利用者として429になる
+          wantSecondStatus: 429,
+        },
+      ];
 
-      // 別IPは影響を受けない
-      const other = await (POST as Handler)(
-        buildContext({
-          slug: "test-post",
-          method: "POST",
-          body: JSON.stringify({ emoji: "👍" }),
-          ip: "198.51.100.8",
-        }),
-      );
-      expect(other.status).toBe(200);
+      for (const tt of tests) {
+        it(tt.name, async () => {
+          vi.stubEnv(
+            "TRUST_CF_CONNECTING_IP",
+            tt.trustCfConnectingIp ? "true" : "false",
+          );
+          const { POST, REACTION_POST_RATE_LIMIT } = await import(
+            "../reactions/[slug]"
+          );
+          const post = (from: { ip: string; clientAddress?: string | null }) =>
+            (POST as Handler)(
+              buildContext({
+                slug: "test-post",
+                method: "POST",
+                body: JSON.stringify({ emoji: "👍" }),
+                ip: from.ip,
+                clientAddress: from.clientAddress,
+              }),
+            );
+          for (let i = 0; i < REACTION_POST_RATE_LIMIT; i++) {
+            expect((await post(tt.first)).status).toBe(200);
+          }
+          expect((await post(tt.second)).status).toBe(tt.wantSecondStatus);
+        });
+      }
     });
   });
 });

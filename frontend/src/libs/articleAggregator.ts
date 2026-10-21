@@ -311,24 +311,25 @@ async function aggregateArticles(
 // 全件リストのキャッシュキー(集約ロジックを変えたらバージョンを上げて無効化する)
 const ALL_ARTICLES_CACHE_KEY = "aggregated_all_articles:v3";
 
-// 全記事をキャッシュ付きで取得する(一覧ページ・前後記事ナビで共用)
-// forceRefresh=trueのときはキャッシュを無視して最新データを取得し直す
-export async function getAllArticlesCached(
-  includeExternal = true,
-  forceRefresh = false,
-): Promise<ArticleArchiveType[]> {
-  const cacheKey = `${ALL_ARTICLES_CACHE_KEY}:${includeExternal ? "all" : "ghost"}`;
-  if (!forceRefresh) {
-    const cached = cache.get<ArticleArchiveType[]>(cacheKey);
-    if (cached) {
-      return cached;
-    }
-  }
+function buildAllArticlesCacheKey(includeExternal: boolean): string {
+  return `${ALL_ARTICLES_CACHE_KEY}:${includeExternal ? "all" : "ghost"}`;
+}
 
-  const { articles, ghostAvailable } = await aggregateArticles({
+// キャッシュキーごとの、全件リストを最後にキャッシュへ保存した時刻(鮮度判定用)
+const allArticlesCachedAt = new Map<string, number>();
+// キャッシュキーごとの取得中のPromise。同時に来たリクエストで全件取得が重複しないよう共有する
+const allArticlesInFlight = new Map<string, Promise<AggregatedArticles>>();
+
+// 全記事をGhost・外部ソースから取得し、Ghostが取得できていればキャッシュする
+async function fetchAndCacheAllArticles(
+  includeExternal: boolean,
+  cacheKey: string,
+): Promise<AggregatedArticles> {
+  const result = await aggregateArticles({
     includeExternal,
     unlimited: true,
   });
+  const { articles, ghostAvailable } = result;
 
   // Ghostが取得できていない結果はキャッシュしない。
   // 外部記事(RSS/Qiita)だけは取得できるため articles.length > 0 になってしまい、
@@ -343,14 +344,94 @@ export async function getAllArticlesCached(
         articleCount: articles.length,
       },
     );
-    return articles;
+    return result;
   }
 
   // 取得失敗などで空のときはキャッシュせず、次のリクエストで再取得させる
   if (articles.length > 0) {
     cache.set(cacheKey, articles, ONE_HOUR_MS);
+    allArticlesCachedAt.set(cacheKey, Date.now());
   }
-  return articles;
+  return result;
+}
+
+// 全記事をキャッシュ付きで取得し、Ghostの取得可否も併せて返す(getAllArticlesCachedの実体)
+async function loadAllArticles(
+  includeExternal: boolean,
+  forceRefresh: boolean,
+): Promise<AggregatedArticles> {
+  const cacheKey = buildAllArticlesCacheKey(includeExternal);
+  if (!forceRefresh) {
+    const cached = cache.get<ArticleArchiveType[]>(cacheKey);
+    if (cached) {
+      return { articles: cached, ghostAvailable: true };
+    }
+  }
+
+  // キャッシュ切れの瞬間に同時に来たリクエストが、それぞれGhostへ全件ページングしに行かないようにする。
+  // 取得中のものがあれば強制再取得の場合も相乗りする(取得中の結果がすでに最新のため)
+  const pending = allArticlesInFlight.get(cacheKey);
+  if (pending) return pending;
+
+  const request = fetchAndCacheAllArticles(includeExternal, cacheKey).finally(
+    () => allArticlesInFlight.delete(cacheKey),
+  );
+  allArticlesInFlight.set(cacheKey, request);
+  return request;
+}
+
+// 全記事をキャッシュ付きで取得する(一覧ページ・前後記事ナビで共用)
+// forceRefresh=trueのときはキャッシュを無視して最新データを取得し直す
+export async function getAllArticlesCached(
+  includeExternal = true,
+  forceRefresh = false,
+): Promise<ArticleArchiveType[]> {
+  return (await loadAllArticles(includeExternal, forceRefresh)).articles;
+}
+
+// 公開記事の存在確認で、キャッシュ済みの一覧をそのまま信用してよい経過時間。
+// 1時間キャッシュをそのまま使うと、非公開にした記事を最大1時間「公開中」と判定してしまうため短くする
+const PUBLISHED_SLUG_MAX_AGE_MS = 5 * 60_000;
+// 存在確認のためにGhostへ全件を取り直す最短間隔。
+// 架空slugの連打やGhost停止中のリクエストのたびに全件ページングが走り、Ghostへの負荷を増幅するのを防ぐ
+const PUBLISHED_SLUG_REFRESH_INTERVAL_MS = 60_000;
+let lastPublishedSlugRefreshAt = Number.NEGATIVE_INFINITY;
+
+export type PublishedSlugStatus = "published" | "not_found" | "unavailable";
+
+// slugが公開済みのGhost記事かを判定する(リアクションPOSTの書き込み可否に使用)。
+// - 一覧が新しく(PUBLISHED_SLUG_MAX_AGE_MS以内)、slugが含まれていればGhostに問い合わせず"published"
+// - 一覧が古い・無い・slugが見つからない場合は取り直すが、PUBLISHED_SLUG_REFRESH_INTERVAL_MSに1回までに抑え、
+//   それ以外は手元の一覧で判定する(公開直後の記事も、間隔が空いていれば取り直しで見つかる)
+// - 判定に使える一覧が無ければ"unavailable"
+export async function checkPublishedGhostSlug(
+  slug: string,
+): Promise<PublishedSlugStatus> {
+  const cacheKey = buildAllArticlesCacheKey(false);
+  const now = Date.now();
+  const cached = cache.get<ArticleArchiveType[]>(cacheKey);
+  const cachedAt = allArticlesCachedAt.get(cacheKey);
+  const isFresh =
+    cached !== null &&
+    cachedAt !== undefined &&
+    now - cachedAt <= PUBLISHED_SLUG_MAX_AGE_MS;
+  const includesSlug = (articles: ArticleArchiveType[]) =>
+    articles.some((article) => article.slug === slug);
+
+  if (isFresh && includesSlug(cached)) return "published";
+
+  // 判定に使う一覧。nullは判定材料が無いことを表す
+  let articles: ArticleArchiveType[] | null = cached;
+  if (now - lastPublishedSlugRefreshAt >= PUBLISHED_SLUG_REFRESH_INTERVAL_MS) {
+    lastPublishedSlugRefreshAt = now;
+    const refreshed = await loadAllArticles(false, true);
+    // Ghost停止などで取り直しに失敗した場合は、手元にある一覧で判定を続ける。
+    // 成功していれば0件(全記事を非公開にした)でもその結果を正とする
+    if (refreshed.ghostAvailable) articles = refreshed.articles;
+  }
+
+  if (articles === null) return "unavailable";
+  return includesSlug(articles) ? "published" : "not_found";
 }
 
 // 記事詳細用: 前後記事・関連記事の両方が使うGhost全記事リストを取得する。

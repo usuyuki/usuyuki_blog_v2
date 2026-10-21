@@ -123,14 +123,15 @@ The frontend follows Atomic Design principles:
 - `frontend/src/consts.ts` - Site configuration constants(`SITE_TITLE_EN`: ヘッダー/フッター共用の英字ブランド表記、`SOCIAL_LINKS`: SNS・外部プロフィールリンクの一覧。console banner(`libs/console/snsLinkProvider.ts`)も含め表記揺れを避けるためこれらを唯一の情報源とする)
 - `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching (posts.browse は `include: "tags"` で公開タグも変換)
 - `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
-- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得。Ghostへの問い合わせが失敗した結果はキャッシュしない — Docker再起動直後などGhostが未起動でも外部記事(RSS/Qiita)だけは取得できてしまい、Ghost記事が欠けた不完全な結果を1時間キャッシュすると記事が表示されなくなるため) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
+- `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得。Ghostへの問い合わせが失敗した結果はキャッシュしない — Docker再起動直後などGhostが未起動でも外部記事(RSS/Qiita)だけは取得できてしまい、Ghost記事が欠けた不完全な結果を1時間キャッシュすると記事が表示されなくなるため。同時に呼ばれた場合は取得中のPromiseを共有し、Ghostへの全件取得を1回にまとめる) / `checkPublishedGhostSlug`(リアクションPOST用の公開記事判定。`"published"`/`"not_found"`/`"unavailable"`を返す。一覧が5分より古い・slugが見つからない場合は取り直すが、Ghostへの取り直しは1分に1回までに抑える) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
 - `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
 - `frontend/src/libs/helper/cacheClearToken.ts` - `isCacheClearTokenValid()`で記事詳細ページの`?debug=`を環境変数`CACHE_CLEAR_TOKEN`と定数時間比較する(未設定なら手動キャッシュクリア無効)
-- `frontend/src/libs/helper/ghostSlugFilter.ts` - `buildGhostSlugFilter()`でslug一覧から`isSlug()`を満たすものだけを使ってGhost NQLフィルタ(`slug:[...]`)を組み立てる。DB由来のslugによるNQL注入を防ぐため`/reactions`で使用
-- `frontend/src/libs/helper/clientIp.ts` - `resolveClientIp()`でCloudflareの`CF-Connecting-IP`を優先してクライアントIPを決定する(本番astroはcloudflared経由でしか到達できないため信頼できる)
-- `frontend/src/libs/rateLimiter.ts` - インメモリの固定ウィンドウ型レートリミッター。`/api/reactions/[slug]`のPOSTをIP単位で1分30回に制限
-- `frontend/src/pages/api/reactions/[slug].ts` - 絵文字リアクションAPI。`isSlug()`で不正slugを400、POSTはレート制限(429)と公開済みGhost記事の存在確認(`getAllArticlesCached(false)`、無ければ404・一覧取得不可なら503)を経てから保存する
+- `frontend/src/libs/helper/clientIp.ts` - `resolveClientIp()`でクライアントIPを決定する。`CF-Connecting-IP`は`TRUST_CF_CONNECTING_IP=true`のとき(本番。cloudflared経由でしか到達できない)だけ信用し、それ以外は接続元アドレスを使う。`toRateLimitKey()`はIPv6を/64プレフィックスにまとめる(IPv4射影アドレスはIPv4として扱う)
+- `frontend/src/libs/rateLimiter.ts` - インメモリの固定ウィンドウ型レートリミッター。`/api/reactions/[slug]`のPOSTを利用者単位で1分30回に制限。保持キー数は`maxKeys`(既定1万)を上限とし、上限に達したら新規キーを拒否する(古いキーを追い出すと他人のカウントをリセットさせられるため)。期限切れキーはMapの挿入順(=期限順)で先頭から掃除する
+- `frontend/src/pages/api/reactions/[slug].ts` - 絵文字リアクションAPI。`isSlug()`で不正slugを400、POSTはレート制限(429。キーはIP(IPv6は/64)、IPが取れなければcookieのclientId)と公開済みGhost記事の存在確認(`checkPublishedGhostSlug`、無ければ404・一覧取得不可なら503)を経てから保存する
+- `frontend/src/libs/helper/reactionErrorMessage.ts` - `getReactionErrorMessage()`でリアクションPOST失敗時(429/404/503/通信失敗など)に`EmojiReaction.svelte`が表示するメッセージを返す
+- `infra/db/cleanup/` - slug検証を入れる前に保存された不正slugのリアクション行を扱う一回限りのSQL(手動実行)。`select_invalid_slug_reactions.sql`で対象を確認し、`delete_invalid_slug_reactions.sql`で削除する。削除条件は両ファイルと`isSlug()`でそろえる
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ、fetchは5秒でタイムアウト)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
 - `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
@@ -217,7 +218,8 @@ astroLogger.systemLog('System startup completed');
   ]
   ```
 - `LOKI_URL` - Loki log aggregation endpoint (default: http://loki:3100)
-- `CACHE_CLEAR_TOKEN` - 記事詳細ページの `?debug=<値>` で全インメモリキャッシュを消去するためのトークン。未設定なら機能無効
+- `CACHE_CLEAR_TOKEN` - 記事詳細ページの `?debug=<値>` で全インメモリキャッシュを消去するためのトークン。未設定なら機能無効。秘密値なのでSSR時の`process.env`からのみ読む
+- `TRUST_CF_CONNECTING_IP` - `"true"`のときだけ`CF-Connecting-IP`ヘッダーをクライアントIPとして信用する。cloudflared経由でしか到達できない本番(`compose-prod.yml`)でのみ設定する。ポートを公開する環境で有効にするとヘッダー偽装でレート制限を回避される
 
 ### Monitoring Variables
 - `GF_SECURITY_ADMIN_USER` - Grafana admin username (default: admin)

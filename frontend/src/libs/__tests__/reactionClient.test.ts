@@ -87,44 +87,44 @@ describe("reactionClient", () => {
       }
     });
 
-    it("returns true for common emoji", () => {
+    it("正常系: 一般的な絵文字は有効と判定される", () => {
       expect(validateEmoji("👍")).toBe(true);
       expect(validateEmoji("❤️")).toBe(true);
       expect(validateEmoji("🎉")).toBe(true);
     });
 
-    it("returns false for empty string", () => {
+    it("異常系: 空文字を入れると絵文字が無いので無効と判定される", () => {
       expect(validateEmoji("")).toBe(false);
     });
 
-    it("returns true for NSFW emoji when no blocklist is configured", () => {
+    it("正常系: ブロックリスト未設定ならNSFW絵文字も有効と判定される", () => {
       expect(validateEmoji("🍆")).toBe(true);
       expect(validateEmoji("🍑")).toBe(true);
       expect(validateEmoji("🖕")).toBe(true);
     });
 
-    it("returns false when codepoint count exceeds 8", () => {
+    it("異常系: コードポイント数が8を超える文字列を入れると上限超過なので無効と判定される", () => {
       const longEmoji = "👨‍👩‍👧‍👦👨‍👩‍👧‍👦👨‍👩‍👧‍👦";
       expect(validateEmoji(longEmoji)).toBe(false);
     });
 
-    it("returns false for plain text", () => {
+    it("異常系: 通常の文字列を入れると絵文字ではないので無効と判定される", () => {
       expect(validateEmoji("abc")).toBe(false);
       expect(validateEmoji("hello")).toBe(false);
     });
 
-    it("accepts compound emoji within codepoint limit", () => {
+    it("正常系: コードポイント上限内の合成絵文字は有効と判定される", () => {
       expect(validateEmoji("👨‍💻")).toBe(true);
     });
 
-    it("accepts keycap number emoji", () => {
+    it("正常系: キーキャップ数字の絵文字は有効と判定される", () => {
       expect(validateEmoji("1️⃣")).toBe(true);
       expect(validateEmoji("2️⃣")).toBe(true);
       expect(validateEmoji("0️⃣")).toBe(true);
       expect(validateEmoji("#️⃣")).toBe(true);
     });
 
-    it("returns false for plain digits", () => {
+    it("異常系: ただの数字を入れると絵文字ではないので無効と判定される", () => {
       expect(validateEmoji("1")).toBe(false);
       expect(validateEmoji("9")).toBe(false);
     });
@@ -134,7 +134,7 @@ describe("reactionClient", () => {
         delete process.env.REACTIONS_NSFW_BLOCKLIST;
       });
 
-      it("blocks emoji specified in env var", async () => {
+      it("異常系: 環境変数のブロックリストに含まれる絵文字を入れるとブロック対象なので無効と判定される", async () => {
         process.env.REACTIONS_NSFW_BLOCKLIST = "🚀,🔥";
         vi.resetModules();
         const { validateEmoji: fn } = await import("../reactionClient");
@@ -142,7 +142,7 @@ describe("reactionClient", () => {
         expect(fn("🔥")).toBe(false);
       });
 
-      it("allows emoji not in the env var blocklist", async () => {
+      it("正常系: 環境変数のブロックリストに無い絵文字は有効と判定される", async () => {
         process.env.REACTIONS_NSFW_BLOCKLIST = "🚀";
         vi.resetModules();
         const { validateEmoji: fn } = await import("../reactionClient");
@@ -176,7 +176,7 @@ describe("getReactions", () => {
     }
   });
 
-  it("returns reaction with count and reacted: true when client has reacted", async () => {
+  it("正常系: 自分がリアクション済みならカウントとreacted: trueを返す", async () => {
     mockEmojiReaction.groupBy.mockResolvedValue([
       { emoji: "👍", _count: { emoji: 3 }, _min: { createdAt: new Date() } },
     ]);
@@ -186,7 +186,7 @@ describe("getReactions", () => {
     expect(result).toEqual([{ emoji: "👍", count: 3, reacted: true }]);
   });
 
-  it("returns reacted: false when client has not reacted", async () => {
+  it("正常系: 自分がリアクションしていなければreacted: falseを返す", async () => {
     mockEmojiReaction.groupBy.mockResolvedValue([
       { emoji: "❤️", _count: { emoji: 2 }, _min: { createdAt: new Date() } },
     ]);
@@ -196,7 +196,7 @@ describe("getReactions", () => {
     expect(result).toEqual([{ emoji: "❤️", count: 2, reacted: false }]);
   });
 
-  it("filters out NSFW emoji from results", async () => {
+  it("正常系: NSFW絵文字は結果から除外される", async () => {
     process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
     mockEmojiReaction.groupBy.mockResolvedValue([
       { emoji: "👍", _count: { emoji: 1 }, _min: { createdAt: new Date() } },
@@ -235,7 +235,7 @@ describe("getAllSlugReactions", () => {
     }
   });
 
-  it("returns slugs sorted by total reaction count descending", async () => {
+  it("正常系: リアクション合計数の降順でslugを返す", async () => {
     mockEmojiReaction.groupBy.mockResolvedValue([
       {
         slug: "post-a",
@@ -269,7 +269,7 @@ describe("getAllSlugReactions", () => {
     expect(typed[1].total).toBe(3);
   });
 
-  it("aggregates multiple emoji per slug correctly", async () => {
+  it("正常系: 1つのslugに付いた複数の絵文字を集計する", async () => {
     mockEmojiReaction.groupBy.mockResolvedValue([
       {
         slug: "post-a",
@@ -301,7 +301,7 @@ describe("getAllSlugReactions", () => {
     );
   });
 
-  it("filters out blocklisted emoji", async () => {
+  it("正常系: ブロックリストの絵文字は集計から除外される", async () => {
     process.env.REACTIONS_NSFW_BLOCKLIST = "🍆";
     mockEmojiReaction.groupBy.mockResolvedValue([
       {
@@ -328,14 +328,35 @@ describe("getAllSlugReactions", () => {
     expect(typed[0].reactions.every((r) => r.emoji !== "🍆")).toBe(true);
   });
 
-  it("returns empty array when there are no reactions", async () => {
+  it("正常系: slug形式に合わない不正なslug(過去に保存されたNQLペイロードなど)はランキングから除外される", async () => {
+    mockEmojiReaction.groupBy.mockResolvedValue([
+      {
+        slug: "zz]+slug:-[victim",
+        emoji: "👍",
+        _count: { emoji: 100 },
+        _min: { createdAt: new Date() },
+      },
+      {
+        slug: "valid-post",
+        emoji: "👍",
+        _count: { emoji: 1 },
+        _min: { createdAt: new Date() },
+      },
+    ]);
+
+    const result = await getAllSlugReactions();
+    const typed = result as Array<{ slug: string }>;
+    expect(typed.map((r) => r.slug)).toEqual(["valid-post"]);
+  });
+
+  it("正常系: リアクションが無ければ空配列を返す", async () => {
     mockEmojiReaction.groupBy.mockResolvedValue([]);
 
     const result = await getAllSlugReactions();
     expect(result).toEqual([]);
   });
 
-  it("limits results to 50 entries", async () => {
+  it("正常系: 結果は上位50件までに絞られる", async () => {
     const rows = Array.from({ length: 60 }, (_, i) => ({
       slug: `post-${i}`,
       emoji: "👍",
@@ -348,7 +369,7 @@ describe("getAllSlugReactions", () => {
     expect((result as unknown[]).length).toBe(50);
   });
 
-  it("returns cached result without hitting DB", async () => {
+  it("正常系: キャッシュがあればDBに問い合わせずキャッシュを返す", async () => {
     const { cache: mockCache } = await import("../cache");
     const cachedData = [
       {
@@ -364,7 +385,7 @@ describe("getAllSlugReactions", () => {
     expect(mockEmojiReaction.groupBy).not.toHaveBeenCalled();
   });
 
-  it("stores result in cache after DB query", async () => {
+  it("正常系: DBから集計した結果をキャッシュに保存する", async () => {
     const { cache: mockCache } = await import("../cache");
     mockEmojiReaction.groupBy.mockResolvedValue([
       {
@@ -400,7 +421,7 @@ describe("toggleReaction", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 'removed' and calls delete when reaction already exists", async () => {
+  it("正常系: リアクション済みなら削除して'removed'を返す", async () => {
     mockEmojiReaction.findUnique.mockResolvedValue({ id: 1 });
     mockEmojiReaction.delete.mockResolvedValue({});
 
@@ -409,7 +430,7 @@ describe("toggleReaction", () => {
     expect(mockEmojiReaction.delete).toHaveBeenCalledOnce();
   });
 
-  it("returns 'added' and calls create when reaction does not exist", async () => {
+  it("正常系: 未リアクションなら作成して'added'を返す", async () => {
     mockEmojiReaction.findUnique.mockResolvedValue(null);
     mockEmojiReaction.create.mockResolvedValue({});
 
@@ -418,7 +439,7 @@ describe("toggleReaction", () => {
     expect(mockEmojiReaction.create).toHaveBeenCalledOnce();
   });
 
-  it("returns 'added' on P2002 unique constraint violation", async () => {
+  it("異常系: 同時作成で一意制約違反(P2002)が起きても既に追加済みなので'added'を返す", async () => {
     mockEmojiReaction.findUnique.mockResolvedValue(null);
     mockEmojiReaction.create.mockRejectedValue(
       new MockPrismaClientKnownRequestError("Unique constraint failed", {
@@ -460,7 +481,7 @@ describe("slow query warning", () => {
     vi.clearAllMocks();
   });
 
-  it("should warn when SQL query exceeds threshold", () => {
+  it("異常系: SQLの実行時間が閾値を超えると遅いクエリなので警告ログを出す", () => {
     queryHandler?.({
       duration: 500,
       query: "SELECT * FROM emoji_reactions",
@@ -475,7 +496,7 @@ describe("slow query warning", () => {
     );
   });
 
-  it("should not warn when SQL query is within threshold", () => {
+  it("正常系: SQLの実行時間が閾値以内なら警告ログを出さない", () => {
     queryHandler?.({
       duration: 100,
       query: "SELECT 1",
