@@ -36,12 +36,15 @@ import { isSlug } from "~/libs/validation/isSlug";
 import { loadDefaultJapaneseParser } from "budoux";
 import { cache } from "~/libs/cache";
 import { clearCache } from "~/libs/ghostClient";
+import { getCacheClearToken } from "~/libs/env";
+import { isCacheClearTokenValid } from "~/libs/helper/cacheClearToken";
 
 const parser = loadDefaultJapaneseParser();
 const slug = Astro.params.slug;
 
+// 環境変数CACHE_CLEAR_TOKENと一致する ?debug= が付いたときだけ全キャッシュを消去する(未設定なら無効)
 const debugParam = Astro.url.searchParams.get("debug");
-if (debugParam === "usuyuki-udekumi") {
+if (isCacheClearTokenValid(debugParam, getCacheClearToken())) {
   cache.clear();
   clearCache();
   astroLogger.info("Manual cache clear via debug param", {
