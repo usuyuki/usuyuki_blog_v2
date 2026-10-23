@@ -180,7 +180,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 					/* WordPress記事は本文内に目次があるため本文冒頭のインライン目次(details)だけ出さない。
 					   フローティングボタン・モーダルはWordPress記事でも出し、常に目次へアクセスできるようにする */
 					!isWpArticle && tocList.length > 0 && (
-						<details class="toc-inline" id="toc-inline-wrapper" open>
+						<details class="toc-inline" id="toc-inline-wrapper">
 							<summary>INDEX / 目次</summary>
 							<ArticleToc tocList={tocList} variant="inline" />
 						</details>
