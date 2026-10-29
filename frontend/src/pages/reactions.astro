@@ -1,7 +1,7 @@
 ---
 import PageHead from "~/components/atom/section/PageHead.astro";
 import PageLayout from "~/layouts/extends/PageLayout.astro";
-import { ghostApiWithRetry } from "~/libs/ghostClient";
+import { getAllArticlesCached } from "~/libs/articleAggregator";
 import { thumbGradient } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
@@ -28,22 +28,11 @@ let ranked: {
 try {
   const slugReactions = await getAllSlugReactions();
 
-  // Ghost から記事情報をまとめて取得
-  const slugs = slugReactions.map((r) => r.slug);
-  const posts =
-    slugs.length > 0
-      ? ((await ghostApiWithRetry.posts.browse(
-          {
-            filter: `slug:[${slugs.join(",")}]`,
-            fields: "slug,title,feature_image,published_at",
-            limit: slugs.length,
-          },
-          3,
-          Astro.request,
-        )) ?? [])
-      : [];
-
-  const postMap = new Map(posts.map((p) => [p.slug, p]));
+  // 記事情報はキャッシュ済みのGhost全記事一覧から引く。
+  // DB由来のslugをGhostのNQLクエリに埋め込まないので注入の余地が無く、
+  // Ghost v6の1リクエスト100件上限でランキング対象が欠けることも無い
+  const ghostArticles = await getAllArticlesCached(false);
+  const postMap = new Map(ghostArticles.map((p) => [p.slug, p]));
 
   ranked = slugReactions
     .map((sr) => ({ ...sr, post: postMap.get(sr.slug) ?? null }))

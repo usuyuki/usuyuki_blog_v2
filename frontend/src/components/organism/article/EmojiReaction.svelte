@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { getReactionErrorMessage } from "~/libs/helper/reactionErrorMessage";
   import { getReactionListMaxHeight } from "~/libs/helper/reactionListMaxHeight";
 
   interface Props {
@@ -28,6 +29,17 @@
   let reactionsContainer = $state<HTMLDivElement | null>(null);
   let collapsed = $state(true);
   let hasOverflow = $state(false);
+  let errorMessage = $state<string | null>(null);
+  let errorTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // 楽観的更新を取り消したときに、理由を一定時間だけ表示する(黙って戻るとバグに見えるため)
+  function showError(status: number | null) {
+    errorMessage = getReactionErrorMessage(status);
+    if (errorTimer) clearTimeout(errorTimer);
+    errorTimer = setTimeout(() => {
+      errorMessage = null;
+    }, 4000);
+  }
 
   function handleOpenPicker() {
     showPicker = !showPicker;
@@ -159,6 +171,7 @@
 
     return () => {
       destroyed = true;
+      if (errorTimer) clearTimeout(errorTimer);
       picker?.remove();
       picker = null;
     };
@@ -199,11 +212,14 @@
       if (res.ok) {
         const data = await res.json();
         reactions = data.reactions;
+        errorMessage = null;
       } else {
         reactions = prev;
+        showError(res.status);
       }
     } catch {
       reactions = prev;
+      showError(null);
     } finally {
       posting = null;
     }
@@ -297,6 +313,12 @@
 			</div>
 			{#if reactions.length === 0}
 				<p class="text-sm text-gray-400" style="word-break: keep-all; overflow-wrap: anywhere;">絵文字で記事に<wbr>反応できます</p>
+			{/if}
+		</div>
+		<!-- 送信失敗の理由。読み上げ環境でも伝わるよう、要素は常に置いて中身だけ差し替える -->
+		<div role="status" aria-live="polite">
+			{#if errorMessage}
+				<p class="text-xs text-orange mt-1">{errorMessage}</p>
 			{/if}
 		</div>
 	{:else}

@@ -55,6 +55,34 @@ Ghost 記事に加えて、外部サービスの記事をまとめて表示で�
 ]
 ```
 
+## 手動キャッシュクリア
+
+記事詳細ページに `?debug=<CACHE_CLEAR_TOKEN>` を付けてアクセスすると、全インメモリキャッシュを消去します。トークンは `.env` の `CACHE_CLEAR_TOKEN` で指定します(compose経由でastroに渡る)。未設定なら機能は無効です。
+
+```bash
+openssl rand -hex 32  # トークン生成例
+```
+
+## 絵文字リアクションの保護
+
+| 対策 | 内容 |
+|------|------|
+| slug検証 | `POST/GET /api/reactions/<slug>` は `isSlug()` を満たさないslugを400で拒否 |
+| 記事存在確認 | POSTは公開済みGhost記事のslugのみ受け付け、それ以外は404(記事一覧が取得できないときは503)。判定に使う一覧は5分より古ければ取り直し、Ghostへの取り直しは1分に1回までに抑える |
+| レート制限 | POSTは利用者単位で1分30回まで(超過は429)。IPv6は/64単位でまとめる。保持するキーは最大1万件で、超えた分の新規キーは拒否する |
+| クライアントIP | `CF-Connecting-IP` は環境変数 `TRUST_CF_CONNECTING_IP=true` のとき(本番の `compose-prod.yml` で設定)だけ信用し、それ以外は接続元アドレスを使う。IPが取れない場合はcookieのclientId単位で制限する |
+| ランキング | `/reactions` はDB由来のslugをGhostのクエリに使わず、キャッシュ済みの全記事一覧から記事情報を引く。不正な形式のslugは集計から除外する |
+| UI | 429・404・503などで送信に失敗したときは、楽観的更新を戻したうえで理由を表示する |
+
+slugの検証を入れる前に保存された不正なslugの行は、以下の手順で確認・削除できます。
+
+```bash
+# 1. 対象を確認する
+docker compose -f compose-prod.yml exec -T db mysql -uroot -pexample usuyuki_blog < infra/db/cleanup/select_invalid_slug_reactions.sql
+# 2. 問題が無ければ削除する
+docker compose -f compose-prod.yml exec -T db mysql -uroot -pexample usuyuki_blog < infra/db/cleanup/delete_invalid_slug_reactions.sql
+```
+
 ## テスト
 
 | 種別 | ツール | 実行方法 |
