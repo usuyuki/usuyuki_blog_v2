@@ -367,6 +367,7 @@ docker compose -f compose-prod.yml restart astro
 | ローカルの記事URL | 末尾スラッシュなし(例: `http://localhost:1000/isucon2026`) |
 | スクロール | `body { scroll-behavior: smooth }` のため、`window.scrollTo` は `behavior: "instant"` を付ける。付けないとスクロール途中で撮影してしまう |
 | 撮影 | `computer` の `zoom` に `save_to_disk: true` を付けて範囲を切り出す。変更前(本番)と変更後(ローカル)は同じスクロール位置・同じ範囲で撮る |
+| スマホ幅 | `resize_window` はウィンドウが最大化されていると効かない。ローカルの任意のページで `document.body` を空にし、幅390pxの `<iframe>` に対象ページを読み込んで再現する(同一オリジンなのでiframe内のDOMも操作できる) |
 
 ### PRへのスクリーンショット添付
 見た目に関わる変更のPRには、**変更前(本番)と変更後(ローカル)のスクリーンショットを必ず貼る**。

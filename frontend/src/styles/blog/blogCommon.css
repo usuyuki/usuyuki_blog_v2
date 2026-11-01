@@ -184,6 +184,24 @@
     background: var(--color-gray);
     font-weight: 700;
   }
+  /* スマホ幅では表を画面幅に押し込むと、bodyのword-break: break-allで「Work/tree」のように単語の途中で折り返して読みにくい。
+     表を横スクロールできるブロックにし、単語の途中では折り返さず、列に最低幅を持たせて収まらない分はスクロールさせる。
+     長い文章のセルは1行に伸ばさず最低幅の中で折り返すので、横スクロールしながら読む必要は無い */
+  @media (max-width: 639.98px) {
+    .blog-content table {
+      display: block;
+      overflow-x: auto;
+    }
+    .blog-content th,
+    .blog-content td {
+      word-break: normal;
+      overflow-wrap: normal;
+      min-width: 5em;
+    }
+    .blog-content th {
+      white-space: nowrap;
+    }
+  }
   .blog-content > hr {
     border: none;
     border-top: var(--bw) solid var(--color-ink);
