@@ -20,13 +20,19 @@ services:
     depends_on:
       - db
     healthcheck:
-      # Content APIが応答を返せる(= HTTPサーバとルーティングが起動済み)ことを確認する。
-      # キーは検証しないので401でも良く、"HTTP応答が返ること"だけを合格条件にする。
+      # 認証なしで200を返すAdmin APIのsiteエンドポイントで、Ghostが起動済みかを確認する。
+      # 以前は無効なキーでContent APIを叩いていたが、Ghostの総当たり対策(express-brute)が
+      # 失敗を数えて429を返し、10秒ごとにERRORログが出ていたため変更した。
+      # wgetは2xx以外で失敗するので、Ghostが応答できない間は不合格になる。
       # localhostはIPv6解決で接続拒否になるため127.0.0.1を明示する
       test:
         [
-          "CMD-SHELL",
-          "wget -q -O /dev/null --server-response 'http://127.0.0.1:2368/ghost/api/content/posts/?key=healthcheck&limit=1' 2>&1 | grep -q 'HTTP/'",
+          "CMD",
+          "wget",
+          "-q",
+          "-O",
+          "/dev/null",
+          "http://127.0.0.1:2368/ghost/api/admin/site/",
         ]
       interval: 10s
       timeout: 10s

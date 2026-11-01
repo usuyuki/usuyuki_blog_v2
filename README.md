@@ -33,7 +33,7 @@ astro が Ghost より先に起動すると記事を取得できないまま立�
 
 | 層 | 仕組み |
 |---|---|
-| Docker | `ghost` の `healthcheck` が Content API の応答を確認し、`astro` は `condition: service_healthy` で待機します |
+| Docker | `ghost` の `healthcheck` が Admin API の `/ghost/api/admin/site/`（認証なしで応答する）を確認し、`astro` は `condition: service_healthy` で待機します |
 | アプリ | Ghost の取得に失敗した回の記事一覧はキャッシュせず、次のリクエストで取得し直します |
 
 ## 記事ソース

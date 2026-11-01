@@ -151,10 +151,10 @@ astroがGhostより先に起動すると記事を取得できないまま立ち�
 
 | 層 | 仕組み |
 | --- | --- |
-| Docker | `ghost`サービスに`healthcheck`(Content APIへwgetし、HTTP応答が返ることを確認。キーは検証しないので401でも合格)を定義し、`astro`の`depends_on`を`ghost: condition: service_healthy`にして待機させる |
+| Docker | `ghost`サービスに`healthcheck`(認証なしで200を返すAdmin APIの`/ghost/api/admin/site/`へwgetし、2xxが返ることを確認)を定義し、`astro`の`depends_on`を`ghost: condition: service_healthy`にして待機させる |
 | アプリ | `getAllArticlesCached`はGhostへの問い合わせが失敗した回の結果をキャッシュしない。外部記事(RSS/Qiita)だけは取得できてしまうため、Ghost記事が欠けた結果を1時間キャッシュすると記事が出ないまま固定される |
 
-healthcheckの`test`は`localhost`ではなく`127.0.0.1`を使う(`localhost`はIPv6に解決され接続拒否になる)。
+healthcheckの`test`は`localhost`ではなく`127.0.0.1`を使う(`localhost`はIPv6に解決され接続拒否になる)。無効なキーでContent APIを叩く方式にしてはいけない。Ghostの総当たり対策が失敗を数えて429を返し、10秒ごとにERRORログが出てエラーのアラートを埋もれさせる。
 
 ### Monitoring Configuration
 - `grafana/` - Grafana configuration and dashboards
