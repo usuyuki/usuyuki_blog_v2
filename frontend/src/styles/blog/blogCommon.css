@@ -96,6 +96,12 @@
   .blog-content > figure {
     margin-top: 2em;
   }
+  /* 本文幅より狭い写真(WordPress時代の縦長写真など)を中央に置く。Tailwindのpreflightでimgはblock要素のため左右autoで中央になる。
+     ブックマークカード内のアイコン等に効かないよう、figure直下(リンク付きはa直下)の画像に限る */
+  .blog-content figure > img,
+  .blog-content figure > a > img {
+    margin-inline: auto;
+  }
   .blog-content figcaption {
     font-size: 0.78rem;
     color: var(--color-muted);
@@ -186,5 +192,10 @@
   }
   .blog-content em {
     font-style: italic;
+  }
+  /* 本文中の太字も、英数字(Helvetica)と日本語(ヒラギノ等)で太さがずれないよう日本語フォントで揃える */
+  .blog-content strong,
+  .blog-content b {
+    font-family: var(--font-ja-heading);
   }
 }

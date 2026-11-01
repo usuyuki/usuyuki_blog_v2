@@ -60,6 +60,8 @@ const tags = await ghostApiWithRetry.tags.browse(
 		padding: 12px 22px;
 		font-size: 0.85rem;
 		font-weight: 700;
+		/* 太字で英数字と日本語が混ざる(例: 青春18きっぷ)ため、見出しと同じく日本語フォントで揃える */
+		font-family: var(--font-ja-heading);
 		max-width: 100%;
 		min-width: 0;
 		word-break: break-all;
