@@ -10,6 +10,11 @@
   .blog-content > * + * {
     margin-top: 1.6em;
   }
+  /* 本文冒頭の要素(多くはh2)の上余白を消し、PCで右サイドバーの目次と上端を揃える。
+     モバイルでは直前の目次(toc-inline)のmargin-bottomが間隔になる */
+  .blog-content > :first-child {
+    margin-top: 0;
+  }
 
   /* 見出し: h2は罫線ボックス+左太罫線、h3は下罫線 */
   .blog-content > h1,

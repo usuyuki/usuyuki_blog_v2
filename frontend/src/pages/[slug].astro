@@ -264,6 +264,9 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		margin-bottom: 24px;
 	}
 	.article-title {
+		/* 本文フォント(--font-family-main)は英数字がHelvetica・日本語がヒラギノ等で描画され、
+		   900ウェイトだと英数字だけ細く小さく見えるため、タイトルは英数字も日本語フォントで揃える */
+		font-family: var(--font-ja-heading);
 		font-size: clamp(1.5rem, 3.4vw, 2.2rem);
 		font-weight: 900;
 		line-height: 1.55;
