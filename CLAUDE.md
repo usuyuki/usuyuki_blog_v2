@@ -113,6 +113,7 @@ The frontend follows Atomic Design principles:
 - **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px` / `--font-ja-heading`(英数字も日本語フォントで描画する太字用。本文フォントは英数字がHelveticaになり、太字だと日本語と太さ・大きさがずれるため、h1〜h6の既定書体とし、本文の`strong`/`b`・タグ一覧・前後記事タイトルなど見出し以外の太字にも指定する。英字だけの見出しは`--font-display`を使う)
 - **目次**: `molecule/article/ArticleToc.astro` は `numberTOC`(`libs/helper/generateTOC.ts`)で見出し階層に応じた番号(`1` / `2.1` / `2.1.1`)を振る。見出しレベルが飛んでも空の階層は作らない
 - **原則**: 角丸なし(`rounded-*` を使わない)、2px罫線で構造を見せる、英字見出しは900ウェイト+letter-spacing、ホバーは黒反転か下線
+- **スクロールバー**: ページ内のスクロール領域(目次・リアクション一覧・表・コードブロック等)は `global.css` で6px・角なし・黒のつまみに統一(黒背景のコードブロックだけグレー)。Chrome/Safariは`::-webkit-scrollbar`で描き、標準の`scrollbar-width`/`scrollbar-color`は`@supports (-moz-appearance: none)`でFirefoxだけに当てる(標準プロパティを指定するとChromeが`::-webkit-scrollbar`を無視して丸いつまみになるため)。ページ全体のスクロールバーは変えない
 - **レイアウト**: `main` はフルブリード。各セクションが内側に `.container` を持つ
 - **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)
 - **記事セル**: `molecule/articleArchive/ArticleCell.astro`(+`ArticleCellGrid.astro`)をトップ/一覧/タグ/関連記事で共用。外部記事(Qiita/Zenn)はソース名バッジ付きで外部リンク。`transition` propで記事詳細ページとのView Transitions連携(サムネ・タイトルのクロスフェード)を個別に有効化できる(`transition:name`は値をundefinedにしても要素の自動生成名が残ってしまうため、Astroコンパイラの制約でJSX側の分岐で出し分けている)
