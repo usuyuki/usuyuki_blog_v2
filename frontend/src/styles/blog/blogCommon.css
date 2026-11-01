@@ -148,16 +148,6 @@
     padding: 0;
   }
 
-  /* 黒背景のコードブロックでは黒いつまみが見えないため、グレーにする(mermaid図は白背景なので黒のまま) */
-  .blog-content pre:not(.mermaid)::-webkit-scrollbar-thumb {
-    background: var(--color-muted);
-  }
-  @supports (-moz-appearance: none) {
-    .blog-content pre:not(.mermaid) {
-      scrollbar-color: var(--color-muted) transparent;
-    }
-  }
-
   /* mermaid図: 描画前はコード文字列、mermaid.js実行後は内部にSVGが挿入される。
      他のコードブロックと違い黒背景反転はせず、罫線で囲うだけに留める */
   .blog-content pre.mermaid {
