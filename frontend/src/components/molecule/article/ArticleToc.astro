@@ -1,4 +1,5 @@
 ---
+import { numberTOC } from "~/libs/helper/generateTOC";
 import type { TOCType } from "~/types/TOCType";
 
 // 記事の目次。sidebar: PC右カラム用(スクロールスパイ対象) / inline: モバイル用(本文冒頭details内)
@@ -16,6 +17,8 @@ const {
   withHeading = variant === "sidebar",
 } = Astro.props;
 const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
+// 見出しの階層に応じて「1」「2.1」のような番号を振る
+const numberedTocList = numberTOC(tocList);
 ---
 
 {
@@ -23,9 +26,12 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 		<nav class:list={["article-toc", variant]} id={navId} aria-label="目次">
 			{withHeading && <h2>INDEX</h2>}
 			<ol>
-				{tocList.map((toc) => (
+				{numberedTocList.map((toc) => (
 					<li class={`level-${toc.heading}`}>
-						<a href={`#${toc.id}`}>{toc.title}</a>
+						<a href={`#${toc.id}`}>
+							<span class="toc-number">{toc.number}</span>
+							<span>{toc.title}</span>
+						</a>
 					</li>
 				))}
 			</ol>
@@ -49,11 +55,7 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 	}
 	.article-toc ol {
 		list-style: none;
-		counter-reset: toc;
 		padding: 10px 0;
-	}
-	.article-toc li {
-		counter-increment: toc;
 	}
 	.article-toc a {
 		display: flex;
@@ -65,8 +67,7 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 		word-break: normal;
 		overflow-wrap: break-word;
 	}
-	.article-toc a::before {
-		content: counter(toc, decimal-leading-zero);
+	.article-toc .toc-number {
 		font-family: var(--font-en);
 		font-weight: 700;
 		color: var(--color-muted);
@@ -79,7 +80,7 @@ const navId = id ?? (variant === "sidebar" ? "toc-sidebar" : undefined);
 		background: var(--color-ink);
 		color: var(--color-paper);
 	}
-	.article-toc a.active::before {
+	.article-toc a.active .toc-number {
 		color: var(--color-paper);
 	}
 	/* 見出しレベルに応じたインデント(h2相当が基準) */

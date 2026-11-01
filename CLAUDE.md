@@ -110,7 +110,8 @@ The frontend follows Atomic Design principles:
 エディトリアル(新聞・雑誌)調のデザイン。原典は `wire/` のワイヤーフレーム3枚(トップ・記事一覧・記事詳細のHTML)。
 
 - **デザイントークン**: `frontend/src/styles/tailwind.css` の `@theme` で定義 — `--color-ink: #141414`(文字・罫線)/ `--color-paper: #ffffff`(背景)/ `--color-gray: #f4f3f0` / `--color-orange: #ff5c00`(アクセント)/ `--font-display`・`--font-en`(システムサンセリフ。Webフォントは使わない)
-- **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px`
+- **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px` / `--font-ja-heading`(英数字も日本語フォントで描画する太字見出し用。本文フォントは英数字がHelveticaになり、900ウェイトだと日本語と太さ・大きさがずれるため記事タイトルで使用)
+- **目次**: `molecule/article/ArticleToc.astro` は `numberTOC`(`libs/helper/generateTOC.ts`)で見出し階層に応じた番号(`1` / `2.1` / `2.1.1`)を振る。見出しレベルが飛んでも空の階層は作らない
 - **原則**: 角丸なし(`rounded-*` を使わない)、2px罫線で構造を見せる、英字見出しは900ウェイト+letter-spacing、ホバーは黒反転か下線
 - **レイアウト**: `main` はフルブリード。各セクションが内側に `.container` を持つ
 - **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)

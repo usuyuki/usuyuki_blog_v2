@@ -11,6 +11,10 @@
   --font-family-main:
     Helvetica, Arial, "Noto Sans JP", "Noto Sans CJK JP", "Hiragino Sans",
     "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+  /* 英数字と日本語を同じ書体で描画したい太字見出し用(日本語フォントの欧文グリフを使う) */
+  --font-ja-heading:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Noto Sans CJK JP", Meiryo, sans-serif;
 }
 
 body {
