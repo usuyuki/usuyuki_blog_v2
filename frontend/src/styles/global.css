@@ -29,7 +29,8 @@ body {
   font-family: var(--font-family-main);
 }
 /* ページ内のスクロール領域(目次・リアクション一覧・表・コードブロック等)のスクロールバーを
-   エディトリアル調に揃える: 細身(6px)・角なし・アクセント色(オレンジ)のつまみ・透明なレール。
+   エディトリアル調に揃える: 細身(6px)・角なし・アクセント色(オレンジ)のつまみ・グレーのレール。
+   レールに色を付けるのは、スクロールできる範囲とつまみの位置を分かりやすくするため(--color-grayでは白背景と見分けがつかないため--color-border-light)。
    黒だと罫線や本文と紛れてスクロールできることに気付きにくく、黒背景のコードブロックでは見えなくなるためオレンジにする。
    htmlには指定しないので、ページ全体のスクロールバーは変えない。
    Chrome/Safariは::-webkit-scrollbarで角ばったバーを描く。標準のscrollbar-width/scrollbar-colorを指定すると
@@ -39,7 +40,7 @@ body *::-webkit-scrollbar {
   height: 6px;
 }
 body *::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-border-light);
 }
 body *::-webkit-scrollbar-thumb {
   background: var(--color-orange);
@@ -47,7 +48,7 @@ body *::-webkit-scrollbar-thumb {
 }
 @supports (-moz-appearance: none) {
   body {
-    scrollbar-color: var(--color-orange) transparent;
+    scrollbar-color: var(--color-orange) var(--color-border-light);
   }
   body * {
     scrollbar-width: thin;

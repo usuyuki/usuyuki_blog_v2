@@ -148,6 +148,16 @@
     padding: 0;
   }
 
+  /* 黒背景のコードブロックでは明るいレールが浮くため、暗いグレーにする(mermaid図は白背景なので共通のまま) */
+  .blog-content pre:not(.mermaid)::-webkit-scrollbar-track {
+    background: var(--color-ink-border);
+  }
+  @supports (-moz-appearance: none) {
+    .blog-content pre:not(.mermaid) {
+      scrollbar-color: var(--color-orange) var(--color-ink-border);
+    }
+  }
+
   /* mermaid図: 描画前はコード文字列、mermaid.js実行後は内部にSVGが挿入される。
      他のコードブロックと違い黒背景反転はせず、罫線で囲うだけに留める */
   .blog-content pre.mermaid {
