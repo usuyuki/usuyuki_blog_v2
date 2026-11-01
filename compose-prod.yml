@@ -37,8 +37,6 @@ services:
       timeout: 10s
       retries: 30
       start_period: 40s
-    labels:
-      - "logging=promtail"
     networks:
       - app-network
 
@@ -59,7 +57,6 @@ services:
       FRONTEND_URL: ${FRONTEND_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}
       GHOST_FRONT_URL: ${GHOST_FRONT_URL}
-      LOKI_URL: http://loki:3100
       REACTIONS_DB_HOST: db
       REACTIONS_DB_USER: root
       REACTIONS_DB_PASSWORD: example
@@ -70,12 +67,8 @@ services:
       # Ghostより先にastroが起動すると記事取得に失敗するため、healthyになるまで待つ
       ghost:
         condition: service_healthy
-      loki:
-        condition: service_started
       db:
         condition: service_healthy
-    labels:
-      - "logging=promtail"
     networks:
       - app-network
 
@@ -106,50 +99,8 @@ services:
     networks:
       - app-network
 
-  loki:
-    image: grafana/loki:3
-    restart: always
-    volumes:
-      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
-      - loki-data:/loki
-    command: -config.file=/etc/loki/local-config.yaml
-    networks:
-      - app-network
-
-  grafana:
-    image: grafana/grafana:12.4
-    restart: always
-    environment:
-      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-admin}
-      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-      GRAFANA_BASE_URL: ${GRAFANA_BASE_URL:-http://localhost:1002}
-    volumes:
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
-      - grafana-storage:/var/lib/grafana
-    depends_on:
-      - loki
-    networks:
-      - app-network
-
-  alloy:
-    image: grafana/alloy:latest
-    restart: always
-    volumes:
-      - ./alloy/config.alloy:/etc/alloy/config.alloy
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
-    depends_on:
-      - loki
-    networks:
-      - app-network
-
 volumes:
   db-store:
-  loki-data:
-  grafana-storage:
 
 networks:
   app-network:

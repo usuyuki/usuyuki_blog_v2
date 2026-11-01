@@ -1,0 +1,8 @@
+version: 1
+contexts:
+  shared-grafana:
+    stack: shared-grafana
+    datasources:
+      loki: loki
+      prometheus: prometheus
+current-context: shared-grafana
