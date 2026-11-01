@@ -71,21 +71,13 @@ docker compose restart astro
 Test production build:
 ```bash
 docker compose down
-docker compose -f compose-prod.yml up -d --build --remove-orphans
+docker compose -f compose-prod.yml up -d --build
 ```
 
 Production update (no downtime):
 ```bash
 docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d --remove-orphans
-```
-
-`--remove-orphans` は、compose ファイルから消したサービス(旧 loki / grafana / alloy)のコンテナを止めて削除する。付け忘れると旧 Grafana が動き続け、そのアラートと共通の Grafana のアラートが Discord に二重に届く。
-
-ブログ自前の監視スタックを削除した後の初回だけ、残ったボリュームも消す(`--remove-orphans` はボリュームまでは消さない)。
-
-```bash
-docker volume rm usuyuki_blog_v2_loki-data usuyuki_blog_v2_grafana-storage
 ```
 
 ### Docker イメージタグの方針
