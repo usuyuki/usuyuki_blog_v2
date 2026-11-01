@@ -1,8 +1,11 @@
+# 本番のログを見る共通Grafana用のgcx設定。このディレクトリでgcxを実行すると shared-grafana を既定にする。
+# 接続先URLとトークンは `make gcx-login` で ~/.config/gcx/config.yaml の stack に保存する
+# (認証情報を含むstackは設定の層をまたいで丸ごと扱われるため、URLだけをここに書くことはできない)。
+# 接続先URLの定義は Makefile の GRAFANA_SERVER。
 version: 1
 contexts:
   shared-grafana:
     stack: shared-grafana
     datasources:
       loki: loki
-      prometheus: prometheus
 current-context: shared-grafana

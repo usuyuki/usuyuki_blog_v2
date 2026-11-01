@@ -71,13 +71,21 @@ docker compose restart astro
 Test production build:
 ```bash
 docker compose down
-docker compose -f compose-prod.yml up -d --build
+docker compose -f compose-prod.yml up -d --build --remove-orphans
 ```
 
 Production update (no downtime):
 ```bash
 docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
 docker compose -f compose-prod.yml up -d --remove-orphans
+```
+
+`--remove-orphans` は、compose ファイルから消したサービス(旧 loki / grafana / alloy)のコンテナを止めて削除する。付け忘れると旧 Grafana が動き続け、そのアラートと共通の Grafana のアラートが Discord に二重に届く。
+
+ブログ自前の監視スタックを削除した後の初回だけ、残ったボリュームも消す(`--remove-orphans` はボリュームまでは消さない)。
+
+```bash
+docker volume rm usuyuki_blog_v2_loki-data usuyuki_blog_v2_grafana-storage
 ```
 
 ### Docker イメージタグの方針
@@ -329,13 +337,15 @@ docker compose -f compose-prod.yml restart astro
 |---|---|
 | 接続先 | リポジトリ直下の `.gcx.yaml` がコンテキスト `shared-grafana`（Loki のデータソース UID は `loki`）を既定にする。このディレクトリで `gcx` を実行すれば自動で本番を向く |
 | 認証 | サービスアカウント `gcx-local`（ロールは Viewer、見るだけ）のトークン。`~/.config/gcx/config.yaml` にだけ保存し、リポジトリには置かない |
-| 初回ログイン | `make gcx-login`（`gcx login shared-grafana --server http://192.168.37.112:2008`）。初回だけ、自分の端末で実行してトークンを入力する（Claude Code の `!` は端末がなく入力できない） |
-| 接続確認 | `make gcx-check`（`gcx config check`） |
-| ログを探す | `gcx logs query '{project="usuyuki_blog_v2", service="astro"} \|= "error"' --since 1h -o raw` |
-| 件数の移り変わり | `gcx logs metrics 'sum by (service) (count_over_time({project="usuyuki_blog_v2", service=~"astro\|ghost"} \|= "error" [10m]))' --since 6h` |
+| 初回ログイン | `make gcx-login`（`gcx login shared-grafana --server <Makefile の GRAFANA_SERVER>`）。初回だけ、自分の端末で実行してトークンを入力する（Claude Code の `!` は端末がなく入力できない） |
+| 接続確認 | `make gcx-check`（`gcx config check --context shared-grafana`） |
+| astro のエラーを探す | `gcx logs query '{project="usuyuki_blog_v2", service="astro"} \|~ "^(\\x1b\\[\\d+m)?error(\\x1b\\[\\d+m)?:"' --since 1h -o raw` |
+| Ghost のエラーを探す | `gcx logs query '{project="usuyuki_blog_v2", service="ghost"} \|= "ERROR"' --since 1h -o raw` |
+| astro のエラー件数の移り変わり | `gcx logs metrics 'sum(count_over_time({project="usuyuki_blog_v2", service="astro"} \|~ "^(\\x1b\\[\\d+m)?error(\\x1b\\[\\d+m)?:" [10m]))' --since 6h` |
 
 - **ラベル**: ログには `job="docker"`・`service`（compose のサービス名）・`container`・`project`（compose のプロジェクト名。ブログは `usuyuki_blog_v2`）が付く。共通の Grafana には他のプロジェクトのログも入っているので、必ず `project="usuyuki_blog_v2"` で絞り込む
 - **`no route to host` になる場合**: macOS のローカルネットワークの許可が、gcx を起動したアプリ（Ghostty など）から引き継がれていない。herdr のような常駐プロセスの中で動かしているときは、許可を ON にした後にその常駐プロセスを起動し直す（Apple 製の `curl` は制限を受けないので、curl で届くのに gcx で届かないときはこれを疑う）
+- **エラーの判定**: ログレベルはラベルになっていないので、行の中身で判定する。astro(winston)の行は色付きの `info:` / `error:` で始まるため、行頭のレベルを正規表現で見る(`\|= "error"` だと大文字小文字を区別するうえ、本文に "error" を含む info 行まで拾ってしまう)。Ghost はレベルを大文字の `ERROR` で出す
 - **保持期間**: 7 日より古いログは送られないので、それ以前の調査はできない
 
 ## Deployment Pipeline
