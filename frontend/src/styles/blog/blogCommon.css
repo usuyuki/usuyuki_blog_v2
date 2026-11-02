@@ -10,6 +10,11 @@
   .blog-content > * + * {
     margin-top: 1.6em;
   }
+  /* 本文冒頭の要素(多くはh2)の上余白を消し、PCで右サイドバーの目次と上端を揃える。
+     モバイルでは直前の目次(toc-inline)のmargin-bottomが間隔になる */
+  .blog-content > :first-child {
+    margin-top: 0;
+  }
 
   /* 見出し: h2は罫線ボックス+左太罫線、h3は下罫線 */
   .blog-content > h1,
@@ -91,6 +96,12 @@
   .blog-content > figure {
     margin-top: 2em;
   }
+  /* 本文幅より狭い写真(WordPress時代の縦長写真など)を中央に置く。Tailwindのpreflightでimgはblock要素のため左右autoで中央になる。
+     ブックマークカード内のアイコン等に効かないよう、figure直下(リンク付きはa直下)の画像に限る */
+  .blog-content figure > img,
+  .blog-content figure > a > img {
+    margin-inline: auto;
+  }
   .blog-content figcaption {
     font-size: 0.78rem;
     color: var(--color-muted);
@@ -137,6 +148,16 @@
     padding: 0;
   }
 
+  /* 黒背景のコードブロックでは明るいレールが浮くため、暗いグレーにする(mermaid図は白背景なので共通のまま) */
+  .blog-content pre:not(.mermaid)::-webkit-scrollbar-track {
+    background: var(--color-ink-border);
+  }
+  @supports (-moz-appearance: none) {
+    .blog-content pre:not(.mermaid) {
+      scrollbar-color: var(--color-orange) var(--color-ink-border);
+    }
+  }
+
   /* mermaid図: 描画前はコード文字列、mermaid.js実行後は内部にSVGが挿入される。
      他のコードブロックと違い黒背景反転はせず、罫線で囲うだけに留める */
   .blog-content pre.mermaid {
@@ -173,6 +194,24 @@
     background: var(--color-gray);
     font-weight: 700;
   }
+  /* スマホ幅では表を画面幅に押し込むと、bodyのword-break: break-allで「Work/tree」のように単語の途中で折り返して読みにくい。
+     表を横スクロールできるブロックにし、単語の途中では折り返さず、列に最低幅を持たせて収まらない分はスクロールさせる。
+     長い文章のセルは1行に伸ばさず最低幅の中で折り返すので、横スクロールしながら読む必要は無い */
+  @media (max-width: 639.98px) {
+    .blog-content table {
+      display: block;
+      overflow-x: auto;
+    }
+    .blog-content th,
+    .blog-content td {
+      word-break: normal;
+      overflow-wrap: normal;
+      min-width: 5em;
+    }
+    .blog-content th {
+      white-space: nowrap;
+    }
+  }
   .blog-content > hr {
     border: none;
     border-top: var(--bw) solid var(--color-ink);
@@ -181,5 +220,10 @@
   }
   .blog-content em {
     font-style: italic;
+  }
+  /* 本文中の太字も、英数字(Helvetica)と日本語(ヒラギノ等)で太さがずれないよう日本語フォントで揃える */
+  .blog-content strong,
+  .blog-content b {
+    font-family: var(--font-ja-heading);
   }
 }

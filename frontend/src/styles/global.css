@@ -11,6 +11,10 @@
   --font-family-main:
     Helvetica, Arial, "Noto Sans JP", "Noto Sans CJK JP", "Hiragino Sans",
     "Hiragino Kaku Gothic Pro", Meiryo, sans-serif;
+  /* 英数字と日本語を同じ書体で描画したい太字用(日本語フォントの欧文グリフを使う)。h1〜h6の既定書体 */
+  --font-ja-heading:
+    "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Noto Sans CJK JP", Meiryo, sans-serif;
 }
 
 body {
@@ -23,6 +27,32 @@ body {
   tab-size: 4;
   font-feature-settings: normal;
   font-family: var(--font-family-main);
+}
+/* ページ内のスクロール領域(目次・リアクション一覧・表・コードブロック等)のスクロールバーを
+   エディトリアル調に揃える: 細身(6px)・角なし・アクセント色(オレンジ)のつまみ・グレーのレール。
+   レールに色を付けるのは、スクロールできる範囲とつまみの位置を分かりやすくするため(--color-grayでは白背景と見分けがつかないため--color-border-light)。
+   黒だと罫線や本文と紛れてスクロールできることに気付きにくく、黒背景のコードブロックでは見えなくなるためオレンジにする。
+   htmlには指定しないので、ページ全体のスクロールバーは変えない。
+   Chrome/Safariは::-webkit-scrollbarで角ばったバーを描く。標準のscrollbar-width/scrollbar-colorを指定すると
+   Chromeは::-webkit-scrollbarを無視して丸いつまみで描くため、標準プロパティはFirefoxだけに当てる */
+body *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+body *::-webkit-scrollbar-track {
+  background: var(--color-border-light);
+}
+body *::-webkit-scrollbar-thumb {
+  background: var(--color-orange);
+  border-radius: 0;
+}
+@supports (-moz-appearance: none) {
+  body {
+    scrollbar-color: var(--color-orange) var(--color-border-light);
+  }
+  body * {
+    scrollbar-width: thin;
+  }
 }
 article {
   max-width: var(--article-max-width);
@@ -37,7 +67,9 @@ h5,
 h6 {
   letter-spacing: 0.025em;
   font-weight: bold;
-  font-family: var(--font-family-main);
+  /* 見出しは太字のため、本文フォントだと英数字(Helvetica)と日本語(ヒラギノ等)で太さ・大きさがずれる。
+     英数字も日本語フォントで描画する --font-ja-heading で揃える。英字だけの見出しは各コンポーネントで --font-display を指定する */
+  font-family: var(--font-ja-heading);
 }
 /* 新デザインは罫線を画面幅いっぱいに走らせるため、mainには余白を持たせない。
    各セクションが内側に .container を持つ */

@@ -23,11 +23,8 @@ The project uses a Docker-based development and deployment setup:
 - **Dependency layout**: `dependencies` in `frontend/package.json` contains ONLY packages imported at runtime by the SSR bundle (`@astrojs/rss`, `@prisma/adapter-mariadb`, `@prisma/client`, `@tryghost/content-api`, `jsdom`, `sharp`, `shiki`, `winston`). Everything used only at build time (astro itself, adapters, integrations, tailwindcss, svelte, emoji-picker-element, mermaid(クライアントバンドルにのみ含まれる), etc.) lives in `devDependencies` so the production image can drop them with `pnpm prune --prod`. When adding a package, decide based on whether the built server (`dist/server`) imports it at runtime.
 - Backend uses **Ghost CMS 6** as a headless CMS
 - Production deployment uses Docker containers with GitHub Actions CI/CD
-- **Monitoring Stack**: Grafana + Loki + Alloy for log aggregation and visualization
-  - **Loki 3** (`grafana/loki:3`): Log aggregation system (port 3100)
-  - **Grafana 12** (`grafana/grafana:12.4`): Metrics visualization and alerting dashboard (port 1002 in dev)
-  - **Alloy** (`grafana/alloy:latest`): Unified telemetry collector for Docker container logs (port 12345)
-  - タグの選び方は下記「Docker イメージタグの方針」を参照
+- **ログ**: ブログ自身はGrafana / Loki / Alloyを持たない。本番のログは共通のGrafanaで見る(下記「本番ログ調査（gcx）」を参照)
+- イメージタグの選び方は下記「Docker イメージタグの方針」を参照
 
 ## Development Commands
 
@@ -79,19 +76,17 @@ docker compose -f compose-prod.yml up -d --build
 
 Production update (no downtime):
 ```bash
-docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull grafana/loki:3 && docker pull grafana/grafana:12.4 && docker pull grafana/alloy:latest && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
-docker compose -f compose-prod.yml up -d
+docker pull ghost:6-alpine && docker pull cloudflare/cloudflared:latest && docker pull mysql:8.4 && docker pull ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest
+docker compose -f compose-prod.yml up -d --remove-orphans
 ```
 
 ### Docker イメージタグの方針
-`compose.yml` / `compose-prod.yml` のイメージは**メジャーバージョンだけをタグで指定する**(例: `grafana/loki:3`、`ghost:6-alpine`)。マイナー・パッチバージョンの指定はできる限り避け、`docker pull` するだけでセキュリティ修正などの非破壊的な更新が取り込まれるようにする。一方でメジャーアップデートは破壊的変更を含みうるため、タグを書き換えて明示的に上げる。
+`compose.yml` / `compose-prod.yml` のイメージは**メジャーバージョンだけをタグで指定する**(例: `ghost:6-alpine`)。マイナー・パッチバージョンの指定はできる限り避け、`docker pull` するだけでセキュリティ修正などの非破壊的な更新が取り込まれるようにする。一方でメジャーアップデートは破壊的変更を含みうるため、タグを書き換えて明示的に上げる。
 
 メジャータグが配布されていないなど、方針どおりにできないイメージは以下の例外とする。
 
 | イメージ | タグ | 理由 |
 | --- | --- | --- |
-| `grafana/grafana` | `12.4` | `12` のようなメジャータグが配布されていないため、12系の最終マイナーを指定 |
-| `grafana/alloy` | `latest` | メジャータグ自体が無い(現行はv1) |
 | `cloudflare/cloudflared` | `latest` | 日付ベースのバージョンでメジャーの概念が無い |
 | `mysql` | `8.4` | 8系のLTSリリース。データを持つため明示的に固定する |
 | `ghcr.io/usuyuki/usuyuki_blog_v2_astro` | `latest` | 自前ビルドのイメージでCI/CDが常に最新を出す |
@@ -110,8 +105,10 @@ The frontend follows Atomic Design principles:
 エディトリアル(新聞・雑誌)調のデザイン。原典は `wire/` のワイヤーフレーム3枚(トップ・記事一覧・記事詳細のHTML)。
 
 - **デザイントークン**: `frontend/src/styles/tailwind.css` の `@theme` で定義 — `--color-ink: #141414`(文字・罫線)/ `--color-paper: #ffffff`(背景)/ `--color-gray: #f4f3f0` / `--color-orange: #ff5c00`(アクセント)/ `--font-display`・`--font-en`(システムサンセリフ。Webフォントは使わない)
-- **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px`
+- **共通変数**: `frontend/src/styles/global.css` — `--bw: 2px`(基本罫線幅)/ `--max-w: 1240px`(`.container` の最大幅)/ `--article-max-width: 760px` / `--font-ja-heading`(英数字も日本語フォントで描画する太字用。本文フォントは英数字がHelveticaになり、太字だと日本語と太さ・大きさがずれるため、h1〜h6の既定書体とし、本文の`strong`/`b`・タグ一覧・前後記事タイトルなど見出し以外の太字にも指定する。英字だけの見出しは`--font-display`を使う)
+- **目次**: `molecule/article/ArticleToc.astro` は `numberTOC`(`libs/helper/generateTOC.ts`)で見出し階層に応じた番号(`1` / `2.1` / `2.1.1`)を振る。見出しレベルが飛んでも空の階層は作らない
 - **原則**: 角丸なし(`rounded-*` を使わない)、2px罫線で構造を見せる、英字見出しは900ウェイト+letter-spacing、ホバーは黒反転か下線
+- **スクロールバー**: ページ内のスクロール領域(目次・リアクション一覧・表・コードブロック等)は `global.css` で6px・角なし・オレンジ(`--color-orange`)のつまみ・グレー(`--color-border-light`)のレールに統一(黒だと罫線や本文に紛れて気付きにくく、レールが無いとスクロールできる範囲が分からないため。黒背景のコードブロックだけレールを`--color-ink-border`にする)。Chrome/Safariは`::-webkit-scrollbar`で描き、標準の`scrollbar-width`/`scrollbar-color`は`@supports (-moz-appearance: none)`でFirefoxだけに当てる(標準プロパティを指定するとChromeが`::-webkit-scrollbar`を無視して丸いつまみになるため)。ページ全体のスクロールバーは変えない
 - **レイアウト**: `main` はフルブリード。各セクションが内側に `.container` を持つ
 - **共通シェル**: `molecule/header/SiteHeader.astro`(sticky、ハンバーガー、Google検索フォーム。ナビは TOP/ALL/TAGS/ABOUT)+ `atom/footer/SiteFooter.astro`(黒ベタ+巨大タイポ。RSSリンクはフッターのSite Mapに配置)
 - **記事セル**: `molecule/articleArchive/ArticleCell.astro`(+`ArticleCellGrid.astro`)をトップ/一覧/タグ/関連記事で共用。外部記事(Qiita/Zenn)はソース名バッジ付きで外部リンク。`transition` propで記事詳細ページとのView Transitions連携(サムネ・タイトルのクロスフェード)を個別に有効化できる(`transition:name`は値をundefinedにしても要素の自動生成名が残ってしまうため、Astroコンパイラの制約でJSX側の分岐で出し分けている)
@@ -122,7 +119,7 @@ The frontend follows Atomic Design principles:
 
 - `frontend/src/consts.ts` - Site configuration constants(`SITE_TITLE_EN`: ヘッダー/フッター共用の英字ブランド表記、`SOCIAL_LINKS`: SNS・外部プロフィールリンクの一覧。console banner(`libs/console/snsLinkProvider.ts`)も含め表記揺れを避けるためこれらを唯一の情報源とする)
 - `frontend/src/libs/ghostClient.ts` - Ghost CMS API client with retry logic and caching (posts.browse は `include: "tags"` で公開タグも変換)
-- `frontend/src/libs/astroLogger.ts` - Winston-based structured logger with Loki integration
+- `frontend/src/libs/astroLogger.ts` - Winston-based structured logger(標準出力に書くだけで、Lokiへは直接送らない。コンテナの標準出力が共通のGrafana側で収集される)
 - `frontend/src/libs/articleAggregator.ts` - Unified article aggregation from Ghost, RSS feeds, and Qiita API (`getLatestArticles` / `getAllArticlesCached`(第2引数`forceRefresh`でキャッシュを無視して再取得。Ghostへの問い合わせが失敗した結果はキャッシュしない — Docker再起動直後などGhostが未起動でも外部記事(RSS/Qiita)だけは取得できてしまい、Ghost記事が欠けた不完全な結果を1時間キャッシュすると記事が表示されなくなるため。同時に呼ばれた場合は取得中のPromiseを共有し、Ghostへの全件取得を1回にまとめる) / `checkPublishedGhostSlug`(リアクションPOST用の公開記事判定。`"published"`/`"not_found"`/`"unavailable"`を返す。一覧が5分より古い・slugが見つからない場合は取り直すが、Ghostへの取り直しは1分に1回までに抑える) / `getAllGhostArticlesForArticlePage`(記事詳細用。指定slugがキャッシュに無ければ自動で強制再取得し、鮮度確認済みの全記事配列を返す) / `getAdjacentArticles`(前後記事、外部記事は除外。第2引数に`getAllGhostArticlesForArticlePage`の結果を渡す) / `getRelatedArticles`(タグベース関連記事。`options.allGhostArticles`を渡すとタグ一致・補完の両方をin-memoryで処理しGhostへのライブフェッチを回避) / `getFeaturedArticles`)
 - `frontend/src/libs/helper/archiveQuery.ts` - 記事一覧のフィルター・ソート・ページネーション純関数 (`filterByYear` / `sortArticles` / `paginate` / `buildPageList` / `buildArchiveUrl`)
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
@@ -155,18 +152,10 @@ astroがGhostより先に起動すると記事を取得できないまま立ち�
 
 | 層 | 仕組み |
 | --- | --- |
-| Docker | `ghost`サービスに`healthcheck`(Content APIへwgetし、HTTP応答が返ることを確認。キーは検証しないので401でも合格)を定義し、`astro`の`depends_on`を`ghost: condition: service_healthy`にして待機させる |
+| Docker | `ghost`サービスに`healthcheck`(認証なしで200を返すAdmin APIの`/ghost/api/admin/site/`へwgetし、2xxが返ることを確認)を定義し、`astro`の`depends_on`を`ghost: condition: service_healthy`にして待機させる |
 | アプリ | `getAllArticlesCached`はGhostへの問い合わせが失敗した回の結果をキャッシュしない。外部記事(RSS/Qiita)だけは取得できてしまうため、Ghost記事が欠けた結果を1時間キャッシュすると記事が出ないまま固定される |
 
-healthcheckの`test`は`localhost`ではなく`127.0.0.1`を使う(`localhost`はIPv6に解決され接続拒否になる)。
-
-### Monitoring Configuration
-- `grafana/` - Grafana configuration and dashboards
-  - `grafana.ini` - Grafana server configuration
-  - `dashboards/` - Pre-configured dashboards (astro-logs.json, ghost-logs.json)
-  - `provisioning/` - Automated provisioning configuration
-- `loki/loki-config.yml` - Loki log aggregation configuration
-- `alloy/config.alloy` - Alloy telemetry collector configuration for Docker log collection
+healthcheckの`test`は`localhost`ではなく`127.0.0.1`を使う(`localhost`はIPv6に解決され接続拒否になる)。無効なキーでContent APIを叩く方式にしてはいけない。Ghostの総当たり対策が失敗を数えて429を返し、10秒ごとにERRORログが出てエラーのアラートを埋もれさせる。
 
 ## Logging
 
@@ -217,15 +206,8 @@ astroLogger.systemLog('System startup completed');
     {"name": "note", "rssUrl": "https://note.com/username/rss", "color": "#41c9b4"}
   ]
   ```
-- `LOKI_URL` - Loki log aggregation endpoint (default: http://loki:3100)
 - `CACHE_CLEAR_TOKEN` - 記事詳細ページの `?debug=<値>` で全インメモリキャッシュを消去するためのトークン。未設定なら機能無効。秘密値なのでSSR時の`process.env`からのみ読む
 - `TRUST_CF_CONNECTING_IP` - `"true"`のときだけ`CF-Connecting-IP`ヘッダーをクライアントIPとして信用する。cloudflared経由でしか到達できない本番(`compose-prod.yml`)でのみ設定する。ポートを公開する環境で有効にするとヘッダー偽装でレート制限を回避される
-
-### Monitoring Variables
-- `GF_SECURITY_ADMIN_USER` - Grafana admin username (default: admin)
-- `GF_SECURITY_ADMIN_PASSWORD` - Grafana admin password (default: admin)
-- `DISCORD_WEBHOOK_URL` - Discord webhook URL for error notifications
-- `GRAFANA_BASE_URL` - Grafana base URL for notification links
 
 ## Code Style Guidelines
 
@@ -338,22 +320,33 @@ docker compose -f compose-prod.yml restart astro
 
 ## Monitoring and Observability
 
-### Accessing Grafana
-- Development: http://localhost:1002
-- Default credentials: admin/admin (configurable via environment variables)
-- Pre-configured dashboards for Astro and Ghost log analysis
+ブログ自身はGrafana / Loki / Alloyを持たない。ログの収集・可視化・アラートはumi.mikanと共通のGrafanaにまとめている。
 
-### Log Aggregation
-- **Loki** aggregates logs from all Docker containers
-- **Alloy** collects and forwards container logs to Loki (replaces deprecated Promtail)
-- **astroLogger** sends structured logs to Loki via LOKI_URL environment variable
-- Logs are automatically labeled with container information
-- Alloy UI available at http://localhost:12345 in development
+| 用途 | 場所 |
+| --- | --- |
+| ログ収集 | コンテナの標準出力が共通のGrafanaのLokiに集められる。ブログ側にラベルなどの設定は要らない |
+| ログ閲覧 | 共通のGrafana(http://192.168.37.112:2008、LAN内のみ)。CLIなら下記のgcx、ブラウザならLogs Drilldown |
+| アラート | Discordへの通知(AstroのエラーとGhostのERROR)も共通のGrafanaで管理する |
+| 開発環境 | Grafanaは無い。`docker compose logs astro`(`make log`)で見る |
 
-### Alert Notifications
-- Discord notifications for critical errors (configure DISCORD_WEBHOOK_URL)
-- Grafana alerting rules for system monitoring
-- Contact points and notification policies configured in `grafana/provisioning/alerting/`
+### 本番ログ調査（gcx）
+
+本番のログは共通の Grafana（http://192.168.37.112:2008、LAN 内からのみ）で見る。調査はブラウザではなく Grafana 公式 CLI の `gcx` で Grafana の API を通して問い合わせる。
+
+| やること | 使うもの |
+|---|---|
+| 接続先 | リポジトリ直下の `.gcx.yaml` がコンテキスト `shared-grafana`（Loki のデータソース UID は `loki`）を既定にする。このディレクトリで `gcx` を実行すれば自動で本番を向く |
+| 認証 | サービスアカウント `gcx-local`（ロールは Viewer、見るだけ）のトークン。`~/.config/gcx/config.yaml` にだけ保存し、リポジトリには置かない |
+| 初回ログイン | `make gcx-login`（`gcx login shared-grafana --server <Makefile の GRAFANA_SERVER>`）。初回だけ、自分の端末で実行してトークンを入力する（Claude Code の `!` は端末がなく入力できない） |
+| 接続確認 | `make gcx-check`（`gcx config check --context shared-grafana`） |
+| astro のエラーを探す | `gcx logs query '{project="usuyuki_blog_v2", service="astro"} \|~ "^(\\x1b\\[\\d+m)?error(\\x1b\\[\\d+m)?:"' --since 1h -o raw` |
+| Ghost のエラーを探す | `gcx logs query '{project="usuyuki_blog_v2", service="ghost"} \|= "ERROR"' --since 1h -o raw` |
+| astro のエラー件数の移り変わり | `gcx logs metrics 'sum(count_over_time({project="usuyuki_blog_v2", service="astro"} \|~ "^(\\x1b\\[\\d+m)?error(\\x1b\\[\\d+m)?:" [10m]))' --since 6h` |
+
+- **ラベル**: ログには `job="docker"`・`service`（compose のサービス名）・`container`・`project`（compose のプロジェクト名。ブログは `usuyuki_blog_v2`）が付く。共通の Grafana には他のプロジェクトのログも入っているので、必ず `project="usuyuki_blog_v2"` で絞り込む
+- **`no route to host` になる場合**: macOS のローカルネットワークの許可が、gcx を起動したアプリ（Ghostty など）から引き継がれていない。herdr のような常駐プロセスの中で動かしているときは、許可を ON にした後にその常駐プロセスを起動し直す（Apple 製の `curl` は制限を受けないので、curl で届くのに gcx で届かないときはこれを疑う）
+- **エラーの判定**: ログレベルはラベルになっていないので、行の中身で判定する。astro(winston)の行は色付きの `info:` / `error:` で始まるため、行頭のレベルを正規表現で見る(`\|= "error"` だと大文字小文字を区別するうえ、本文に "error" を含む info 行まで拾ってしまう)。Ghost はレベルを大文字の `ERROR` で出す
+- **保持期間**: 7 日より古いログは送られないので、それ以前の調査はできない
 
 ## Deployment Pipeline
 
@@ -362,3 +355,25 @@ docker compose -f compose-prod.yml restart astro
 - Containers are built and pushed to ghcr.io (ghcr.io/usuyuki/usuyuki_blog_v2_astro:latest)
 - Production server pulls and deploys latest containers
 - Cloudflare tunnel provides secure external access in production
+
+## 見た目の確認とPRのスクリーンショット
+
+### ブラウザでの確認
+見た目の確認には **Claude in Chrome**(`mcp__claude-in-chrome__*`)を使う。ユーザーのChromeで開くので、ローカル(`http://localhost:1000`)と本番(`https://blog.usuyuki.net`)の両方を同じウィンドウサイズで見比べられる。
+
+| 項目 | 内容 |
+| --- | --- |
+| 使うツール | Claude in Chrome。Chrome DevTools MCP(`mcp__chrome-devtools__*`)はChromeの実行ファイルが見つからず起動できない |
+| ローカルの記事URL | 末尾スラッシュなし(例: `http://localhost:1000/isucon2026`) |
+| スクロール | `body { scroll-behavior: smooth }` のため、`window.scrollTo` は `behavior: "instant"` を付ける。付けないとスクロール途中で撮影してしまう |
+| 撮影 | `computer` の `zoom` に `save_to_disk: true` を付けて範囲を切り出す。変更前(本番)と変更後(ローカル)は同じスクロール位置・同じ範囲で撮る |
+| スマホ幅 | `resize_window` はウィンドウが最大化されていると効かない。ローカルの任意のページで `document.body` を空にし、幅390pxの `<iframe>` に対象ページを読み込んで再現する(同一オリジンなのでiframe内のDOMも操作できる) |
+
+### PRへのスクリーンショット添付
+見た目に関わる変更のPRには、**変更前(本番)と変更後(ローカル)のスクリーンショットを必ず貼る**。
+
+| 手順 | 内容 |
+| --- | --- |
+| 置き場所 | 画像専用ブランチ `pr-assets/<トピック名>` の `<トピック名>/` 配下(例: `pr-assets/toc-numbering` の `toc-numbering/before-title.png`) |
+| ブランチの作り方 | 作業ツリーに影響しないよう、`git hash-object -w` → `git mktree` → `git commit-tree` で親を持たないコミットを作り、`git push origin "${C}:refs/heads/pr-assets/<トピック名>"` でpushする(zshでは `$C:r` が変数修飾子と解釈されるため `${C}` と書く) |
+| PRでの参照 | `<img src="https://github.com/usuyuki/usuyuki_blog_v2/blob/pr-assets/<トピック名>/<トピック名>/<ファイル名>.png?raw=true" width="...">` を Before / After の表に並べる |

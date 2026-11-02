@@ -138,6 +138,22 @@ test.describe("記事詳細ページ", () => {
     expect(sideHeight).toBeLessThanOrEqual(600 - 60 - 80);
   });
 
+  test("正常系: スマホでは本文冒頭の目次がデフォルトで閉じていて、タップで開く", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/e2e-post-1");
+
+    const inline = page.locator("#toc-inline-wrapper");
+    await expect(inline).toBeVisible();
+    await expect(inline).not.toHaveAttribute("open");
+    await expect(inline.locator(".article-toc")).toBeHidden();
+
+    await inline.locator("summary").click();
+    await expect(inline).toHaveAttribute("open");
+    await expect(inline.locator(".article-toc")).toBeVisible();
+  });
+
   test("正常系: スマホではINDEXボタンが画面右側に出て、目次パネルが右端から開く", async ({
     page,
   }) => {
