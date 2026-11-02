@@ -3,6 +3,7 @@ import { PrismaClient, Prisma } from "~/generated/prisma/client";
 import type { QueryEvent } from "~/generated/prisma/internal/prismaNamespace";
 import { cache } from "./cache";
 import { getNsfwBlocklist } from "./env";
+import { isSlug } from "./validation/isSlug";
 import astroLogger from "./astroLogger";
 import { LOG_TYPES } from "./logTypes";
 
@@ -158,6 +159,8 @@ export async function getAllSlugReactions(): Promise<SlugReactionSummary[]> {
   const slugMap = new Map<string, { emoji: string; count: number }[]>();
   for (const row of grouped) {
     if (blocklist.has(row.emoji)) continue;
+    // POST側でslug形式を検証する以前に保存された不正なslug(NQLペイロードなど)をランキングに出さない
+    if (!isSlug(row.slug)) continue;
     if (!slugMap.has(row.slug)) slugMap.set(row.slug, []);
     slugMap.get(row.slug)?.push({ emoji: row.emoji, count: row._count.emoji });
   }
