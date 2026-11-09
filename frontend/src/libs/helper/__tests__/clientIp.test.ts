@@ -24,6 +24,27 @@ describe("resolveClientIp", () => {
       want: "127.0.0.1",
     },
     {
+      name: "正常系: CF-Connecting-IPの前後の空白は取り除く",
+      cfConnectingIp: " 2001:db8::1 ",
+      trustCfConnectingIp: true,
+      getClientAddress: () => "172.18.0.5",
+      want: "2001:db8::1",
+    },
+    {
+      name: "異常系: CF-Connecting-IPが空白だけだとIPアドレスではないので接続元アドレスを使う",
+      cfConnectingIp: "   ",
+      trustCfConnectingIp: true,
+      getClientAddress: () => "172.18.0.5",
+      want: "172.18.0.5",
+    },
+    {
+      name: "異常系: CF-Connecting-IPがIPアドレスの形式でないと信用できないので接続元アドレスを使う",
+      cfConnectingIp: "not-an-ip",
+      trustCfConnectingIp: true,
+      getClientAddress: () => "172.18.0.5",
+      want: "172.18.0.5",
+    },
+    {
       name: "正常系: 信用する設定でもCF-Connecting-IPが無ければ接続元アドレスを使う",
       cfConnectingIp: null,
       trustCfConnectingIp: true,

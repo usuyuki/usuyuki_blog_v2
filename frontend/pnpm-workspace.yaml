@@ -11,4 +11,3 @@ minimumReleaseAge: 1440
 blockExoticSubdeps: true
 # trustPolicy: no-downgrade はchokidar@4.0.3(Vite/Astroの依存)を誤検知でブロックするため
 # デフォルトのoffのままにする
-

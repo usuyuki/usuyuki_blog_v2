@@ -75,13 +75,29 @@ describe("createFixedWindowRateLimiter", () => {
       wantSize: number;
     }[] = [
       {
-        name: "異常系: 保持上限に達した状態で新しいキーを入れると上限を超えるので拒否され、保持数も増えない",
+        name: "正常系: 保持上限に達した状態でも新しいキーは拒否されず、最も古いキーを追い出して受け付ける",
         calls: [
           [0, "a"],
           [10, "b"],
           [20, "c"],
+          // 追い出されたaは新しいキーとして扱われ、代わりにbが追い出される
+          [30, "a"],
         ],
-        want: [true, true, false],
+        want: [true, true, true, true],
+        wantSize: 2,
+      },
+      {
+        name: "異常系: 保持上限に達していても残っているキーの上限超過は追い出しの影響を受けないので拒否される",
+        calls: [
+          [0, "a"],
+          [10, "b"],
+          [20, "b"],
+          // aが追い出され、bは残る
+          [30, "c"],
+          // limit=2なので3回目のbは上限超過
+          [40, "b"],
+        ],
+        want: [true, true, true, true, false],
         wantSize: 2,
       },
       {

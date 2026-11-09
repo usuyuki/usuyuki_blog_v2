@@ -36,6 +36,7 @@ function buildContext({
   body,
   ip = "203.0.113.1",
   clientAddress = "172.18.0.5",
+  clientId = "test-client-id",
 }: {
   slug: string | undefined;
   method: "GET" | "POST";
@@ -43,11 +44,13 @@ function buildContext({
   ip?: string;
   // nullのときはアダプタがclientAddressに対応していない状況を再現して例外を投げる
   clientAddress?: string | null;
+  // cookieのreaction_client_id
+  clientId?: string;
 }) {
   return {
     params: { slug },
     cookies: {
-      get: vi.fn(() => ({ value: "test-client-id" })),
+      get: vi.fn(() => ({ value: clientId })),
       set: vi.fn(),
     },
     get clientAddress(): string {
@@ -193,14 +196,19 @@ describe("Reactions API", () => {
     }
 
     describe("レート制限", () => {
+      type Sender = {
+        ip: string;
+        clientAddress?: string | null;
+        clientId?: string;
+      };
       // 同じ送信元から上限回数POSTした後、別の送信元から1回POSTしたときのステータスを検証する
       const tests: {
         name: string;
         trustCfConnectingIp: boolean;
         // 上限まで送る送信元
-        first: { ip: string; clientAddress?: string | null };
+        first: Sender;
         // 上限到達後に送る送信元
-        second: { ip: string; clientAddress?: string | null };
+        second: Sender;
         wantSecondStatus: number;
       }[] = [
         {
@@ -232,11 +240,10 @@ describe("Reactions API", () => {
           wantSecondStatus: 429,
         },
         {
-          name: "正常系: IPが取得できない場合は全員で1つの枠を共有せず、clientIdごとに数える",
+          name: "異常系: IPが取得できない場合にcookieのclientIdを作り直してPOSTしても、共有の枠で数えるので429になる",
           trustCfConnectingIp: false,
-          first: { ip: "198.51.100.7", clientAddress: null },
-          second: { ip: "198.51.100.7", clientAddress: null },
-          // buildContextのcookieは常に同じclientIdを返すため、同じ利用者として429になる
+          first: { ip: "198.51.100.7", clientAddress: null, clientId: "a" },
+          second: { ip: "198.51.100.7", clientAddress: null, clientId: "b" },
           wantSecondStatus: 429,
         },
       ];
@@ -250,7 +257,7 @@ describe("Reactions API", () => {
           const { POST, REACTION_POST_RATE_LIMIT } = await import(
             "../reactions/[slug]"
           );
-          const post = (from: { ip: string; clientAddress?: string | null }) =>
+          const post = (from: Sender) =>
             (POST as Handler)(
               buildContext({
                 slug: "test-post",
@@ -258,6 +265,7 @@ describe("Reactions API", () => {
                 body: JSON.stringify({ emoji: "👍" }),
                 ip: from.ip,
                 clientAddress: from.clientAddress,
+                clientId: from.clientId,
               }),
             );
           for (let i = 0; i < REACTION_POST_RATE_LIMIT; i++) {
@@ -266,6 +274,23 @@ describe("Reactions API", () => {
           expect((await post(tt.second)).status).toBe(tt.wantSecondStatus);
         });
       }
+
+      it("正常系: IPが取得できない状態が続いても、ログを溢れさせないよう警告は1回だけ出す", async () => {
+        vi.stubEnv("TRUST_CF_CONNECTING_IP", "false");
+        const { POST } = await import("../reactions/[slug]");
+        const astroLogger = (await import("~/libs/astroLogger")).default;
+        for (let i = 0; i < 3; i++) {
+          await (POST as Handler)(
+            buildContext({
+              slug: "test-post",
+              method: "POST",
+              body: JSON.stringify({ emoji: "👍" }),
+              clientAddress: null,
+            }),
+          );
+        }
+        expect(vi.mocked(astroLogger.warn)).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

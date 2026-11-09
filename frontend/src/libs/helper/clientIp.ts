@@ -1,3 +1,5 @@
+import { isIP } from "node:net";
+
 // リクエスト元のIPアドレスを決定する。
 // 本番はCloudflare Tunnel(cloudflared)経由でしか到達できない(astroはポートを公開していない)ため、
 // 接続元アドレスは常にcloudflaredコンテナになり、実クライアントのIPはCloudflareが付与する
@@ -5,6 +7,8 @@
 // ただしこのヘッダーはクライアントが自由に付けられるため、Cloudflareを経由しない環境(開発環境など)で
 // 信用するとレート制限を素通りされる。trustCfConnectingIp(環境変数TRUST_CF_CONNECTING_IP)が
 // 有効なときだけ採用し、それ以外は接続元アドレスを使う。どちらも取れなければnullを返す。
+// 信用する設定でも、IPアドレスとして解釈できない値(空白だけ・不正な文字列)は採用しない。
+// 採用すると、そうした値を送るリクエストがすべて同じキーにまとまったり、任意の文字列をキーにされたりするため
 export function resolveClientIp({
   cfConnectingIp,
   trustCfConnectingIp,
@@ -14,7 +18,8 @@ export function resolveClientIp({
   trustCfConnectingIp: boolean;
   getClientAddress: () => string;
 }): string | null {
-  if (trustCfConnectingIp && cfConnectingIp) return cfConnectingIp.trim();
+  const headerIp = cfConnectingIp?.trim() ?? "";
+  if (trustCfConnectingIp && isIP(headerIp) !== 0) return headerIp;
   try {
     // AstroのclientAddressはアダプタが対応していない場合に例外を投げる
     return getClientAddress() || null;

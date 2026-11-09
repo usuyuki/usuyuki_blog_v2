@@ -1,4 +1,4 @@
-// 保持キー数の既定の上限(これを超える新規キーは拒否する)
+// 保持キー数の既定の上限(これを超えたら最も古いキーを追い出す)
 const DEFAULT_MAX_KEYS = 10_000;
 
 interface RateLimitWindow {
@@ -15,8 +15,10 @@ export interface FixedWindowRateLimiter {
 
 // 固定ウィンドウ方式の簡易レートリミッターを生成する。
 // カウントはインメモリでコンテナ単位のため、コンテナ再起動でリセットされる。
-// 保持キー数はmaxKeysを上限とし、上限に達している間は新しいキーを拒否する(既存キーは通常どおり判定)。
-// 古いキーを追い出す方式だと、大量のキーを送り付けるだけで他のキーのカウントをリセットできてしまうため採らない。
+// 保持キー数はmaxKeysを上限とし、上限に達したら最も早く期限切れになるキーを追い出して新しいキーを受け付ける。
+// 新しいキーを拒否する方式だと、大量のキーを作るだけで全員の新規リクエストを締め出せてしまうため採らない。
+// 追い出しで他人のカウントがリセットされうるが、それにはウィンドウ内にmaxKeys個のキーを作る必要があり、
+// それだけのキーを作れる相手はリセットするまでもなく各キーの上限分を送れるので、制限が緩むことにはならない。
 export function createFixedWindowRateLimiter({
   limit,
   windowMs,
@@ -51,7 +53,11 @@ export function createFixedWindowRateLimiter({
         window.count += 1;
         return true;
       }
-      if (windows.size >= maxKeys) return false;
+      if (windows.size >= maxKeys) {
+        // 先頭が最も早く期限切れになるキー(Mapの挿入順=resetAtの昇順)
+        const oldestKey = windows.keys().next().value;
+        if (oldestKey !== undefined) windows.delete(oldestKey);
+      }
       windows.set(key, { count: 1, resetAt: current + windowMs });
       return true;
     },

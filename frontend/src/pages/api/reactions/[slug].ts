@@ -27,18 +27,25 @@ function jsonResponse(body: object, status: number): Response {
   });
 }
 
+// IPが取れなかったリクエストが共有するレート制限のキー
+const UNKNOWN_CLIENT_RATE_LIMIT_KEY = "ip:unknown";
+// IPが取れないことを警告済みか(リクエストごとに出すとログが溢れるため、プロセスで1回だけ出す)
+let hasWarnedClientIpUnavailable = false;
+
 // レート制限のキーを決める。IPv6は/64単位にまとめる(toRateLimitKey参照)。
-// アダプタの不具合などでIPが取れない場合に全員を1つの枠にまとめると、1人が使い切っただけで
-// 全員がリアクションできなくなるため、cookieのclientId単位で制限する(cookieは作り直せるので制限としては弱い)
-function buildRateLimitKey(
-  clientIp: string | null,
-  cookies: Parameters<APIRoute>[0]["cookies"],
-): string {
+// IPが取れない場合は、全員を1つの枠にまとめる。cookieのclientIdはクライアントが自由に作り直せるため、
+// それをキーにすると毎回新しい枠になり制限が効かなくなる。
+// 1人が使い切ると全員が制限されるが、IPが取れないのは設定の不備(本番はCloudflare経由で常に取れる)なので制限を優先する
+function buildRateLimitKey(clientIp: string | null): string {
   if (clientIp !== null) return `ip:${toRateLimitKey(clientIp)}`;
-  astroLogger.warn("Client IP is unavailable, falling back to client id", {
-    route: "/api/reactions/[slug]",
-  });
-  return `client:${getOrCreateClientId(cookies)}`;
+  if (!hasWarnedClientIpUnavailable) {
+    hasWarnedClientIpUnavailable = true;
+    astroLogger.warn(
+      "Client IP is unavailable, rate limiting with a shared bucket",
+      { route: "/api/reactions/[slug]" },
+    );
+  }
+  return UNKNOWN_CLIENT_RATE_LIMIT_KEY;
 }
 
 function getOrCreateClientId(
@@ -98,7 +105,7 @@ export const POST: APIRoute = async (context) => {
     trustCfConnectingIp: isCfConnectingIpTrusted(),
     getClientAddress: () => context.clientAddress,
   });
-  if (!reactionPostLimiter.tryConsume(buildRateLimitKey(clientIp, cookies))) {
+  if (!reactionPostLimiter.tryConsume(buildRateLimitKey(clientIp))) {
     return jsonResponse({ error: "Too many requests" }, 429);
   }
   let body: { emoji?: string };

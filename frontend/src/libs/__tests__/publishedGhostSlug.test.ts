@@ -156,6 +156,83 @@ describe("checkPublishedGhostSlug", () => {
   }
 });
 
+describe("checkPublishedGhostSlug の同時呼び出し", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-18T00:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
+
+  it("正常系: 一覧が無い状態で同時に呼ばれても、後続は取得中の結果を待つので公開中と判定され、全件取得は1回で済む", async () => {
+    const { checkPublishedGhostSlug, browse } = await loadModules();
+    mockGhostPages(browse, ["a"]);
+
+    const results = await Promise.all([
+      checkPublishedGhostSlug("a"),
+      checkPublishedGhostSlug("a"),
+    ]);
+
+    expect(results).toEqual(["published", "published"]);
+    expect(countFullFetches(browse)).toBe(1);
+  });
+});
+
+describe("記事一覧の強制再取得の間隔制限", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-18T00:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
+
+  const tests: {
+    name: string;
+    // checkPublishedGhostSlugで架空slugを判定してから、記事詳細ページの取得までの経過時間
+    elapsedMs: number;
+    want: string[];
+    wantFullFetches: number;
+  }[] = [
+    {
+      name: "異常系: 再取得の間隔内に記事詳細ページから強制再取得しようとしても、間隔制限が共通なので全件取得は増えず手元の一覧を返す",
+      elapsedMs: 10_000,
+      want: ["a"],
+      wantFullFetches: 1,
+    },
+    {
+      name: "正常系: 再取得の間隔が空いていれば記事詳細ページから取り直して公開直後の記事も見つかる",
+      elapsedMs: 60_000,
+      want: ["a", "new"],
+      wantFullFetches: 2,
+    },
+  ];
+
+  for (const tt of tests) {
+    it(tt.name, async () => {
+      const {
+        checkPublishedGhostSlug,
+        getAllGhostArticlesForArticlePage,
+        browse,
+      } = await loadModules();
+      mockGhostPages(browse, ["a"]);
+      await checkPublishedGhostSlug("fake");
+
+      vi.advanceTimersByTime(tt.elapsedMs);
+      mockGhostPages(browse, ["a", "new"]);
+      const articles = await getAllGhostArticlesForArticlePage("new");
+
+      expect(articles.map((a) => a.slug)).toEqual(tt.want);
+      expect(countFullFetches(browse)).toBe(tt.wantFullFetches);
+    });
+  }
+});
+
 describe("getAllArticlesCached の同時取得", () => {
   afterEach(() => {
     vi.clearAllMocks();

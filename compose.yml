@@ -24,6 +24,9 @@ services:
       # 以前は無効なキーでContent APIを叩いていたが、Ghostの総当たり対策(express-brute)が
       # 失敗を数えて429を返し、10秒ごとにERRORログが出ていたため変更した。
       # wgetは2xx以外で失敗するので、Ghostが応答できない間は不合格になる。
+      # urlがhttpsの本番では、平文httpで来たAdmin APIのリクエストをGhostが公開URLへ301で飛ばし、
+      # wgetがそれを追ってCloudflare経由の公開サイトを確認してしまう(このコンテナの状態を見られない)。
+      # X-Forwarded-Proto: httpsを付けてHTTPS経由とみなさせ、リダイレクトさせない(urlがhttpの開発環境でも200)。
       # localhostはIPv6解決で接続拒否になるため127.0.0.1を明示する
       test:
         [
@@ -32,6 +35,7 @@ services:
           "-q",
           "-O",
           "/dev/null",
+          "--header=X-Forwarded-Proto: https",
           "http://127.0.0.1:2368/ghost/api/admin/site/",
         ]
       interval: 10s

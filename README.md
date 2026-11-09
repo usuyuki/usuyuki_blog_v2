@@ -33,7 +33,7 @@ astro が Ghost より先に起動すると記事を取得できないまま立�
 
 | 層 | 仕組み |
 |---|---|
-| Docker | `ghost` の `healthcheck` が Admin API の `/ghost/api/admin/site/`（認証なしで応答する）を確認し、`astro` は `condition: service_healthy` で待機します |
+| Docker | `ghost` の `healthcheck` が Admin API の `/ghost/api/admin/site/`（認証なしで応答する）を `X-Forwarded-Proto: https` 付きで確認し（付けないと本番では公開URLへリダイレクトされ、手元のGhostを確認できません）、`astro` は `condition: service_healthy` で待機します |
 | アプリ | Ghost の取得に失敗した回の記事一覧はキャッシュせず、次のリクエストで取得し直します |
 
 ## 記事ソース
@@ -68,9 +68,9 @@ openssl rand -hex 32  # トークン生成例
 | 対策 | 内容 |
 |------|------|
 | slug検証 | `POST/GET /api/reactions/<slug>` は `isSlug()` を満たさないslugを400で拒否 |
-| 記事存在確認 | POSTは公開済みGhost記事のslugのみ受け付け、それ以外は404(記事一覧が取得できないときは503)。判定に使う一覧は5分より古ければ取り直し、Ghostへの取り直しは1分に1回までに抑える |
-| レート制限 | POSTは利用者単位で1分30回まで(超過は429)。IPv6は/64単位でまとめる。保持するキーは最大1万件で、超えた分の新規キーは拒否する |
-| クライアントIP | `CF-Connecting-IP` は環境変数 `TRUST_CF_CONNECTING_IP=true` のとき(本番の `compose-prod.yml` で設定)だけ信用し、それ以外は接続元アドレスを使う。IPが取れない場合はcookieのclientId単位で制限する |
+| 記事存在確認 | POSTは公開済みGhost記事のslugのみ受け付け、それ以外は404(記事一覧が取得できないときは503)。判定に使う一覧は5分より古ければ取り直し、Ghostへの取り直しは記事詳細ページと共通で1分に1回までに抑える(取得中なら結果を待つ) |
+| レート制限 | POSTは利用者単位で1分30回まで(超過は429)。IPv6は/64単位でまとめる。保持するキーは最大1万件で、超えたら最も古いキーを追い出す(新規キーを拒否すると全員を締め出せるため) |
+| クライアントIP | `CF-Connecting-IP` は環境変数 `TRUST_CF_CONNECTING_IP=true` のとき(本番の `compose-prod.yml` で設定)だけ信用し、それ以外は接続元アドレスを使う。IPアドレスとして解釈できないヘッダー値は採用しない。IPが取れない場合は全員共有の1枠で制限する(cookieのclientIdは作り直せるため使わない) |
 | ランキング | `/reactions` はDB由来のslugをGhostのクエリに使わず、キャッシュ済みの全記事一覧から記事情報を引く。不正な形式のslugは集計から除外する |
 | UI | 429・404・503などで送信に失敗したときは、楽観的更新を戻したうえで理由を表示する |
 
