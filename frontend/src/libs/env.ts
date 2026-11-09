@@ -53,6 +53,20 @@ export function getGhostFrontUrl(): string {
   return url;
 }
 
+// 記事詳細ページの ?debug= による手動キャッシュクリア用トークン。未設定なら機能を無効にする。
+// 秘密値なのでSSR時のprocess.envからのみ読む(import.meta.env経由だとPUBLIC_接頭辞を付けた際にクライアントへ埋め込まれうる)
+export function getCacheClearToken(): string | undefined {
+  if (!isServer()) return undefined;
+  return process.env.CACHE_CLEAR_TOKEN || undefined;
+}
+
+// CF-Connecting-IPヘッダーをクライアントIPとして信用するか。
+// Cloudflare Tunnel経由でしか到達できない本番だけ"true"にする(それ以外ではヘッダーを偽装できるため)
+export function isCfConnectingIpTrusted(): boolean {
+  if (!isServer()) return false;
+  return process.env.TRUST_CF_CONNECTING_IP === "true";
+}
+
 export function getNsfwBlocklist(): Set<string> {
   const raw = isServer()
     ? process.env.REACTIONS_NSFW_BLOCKLIST
