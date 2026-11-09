@@ -199,4 +199,37 @@ describe("getRelatedArticles", () => {
     ]);
     expect(vi.mocked(ghostApiWithRetry.posts.browse)).not.toHaveBeenCalled();
   });
+
+  it("正常系: excludeSlugsに指定した記事(最近の記事など)はタグ一致・補完のどちらでも関連記事に含めない", async () => {
+    const allGhostArticles = [
+      // 自分自身なので除外
+      makeArticle("current-post", "2026-06-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      // タグは一致するがexcludeSlugsにあるので除外
+      makeArticle("recent-1", "2026-05-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      // タグ一致で採用
+      makeArticle("related-1", "2026-01-01T00:00:00.000+09:00", [
+        { name: "アニメ", slug: "anime" },
+      ]),
+      // 補完候補だがexcludeSlugsにあるので除外
+      makeArticle("recent-2", "2025-12-01T00:00:00.000+09:00"),
+      // 補完で採用
+      makeArticle("fallback-1", "2025-06-01T00:00:00.000+09:00"),
+      makeArticle("fallback-2", "2025-01-01T00:00:00.000+09:00"),
+    ];
+
+    const articles = await getRelatedArticles(currentPost, {
+      allGhostArticles,
+      excludeSlugs: ["recent-1", "recent-2"],
+    });
+
+    expect(articles.map((a) => a.slug)).toEqual([
+      "related-1",
+      "fallback-1",
+      "fallback-2",
+    ]);
+  });
 });

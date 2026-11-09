@@ -15,7 +15,7 @@ const { articles } = Astro.props;
 	articles.length > 0 && (
 		<section class="related" aria-label="関連記事">
 			<div class="container">
-				<SectionHead en="Related" jp="関連記事" />
+				<SectionHead en="Related" jp="関連記事" size="compact" />
 				<ArticleCellGrid variant="related">
 					{articles.map((article) => (
 						<ArticleCell article={article} contextPrefix="related-" transition={true} />
