@@ -9,12 +9,14 @@ import PrevNextNav from "~/components/molecule/article/PrevNextNav.astro";
 import ShareBar from "~/components/molecule/article/ShareBar.astro";
 import Breadcrumb from "~/components/molecule/navigation/Breadcrumb.astro";
 import EmojiReaction from "~/components/organism/article/EmojiReaction.svelte";
+import RecentArticles from "~/components/organism/article/RecentArticles.astro";
 import RelatedArticles from "~/components/organism/article/RelatedArticles.astro";
 import { getFrontendUrl } from "~/libs/env";
 import ArticleLayout from "~/layouts/extends/ArticleLayout.astro";
 import {
   getAdjacentArticles,
   getAllGhostArticlesForArticlePage,
+  getRecentArticles,
   getRelatedArticles,
 } from "~/libs/articleAggregator";
 import { ghostApiWithRetry } from "~/libs/ghostClient";
@@ -93,9 +95,18 @@ const ogImage = post.feature_image
 // 済ませておくことで、前後記事・関連記事の2関数が同じ鮮度のスナップショットを参照できる。
 const allGhostArticles = await getAllGhostArticlesForArticlePage(slug);
 
+// 関連記事の上の段に出す最近の記事。関連記事と同じ記事が並ばないよう、関連記事からは除外する
+const recentArticles = getRecentArticles(slug, allGhostArticles);
+
 const [adjacent, relatedArticles, ogImageDimensions] = await Promise.all([
   getAdjacentArticles(slug, allGhostArticles),
-  getRelatedArticles({ slug, tags: publicTags }, { allGhostArticles }),
+  getRelatedArticles(
+    { slug, tags: publicTags },
+    {
+      allGhostArticles,
+      excludeSlugs: recentArticles.map((article) => article.slug),
+    },
+  ),
   ogImage ? getImageDimensions(ogImage) : Promise.resolve(null),
 ]);
 
@@ -244,6 +255,7 @@ const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 		</div>
 	</footer>
 
+	<RecentArticles articles={recentArticles} />
 	<RelatedArticles articles={relatedArticles} />
 
 	<script src="../scripts/tocSidebar.ts"></script>

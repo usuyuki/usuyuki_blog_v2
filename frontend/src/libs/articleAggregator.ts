@@ -390,15 +390,35 @@ export async function getAdjacentArticles(
   };
 }
 
+// 記事詳細用: 表示中の記事を除いた最近の記事を新しい順にlimit件返す
+// 外部記事(Qiita/Zenn等)は含めない。allGhostArticlesはgetAllGhostArticlesForArticlePageで
+// 取得した(新しい順に並んだ)配列を渡すこと
+export function getRecentArticles(
+  slug: string,
+  allGhostArticles: ArticleArchiveType[],
+  limit = 3,
+): ArticleArchiveType[] {
+  return allGhostArticles
+    .filter((article) => article.slug !== slug)
+    .slice(0, limit);
+}
+
 // 記事詳細用: タグが共通するGhost記事を関連記事として取得する
 // タグなし・該当不足のときは最新記事(自分以外)で補完する
 // allGhostArticlesを渡すと、タグ一致検索・補完の両方でGhostへのライブフェッチを省略し、
 // 渡されたリストをin-memoryでフィルタする(呼び出し元が既に全記事リストを取得済みの場合用)
+// excludeSlugsに渡した記事は関連記事に含めない(同じページの「最近の記事」との重複を避けるため)
 export async function getRelatedArticles(
   post: { slug: string; tags?: ArticleTagType[] },
-  options: { limit?: number; allGhostArticles?: ArticleArchiveType[] } = {},
+  options: {
+    limit?: number;
+    allGhostArticles?: ArticleArchiveType[];
+    excludeSlugs?: string[];
+  } = {},
 ): Promise<ArticleArchiveType[]> {
-  const { limit = 3, allGhostArticles } = options;
+  const { limit = 3, allGhostArticles, excludeSlugs = [] } = options;
+  // 自分自身と除外指定の記事は候補にしない
+  const excludedSlugSet = new Set([post.slug, ...excludeSlugs]);
   const tagSlugs = (post.tags ?? [])
     .map((tag) => tag.slug)
     .filter((tagSlug) => tagSlug !== "");
@@ -411,7 +431,7 @@ export async function getRelatedArticles(
       const tagSlugSet = new Set(tagSlugs);
       for (const article of allGhostArticles) {
         if (related.length >= limit) break;
-        if (article.slug === post.slug) continue;
+        if (excludedSlugSet.has(article.slug)) continue;
         if (article.tags?.some((tag) => tagSlugSet.has(tag.slug))) {
           related.push(article);
         }
@@ -421,11 +441,16 @@ export async function getRelatedArticles(
         const posts = await ghostApiWithRetry.posts.browse({
           filter: `tags:[${tagSlugs.join(",")}]+slug:-${post.slug}`,
           order: "published_at DESC",
-          limit,
+          // 除外指定の記事が混ざっても足りるように多めに取る
+          limit: limit + excludeSlugs.length,
           include: "tags",
         });
         if (posts) {
-          related.push(...posts.slice(0, limit));
+          related.push(
+            ...posts
+              .filter((article) => !excludedSlugSet.has(article.slug))
+              .slice(0, limit),
+          );
         }
       } catch (error) {
         errorHandler.handleError(error as Error, {
@@ -445,12 +470,12 @@ export async function getRelatedArticles(
         allGhostArticles ??
         (await getLatestArticles({
           includeExternal: false,
-          // 自分自身とタグ一致分が除外されても足りるように多めに取る
-          limit: limit + related.length + 1,
+          // 自分自身・除外指定・タグ一致分が除外されても足りるように多めに取る
+          limit: limit + related.length + excludeSlugs.length + 1,
         }));
       for (const article of latest) {
         if (related.length >= limit) break;
-        if (article.slug === post.slug) continue;
+        if (excludedSlugSet.has(article.slug)) continue;
         if (related.some((r) => r.slug === article.slug)) continue;
         related.push(article);
       }

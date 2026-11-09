@@ -53,14 +53,34 @@ test.describe("記事詳細ページ", () => {
     );
   });
 
-  test("関連記事セクションが表示される", async ({ page }) => {
+  test("最近の記事セクションが関連記事の上に表示され、表示中の記事は含まない", async ({
+    page,
+  }) => {
+    await page.goto("/e2e-post-1");
+    const recent = page.locator("section.recent");
+    await expect(recent).toBeVisible();
+    // post-1が最新なので、それを除いたpost-2〜4が並ぶ
+    for (const slug of ["e2e-post-2", "e2e-post-3", "e2e-post-4"]) {
+      await expect(recent.locator(`a[href='/${slug}']`).first()).toBeVisible();
+    }
+    await expect(recent.locator("a[href='/e2e-post-1']")).toHaveCount(0);
+    // 関連記事より上にある
+    const recentBox = await recent.boundingBox();
+    const relatedBox = await page.locator("section.related").boundingBox();
+    expect(recentBox?.y ?? 0).toBeLessThan(relatedBox?.y ?? 0);
+  });
+
+  test("関連記事セクションが表示され、最近の記事と重複しない", async ({
+    page,
+  }) => {
     await page.goto("/e2e-post-1");
     const related = page.locator("section.related");
     await expect(related).toBeVisible();
-    // 同じtechタグの他記事へのリンクがある
+    // 同じtechタグの他記事のうち、最近の記事に出ているpost-3を除いたpost-5が出る
     await expect(
-      related.locator("a[href='/e2e-post-3']").first(),
+      related.locator("a[href='/e2e-post-5']").first(),
     ).toBeVisible();
+    await expect(related.locator("a[href='/e2e-post-3']")).toHaveCount(0);
   });
 
   test("正常系: 目次が長くてもサイドバーのリアクション欄が画面内に収まり、目次はスクロールできる", async ({

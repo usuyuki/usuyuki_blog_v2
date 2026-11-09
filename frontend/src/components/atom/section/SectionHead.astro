@@ -1,16 +1,19 @@
 ---
 // セクション見出し(巨大英字 + 日本語サブ見出し + 任意のリンクボタン)
+// size="compact"は英字と日本語を1行に並べた小さい見出し。記事詳細下部の最近の記事・関連記事のように、
+// 本文を読み終えた後の補助的なセクションで巨大英字が主張しすぎないようにするため使う
 interface Props {
   en: string;
   jp: string;
   linkHref?: string;
   linkLabel?: string;
   headingId?: string;
+  size?: "large" | "compact";
 }
-const { en, jp, linkHref, linkLabel, headingId } = Astro.props;
+const { en, jp, linkHref, linkLabel, headingId, size = "large" } = Astro.props;
 ---
 
-<div class="section-head">
+<div class:list={["section-head", { compact: size === "compact" }]}>
 	<h2 class="section-title" id={headingId}>
 		<span class="en">{en}</span>
 		<span class="jp">{jp}</span>
@@ -48,6 +51,25 @@ const { en, jp, linkHref, linkLabel, headingId } = Astro.props;
 		font-weight: 700;
 		border-left: 4px solid var(--color-ink);
 		padding-left: 10px;
+	}
+	.compact {
+		padding: 40px 0 16px;
+	}
+	.compact .section-title {
+		display: flex;
+		align-items: baseline;
+		gap: 12px;
+	}
+	.compact .section-title .en {
+		font-size: 1rem;
+		letter-spacing: 0.16em;
+	}
+	.compact .section-title .jp {
+		margin-top: 0;
+		font-size: 0.75rem;
+		border-left: none;
+		padding-left: 0;
+		color: var(--color-muted-dark);
 	}
 	.section-link {
 		font-family: var(--font-en);
