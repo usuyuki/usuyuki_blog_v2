@@ -1,3 +1,6 @@
+// @vitest-environment node
+// Shiki 4.6以降はwasmをBlob.stream()で展開するが、jsdom環境のBlobにはstream()が無く失敗する。
+// highlightCodeBlocksはJSDOMを内部でimportしておりグローバルなDOMを必要としないため、node環境で実行する。
 import { describe, expect, it } from "vitest";
 import { highlightCodeBlocks } from "../highlightCodeBlocks";
 
