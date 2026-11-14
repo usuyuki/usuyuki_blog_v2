@@ -28,16 +28,17 @@ services:
       # 認証なしで200を返すAdmin APIのsiteエンドポイントで、Ghostが起動済みかを確認する。
       # 以前は無効なキーでContent APIを叩いていたが、Ghostの総当たり対策(express-brute)が
       # 失敗を数えて429を返し、10秒ごとにERRORログが出ていたため変更した。
-      # wgetは2xx以外で失敗するので、Ghostが応答できない間は不合格になる。
+      # 本番はurlがhttpsなので、httpのアクセスはhttpsのURLへ301でリダイレクトされる。
+      # wgetはリダイレクトを追ってコンテナの外へ出てしまい失敗するため、Ghostのイメージに
+      # 入っているnodeのfetchでリダイレクトを追わずに判定する。X-Forwarded-Protoでhttps経由と
+      # 伝えてリダイレクト自体も避け、3xxまでを合格、4xx/5xx(起動中の503など)と接続失敗を不合格にする。
       # localhostはIPv6解決で接続拒否になるため127.0.0.1を明示する
       test:
         [
           "CMD",
-          "wget",
-          "-q",
-          "-O",
-          "/dev/null",
-          "http://127.0.0.1:2368/ghost/api/admin/site/",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:2368/ghost/api/admin/site/',{redirect:'manual',headers:{'X-Forwarded-Proto':'https'}}).then(r=>process.exit(r.status<400?0:1)).catch(()=>process.exit(1))",
         ]
       interval: 10s
       timeout: 10s
