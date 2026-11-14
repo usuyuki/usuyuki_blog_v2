@@ -280,6 +280,24 @@ This runs:
 
 **IMPORTANT**: Always verify that `make 1` completes without any errors before considering any task complete. This ensures code quality and prevents broken builds.
 
+### ライブラリ更新時の確認
+依存ライブラリを更新したら、`make 1` に加えて、ローカルの開発サーバーが実際に動くことを **Claude in Chrome** で確認する(テストとビルドが通っても、開発サーバーやブラウザ上の描画だけが壊れることがあるため)。
+
+| 手順 | 内容 |
+| --- | --- |
+| 1. 更新 | `docker compose exec astro pnpm update --latest`(RC版やメジャー更新は個別に判断して除外する。`pnpm-workspace.yaml`の`minimumReleaseAge`で公開後1日未満の版は入らない) |
+| 2. 再起動 | `docker compose restart astro`。再起動しないと開発サーバーが更新前のパッケージのパスを参照し続け、`Failed to create the dev server app` で落ちる |
+| 3. パイプライン | `make 1` |
+| 4. 画面の確認 | Claude in Chromeで `http://localhost:1000` の下表のページを開き、表示とコンソールエラーが無いことを確認する |
+| 5. ログ | `docker compose logs --since 10m astro` にERRORや`Shiki highlighting failed`が無いことを確認する |
+
+| ページ | 見る点 |
+| --- | --- |
+| トップ(`/`) | ヘッダー・最新記事が表示される |
+| 記事一覧(`/archive`) | 記事セルが並び、横スクロールが出ない |
+| mermaidを含む記事(例: `/isucon2026`) | `pre.mermaid` の中に `svg` が描画される |
+| コードブロックを含む記事(例: `/claude-code-pro`) | `pre.shiki` に変換され、色付きの`span`がある(Shiki・jsdomの更新で壊れやすい) |
+
 ## Caching System
 
 The application uses multiple layers of caching for performance:
