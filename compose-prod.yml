@@ -25,14 +25,8 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      # 認証なしで200を返すAdmin APIのsiteエンドポイントで、Ghostが起動済みかを確認する。
-      # 以前は無効なキーでContent APIを叩いていたが、Ghostの総当たり対策(express-brute)が
-      # 失敗を数えて429を返し、10秒ごとにERRORログが出ていたため変更した。
-      # 本番はurlがhttpsなので、httpのアクセスはhttpsのURLへ301でリダイレクトされる。
-      # wgetはリダイレクトを追ってコンテナの外へ出てしまい失敗するため、Ghostのイメージに
-      # 入っているnodeのfetchでリダイレクトを追わずに判定する。X-Forwarded-Protoでhttps経由と
-      # 伝えてリダイレクト自体も避け、3xxまでを合格、4xx/5xx(起動中の503など)と接続失敗を不合格にする。
-      # localhostはIPv6解決で接続拒否になるため127.0.0.1を明示する
+      # 認証不要のAdmin APIで起動を確認する。経緯はCLAUDE.mdの「起動順序」を参照
+      # 本番はhttpsへ301されるため、wgetではなくリダイレクトを追わないnodeのfetchを使う
       test:
         [
           "CMD",
