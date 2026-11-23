@@ -1,10 +1,12 @@
 import { JSDOM } from "jsdom";
 import { bundledLanguages, getSingletonHighlighter } from "shiki";
 import astroLogger from "~/libs/astroLogger";
+import { parseChartSpec, renderChart } from "./renderChart";
 import { usuyukiEditorialShikiTheme } from "./shikiTheme";
 
 const THEME_NAME = "usuyuki-editorial";
 const MERMAID_LANGUAGE = "mermaid";
+const CHART_LANGUAGE = "chart";
 
 // SSRリクエストのたびにWASM文法エンジンを読み込み直さないよう、
 // Highlighterインスタンスをプロセス内で使い回す(getSingletonHighlighterが担保)。
@@ -16,6 +18,7 @@ const getHighlighter = () =>
 
 // Ghostのコードカードが出力する<pre><code class="language-XXX">を検出し、
 // - language-mermaid: <pre class="mermaid">に変換し、クライアント側のmermaid.js描画に委ねる
+// - language-chart: JSONをSSRでSVGのグラフ(<figure class="chart">)に変換する。JSONが不正なら元のまま
 // - それ以外の言語指定あり: Shikiでハイライト済みHTMLに置換する(SSRで完結)
 // - 言語指定なし: 変換せずそのまま維持する
 export const highlightCodeBlocks = async (html: string): Promise<string> => {
@@ -47,6 +50,21 @@ export const highlightCodeBlocks = async (html: string): Promise<string> => {
       mermaidPre.className = "mermaid";
       mermaidPre.textContent = rawCode;
       pre.replaceWith(mermaidPre);
+      continue;
+    }
+
+    if (lang === CHART_LANGUAGE) {
+      try {
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = renderChart(parseChartSpec(rawCode));
+        const figure = wrapper.firstElementChild;
+        if (figure) pre.replaceWith(figure);
+      } catch (error) {
+        // JSONの誤りで記事全体を壊さないよう、書いた内容をコードブロックのまま見せる
+        astroLogger.warn("Chart rendering failed, keeping plain code block", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       continue;
     }
 

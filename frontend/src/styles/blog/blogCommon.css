@@ -174,6 +174,113 @@
     height: auto;
   }
 
+  /* グラフ(言語chartのコードブロックをrenderChart.tsがSSRでSVGにしたもの)。
+     mermaid図と同じく罫線で囲い、系列の色はオレンジ→黒→グレーの順に塗る */
+  .blog-content figure.chart {
+    border: var(--bw) solid var(--color-ink);
+    padding: 20px 24px;
+    margin: 1.6em 0;
+    background: var(--color-paper);
+  }
+  /* 画像キャプション用のfigcaption(灰色・小さい・中央揃え)を打ち消し、見出しとして見せる */
+  .blog-content figcaption.chart-title {
+    font-family: var(--font-ja-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    text-align: left;
+    margin-bottom: 12px;
+    padding: 0 0 8px;
+    border-bottom: var(--bw) solid var(--color-ink);
+  }
+  /* SVGはviewBoxごと縮むため、スマホ幅では目盛りの文字が潰れないよう最低幅を設け、
+     表やコードブロックと同じく枠の中で横スクロールさせる */
+  .blog-content .chart-svg-scroll {
+    overflow-x: auto;
+  }
+  .blog-content .chart-svg {
+    display: block;
+    width: 100%;
+    min-width: 440px;
+    height: auto;
+  }
+  @media (max-width: 640px) {
+    .blog-content figure.chart {
+      padding: 16px 12px;
+    }
+  }
+  .blog-content .chart-grid {
+    stroke: var(--color-border-light);
+    stroke-width: 1;
+  }
+  .blog-content .chart-axis {
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+  .blog-content .chart-tick {
+    font-family: var(--font-en);
+    font-size: 14px;
+    fill: var(--color-muted-dark);
+  }
+  .blog-content .chart-value {
+    font-family: var(--font-en);
+    font-size: 15px;
+    font-weight: 900;
+    fill: var(--color-ink);
+  }
+  .blog-content .chart-line {
+    stroke-width: 3;
+  }
+  .blog-content .chart-point {
+    stroke-width: 2;
+  }
+  .blog-content .chart-series-0 {
+    fill: var(--color-orange);
+    stroke: var(--color-orange);
+    background: var(--color-orange);
+  }
+  .blog-content .chart-series-1 {
+    fill: var(--color-ink);
+    stroke: var(--color-ink);
+    background: var(--color-ink);
+  }
+  .blog-content .chart-series-2 {
+    fill: var(--color-muted);
+    stroke: var(--color-muted);
+    background: var(--color-muted);
+  }
+  /* 棒は塗りだけにし、輪郭線で太って見えないようにする */
+  .blog-content rect.chart-bar {
+    stroke: none;
+  }
+  /* 線は色で塗りつぶさない(.chart-series-*のfillを打ち消す) */
+  .blog-content polyline.chart-line {
+    fill: none;
+  }
+  /* 点は白い縁取りにして線の上で目立たせる */
+  .blog-content circle.chart-point {
+    stroke: var(--color-paper);
+  }
+  .blog-content .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    font-size: 0.9em;
+  }
+  .blog-content .chart-legend li {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+  .blog-content .chart-swatch {
+    width: 12px;
+    height: 12px;
+  }
+
   /* 埋め込み・表・区切り線 */
   .blog-content > iframe {
     margin-left: auto;
