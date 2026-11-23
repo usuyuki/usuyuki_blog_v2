@@ -26,7 +26,8 @@ Astro 7 + Tailwind CSS 4 + Svelte 5
 - 2px罫線(`--bw`)・角丸なし・巨大英字タイポ(Webフォントなし、システムサンセリフ)
 - 記事一覧は `/archive?year=2024&sort=oldest&page=2` 形式のSSRクエリパラメータ(年別・月別アーカイブURLは301でリダイレクト)
 - 記事本文のコードブロックはSSR時に[Shiki](https://shiki.style/)でシンタックスハイライト、`mermaid`言語指定のコードブロックはクライアントサイドで[mermaid.js](https://mermaid.js.org/)により図として描画([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
-- `chart`言語指定のコードブロックにJSON(`type`・`labels`・`series`など)を書くと、SSR時にブログのデザインに合わせたSVGの棒グラフ・折れ線グラフとして描画(書式は`CLAUDE.md`の`renderChart.ts`の項を参照)
+- `chart`言語指定のコードブロックにJSON(`type`・`labels`・`series`など)を書くと、SSR時にブログのデザインに合わせたSVGの棒グラフ・折れ線グラフ・円グラフとして描画(書式は`CLAUDE.md`の`renderChart.ts`の項を参照)
+- `/dev/chart-preview`でchartのJSONを公開前に描画して確認できる(開発環境では認証なし、本番では環境変数`DEV_PAGES_BASIC_AUTH_USER`/`DEV_PAGES_BASIC_AUTH_PASSWORD`のBasic認証。未設定なら404)
 
 ## 起動順序
 

@@ -1,0 +1,150 @@
+---
+// chartコードブロックのJSONを貼ると、記事本文と同じ見た目でグラフを描画する。
+// Ghostの下書きはContent APIで取得できず、公開するまで本番で確認できないため、貼る前に確かめる用途。
+// /dev配下なので、本番ではmiddleware.tsのBasic認証(未設定なら404)で保護される。
+import "~/styles/blog/blogCommon.css";
+import PageHead from "~/components/atom/section/PageHead.astro";
+import PageLayout from "~/layouts/extends/PageLayout.astro";
+import { CHART_PREVIEW_SAMPLES } from "~/libs/helper/chartPreview";
+import { buildFixedOgpMeta } from "~/libs/helper/ogpMeta";
+import type { HeadMetaType } from "~/types/HeadMetaType";
+
+const headMeta: HeadMetaType = {
+  title: "グラフのプレビュー",
+  slug: "/dev/chart-preview",
+  description: "chartコードブロックのプレビュー",
+  ...buildFixedOgpMeta(),
+};
+---
+
+<PageLayout {...headMeta}>
+	<PageHead en="Chart Preview" jp="グラフのプレビュー" />
+	<div class="container chart-preview">
+		<section class="editor">
+			<p class="hint">
+				Ghostのコードカードで言語を<code>chart</code>にして貼るJSONを入力すると、右側に記事本文と同じ見た目で描画します。
+			</p>
+			<div class="buttons" role="group" aria-label="サンプル">
+				{CHART_PREVIEW_SAMPLES.map((sample, i) => (
+					<button type="button" class="sample-button" data-sample-index={i}>{sample.label}</button>
+				))}
+			</div>
+			<textarea id="chart-preview-source" spellcheck="false" aria-label="chartのJSON">{CHART_PREVIEW_SAMPLES[0].json}</textarea>
+			<p id="chart-preview-error" class="error" role="alert" hidden></p>
+		</section>
+		<section class="result">
+			<div class="buttons" role="group" aria-label="表示幅">
+				<button type="button" class="width-button is-active" data-width="pc">PC幅</button>
+				<button type="button" class="width-button" data-width="sp">スマホ幅(390px)</button>
+			</div>
+			<div id="chart-preview-frame" class="frame">
+				<article id="chart-preview-output" class="blog-content"></article>
+			</div>
+		</section>
+	</div>
+</PageLayout>
+
+<script>
+	import { CHART_PREVIEW_SAMPLES, previewChart } from "~/libs/helper/chartPreview";
+
+	// 入力のたびにJSONを描画し直す。エラー時は直前のグラフを残したまま理由を出す
+	document.addEventListener("astro:page-load", () => {
+		const source = document.querySelector<HTMLTextAreaElement>("#chart-preview-source");
+		const output = document.querySelector<HTMLElement>("#chart-preview-output");
+		const errorBox = document.querySelector<HTMLElement>("#chart-preview-error");
+		const frame = document.querySelector<HTMLElement>("#chart-preview-frame");
+		if (!source || !output || !errorBox || !frame) return;
+
+		const render = () => {
+			const result = previewChart(source.value);
+			if ("html" in result) {
+				output.innerHTML = result.html;
+				errorBox.hidden = true;
+			} else {
+				errorBox.textContent = result.error;
+				errorBox.hidden = false;
+			}
+		};
+
+		source.addEventListener("input", render);
+		for (const button of document.querySelectorAll<HTMLButtonElement>(".sample-button")) {
+			button.addEventListener("click", () => {
+				source.value = CHART_PREVIEW_SAMPLES[Number(button.dataset.sampleIndex)].json;
+				render();
+			});
+		}
+		for (const button of document.querySelectorAll<HTMLButtonElement>(".width-button")) {
+			button.addEventListener("click", () => {
+				frame.classList.toggle("is-sp", button.dataset.width === "sp");
+				for (const other of document.querySelectorAll(".width-button")) {
+					other.classList.toggle("is-active", other === button);
+				}
+			});
+		}
+		render();
+	});
+</script>
+
+<style>
+	.chart-preview {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+		gap: 32px;
+		padding-top: 32px;
+		padding-bottom: 80px;
+		align-items: start;
+	}
+	@media (max-width: 900px) {
+		.chart-preview {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	.hint {
+		font-size: 0.9rem;
+		margin-bottom: 12px;
+	}
+	.buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-bottom: 12px;
+	}
+	.buttons button {
+		font-family: var(--font-en);
+		font-weight: 700;
+		font-size: 0.8rem;
+		border: var(--bw) solid var(--color-ink);
+		padding: 6px 14px;
+		background: var(--color-paper);
+		cursor: pointer;
+	}
+	.buttons button:hover,
+	.buttons button.is-active {
+		background: var(--color-ink);
+		color: var(--color-paper);
+	}
+	textarea {
+		width: 100%;
+		min-height: 420px;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.85rem;
+		line-height: 1.6;
+		border: var(--bw) solid var(--color-ink);
+		padding: 12px;
+		resize: vertical;
+	}
+	.error {
+		margin-top: 12px;
+		padding: 10px 14px;
+		border: var(--bw) solid var(--color-orange);
+		color: var(--color-ink);
+		font-size: 0.9rem;
+	}
+	.frame {
+		max-width: 760px;
+	}
+	/* スマホ幅の確認用。記事本文の左右余白(16px)を除いた幅で描く */
+	.frame.is-sp {
+		max-width: 358px;
+	}
+</style>

@@ -175,7 +175,7 @@
   }
 
   /* グラフ(言語chartのコードブロックをrenderChart.tsがSSRでSVGにしたもの)。
-     mermaid図と同じく罫線で囲い、系列の色はオレンジ→黒→グレーの順に塗る */
+     mermaid図と同じく罫線で囲い、系列の色はオレンジ→黒→グレー→薄いグレーの順に塗り、5つ目からは繰り返す */
   .blog-content figure.chart {
     border: var(--bw) solid var(--color-ink);
     padding: 20px 24px;
@@ -248,6 +248,28 @@
     fill: var(--color-muted);
     stroke: var(--color-muted);
     background: var(--color-muted);
+  }
+  .blog-content .chart-series-3 {
+    fill: var(--color-faint);
+    stroke: var(--color-faint);
+    background: var(--color-faint);
+  }
+  /* 円グラフの扇形は白い線で区切る */
+  .blog-content path.chart-slice {
+    stroke: var(--color-paper);
+    stroke-width: 2;
+  }
+  /* 円グラフ中央の合計値 */
+  .blog-content .chart-total {
+    font-family: var(--font-en);
+    font-size: 30px;
+    font-weight: 900;
+    fill: var(--color-ink);
+  }
+  .blog-content .chart-legend-value {
+    margin-left: 6px;
+    font-family: var(--font-en);
+    color: var(--color-muted-dark);
   }
   /* 棒は塗りだけにし、輪郭線で太って見えないようにする */
   .blog-content rect.chart-bar {

@@ -63,6 +63,9 @@ services:
       REACTIONS_DB_PASSWORD: example
       REACTIONS_DB_NAME: usuyuki_blog
       REACTIONS_NSFW_BLOCKLIST: ${REACTIONS_NSFW_BLOCKLIST:-🖕,💢}
+      # /dev配下(グラフのプレビューなど)のBasic認証。未設定なら本番では/dev配下が404になる
+      DEV_PAGES_BASIC_AUTH_USER: ${DEV_PAGES_BASIC_AUTH_USER:-}
+      DEV_PAGES_BASIC_AUTH_PASSWORD: ${DEV_PAGES_BASIC_AUTH_PASSWORD:-}
     user: "1000:1000"
     depends_on:
       # Ghostより先にastroが起動すると記事取得に失敗するため、healthyになるまで待つ

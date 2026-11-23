@@ -1,7 +1,7 @@
 // Ghostのコードカード(言語: chart)に書いたJSONから、記事本文用のグラフ(SVG)をSSRで組み立てる。
 // 色はSVG属性に直書きせずクラス名だけを付け、blogCommon.cssのデザイントークンで塗る。
 
-export type ChartType = "bar" | "line";
+export type ChartType = "bar" | "line" | "pie";
 
 export type ChartSeries = {
   name: string;
@@ -17,7 +17,7 @@ export type ChartSpec = {
   series: ChartSeries[];
 };
 
-const CHART_TYPES: readonly ChartType[] = ["bar", "line"];
+const CHART_TYPES: readonly ChartType[] = ["bar", "line", "pie"];
 
 // SVGの座標系。viewBoxで縮小されるため、スマホ幅でも文字が潰れないよう横幅は控えめにしている
 const WIDTH = 560;
@@ -27,6 +27,13 @@ const PLOT_WIDTH = WIDTH - MARGIN.left - MARGIN.right;
 const PLOT_HEIGHT = HEIGHT - MARGIN.top - MARGIN.bottom;
 // 1区間のうち棒が占める割合
 const BAR_RATIO = 0.6;
+// 円グラフ(ドーナツ型)の中心と外径・内径。内側の穴に合計値を出す
+const PIE = { cx: WIDTH / 2, cy: HEIGHT / 2, outer: 132, inner: 76 };
+// blogCommon.cssで定義している系列色の数。これを超える系列・扇形は先頭の色から繰り返す
+const SERIES_COLOR_COUNT = 4;
+
+const seriesClass = (index: number): string =>
+  `chart-series-${index % SERIES_COLOR_COUNT}`;
 
 const escapeHtml = (text: string): string =>
   text
@@ -84,6 +91,16 @@ export const parseChartSpec = (source: string): ChartSpec => {
     }
     return { name: item.name, values };
   });
+  if (type === "pie") {
+    if (parsedSeries.length !== 1) {
+      throw new Error("chart: pieのseriesは1つだけにしてください");
+    }
+    if (parsedSeries[0].values.every((value) => value === 0)) {
+      throw new Error(
+        "chart: pieのvaluesには0より大きい値を1つ以上入れてください",
+      );
+    }
+  }
 
   return {
     type: type as ChartType,
@@ -154,7 +171,7 @@ const renderBars = (
           const top = toY(stacked + value);
           const height = round(toY(stacked) - top);
           stacked += value;
-          return `<rect class="chart-bar chart-series-${seriesIndex}" x="${x}" y="${round(top)}" width="${barWidth}" height="${height}"/>`;
+          return `<rect class="chart-bar ${seriesClass(seriesIndex)}" x="${x}" y="${round(top)}" width="${barWidth}" height="${height}"/>`;
         })
         .join("");
       const label = `<text class="chart-value" x="${round(bandCenter(i))}" y="${round(toY(stacked) - 8)}" text-anchor="middle">${stacked}${unit}</text>`;
@@ -175,11 +192,11 @@ const renderLines = (
         x: round(bandCenter(i)),
         y: round(toY(value)),
       }));
-      const polyline = `<polyline class="chart-line chart-series-${seriesIndex}" points="${points.map((p) => `${p.x},${p.y}`).join(" ")}"/>`;
+      const polyline = `<polyline class="chart-line ${seriesClass(seriesIndex)}" points="${points.map((p) => `${p.x},${p.y}`).join(" ")}"/>`;
       const circles = points
         .map(
           (p) =>
-            `<circle class="chart-point chart-series-${seriesIndex}" cx="${p.x}" cy="${p.y}" r="4"/>`,
+            `<circle class="chart-point ${seriesClass(seriesIndex)}" cx="${p.x}" cy="${p.y}" r="4"/>`,
         )
         .join("");
       return polyline + circles;
@@ -193,12 +210,65 @@ const renderLegend = (series: ChartSeries[]): string =>
     : `<ul class="chart-legend">${series
         .map(
           (s, i) =>
-            `<li><span class="chart-swatch chart-series-${i}"></span>${escapeHtml(s.name)}</li>`,
+            `<li><span class="chart-swatch ${seriesClass(i)}"></span>${escapeHtml(s.name)}</li>`,
         )
         .join("")}</ul>`;
 
-// ChartSpecから<figure class="chart">のHTML文字列を組み立てる
-export const renderChart = (spec: ChartSpec): string => {
+// 円周上の点。角度0を真上にし、時計回りに進める
+const pointOnCircle = (radius: number, angle: number) => ({
+  x: round(PIE.cx + radius * Math.sin(angle)),
+  y: round(PIE.cy - radius * Math.cos(angle)),
+});
+
+// ドーナツ型の扇形のパス。開始点と終了点が重なる100%の扇形でも描けるよう、
+// 外周・内周の弧をそれぞれ中間点で2本に分けて描く(1本の弧は180度以下になる)
+const donutSlicePath = (start: number, end: number): string => {
+  const mid = (start + end) / 2;
+  const [o1, o2, o3] = [start, mid, end].map((a) =>
+    pointOnCircle(PIE.outer, a),
+  );
+  const [i1, i2, i3] = [start, mid, end].map((a) =>
+    pointOnCircle(PIE.inner, a),
+  );
+  return (
+    `M${o1.x} ${o1.y}` +
+    `A${PIE.outer} ${PIE.outer} 0 0 1 ${o2.x} ${o2.y}` +
+    `A${PIE.outer} ${PIE.outer} 0 0 1 ${o3.x} ${o3.y}` +
+    `L${i3.x} ${i3.y}` +
+    `A${PIE.inner} ${PIE.inner} 0 0 0 ${i2.x} ${i2.y}` +
+    `A${PIE.inner} ${PIE.inner} 0 0 0 ${i1.x} ${i1.y}Z`
+  );
+};
+
+// 円グラフ(ドーナツ型)。labelsの各値を扇形にし、中央に合計、凡例に値と割合を出す
+const renderPie = (spec: ChartSpec): { svgBody: string; legend: string } => {
+  const { values } = spec.series[0];
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const unit = escapeHtml(spec.unit ?? "");
+  let angle = 0;
+  const slices = values
+    .map((value, i) => {
+      const start = angle;
+      angle += (value / total) * 2 * Math.PI;
+      // 値が0の扇形は幅が無いので描かない(凡例には残す)
+      if (value === 0) return "";
+      return `<path class="chart-slice ${seriesClass(i)}" d="${donutSlicePath(start, angle)}"/>`;
+    })
+    .join("");
+  const center =
+    `<text class="chart-total" x="${PIE.cx}" y="${PIE.cy}" text-anchor="middle" dominant-baseline="middle">${total}${unit}</text>` +
+    `<text class="chart-tick" x="${PIE.cx}" y="${PIE.cy + 28}" text-anchor="middle">合計</text>`;
+  const legend = `<ul class="chart-legend">${spec.labels
+    .map((label, i) => {
+      const percent = Math.round((values[i] / total) * 100);
+      return `<li><span class="chart-swatch ${seriesClass(i)}"></span>${escapeHtml(label)}<span class="chart-legend-value">${values[i]}${unit}（${percent}%）</span></li>`;
+    })
+    .join("")}</ul>`;
+  return { svgBody: slices + center, legend };
+};
+
+// 棒グラフ・折れ線グラフの、目盛り・グラフ本体・軸ラベルを組み立てる
+const renderAxisChart = (spec: ChartSpec): string => {
   const maxValue =
     spec.type === "bar"
       ? Math.max(
@@ -218,6 +288,19 @@ export const renderChart = (spec: ChartSpec): string => {
       ? renderBars(spec, toY, bandWidth, bandCenter)
       : renderLines(spec, toY, bandCenter);
   const baseline = `<line class="chart-axis" x1="${MARGIN.left}" x2="${WIDTH - MARGIN.right}" y1="${HEIGHT - MARGIN.bottom}" y2="${HEIGHT - MARGIN.bottom}"/>`;
+  return (
+    renderYAxis(ticks, toY) +
+    marks +
+    baseline +
+    renderXLabels(spec.labels, bandCenter)
+  );
+};
+
+// ChartSpecから<figure class="chart">のHTML文字列を組み立てる
+export const renderChart = (spec: ChartSpec): string => {
+  const pie = spec.type === "pie" ? renderPie(spec) : undefined;
+  const svgBody = pie ? pie.svgBody : renderAxisChart(spec);
+  const legend = pie ? pie.legend : renderLegend(spec.series);
   const ariaLabel = escapeHtml(
     spec.title ?? spec.series.map((s) => s.name).join(" / "),
   );
@@ -227,11 +310,8 @@ export const renderChart = (spec: ChartSpec): string => {
     : "";
   const svg =
     `<div class="chart-svg-scroll"><svg class="chart-svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="${ariaLabel}">` +
-    renderYAxis(ticks, toY) +
-    marks +
-    baseline +
-    renderXLabels(spec.labels, bandCenter) +
+    svgBody +
     "</svg></div>";
 
-  return `<figure class="chart">${title}${svg}${renderLegend(spec.series)}</figure>`;
+  return `<figure class="chart">${title}${svg}${legend}</figure>`;
 };

@@ -28,10 +28,22 @@ describe("parseChartSpec", () => {
       message: "JSON",
     },
     {
-      name: "typeにbar/line以外を入れると描画方法が無いのでエラーになる",
+      name: "typeにbar/line/pie以外を入れると描画方法が無いのでエラーになる",
       input:
-        '{"type":"pie","labels":["a"],"series":[{"name":"s","values":[1]}]}',
+        '{"type":"scatter","labels":["a"],"series":[{"name":"s","values":[1]}]}',
       message: "type",
+    },
+    {
+      name: "pieにseriesを2つ入れると1つの円に収められないのでエラーになる",
+      input:
+        '{"type":"pie","labels":["a"],"series":[{"name":"s","values":[1]},{"name":"t","values":[2]}]}',
+      message: "pie",
+    },
+    {
+      name: "pieのvaluesがすべて0だと割合を計算できないのでエラーになる",
+      input:
+        '{"type":"pie","labels":["a","b"],"series":[{"name":"s","values":[0,0]}]}',
+      message: "pie",
     },
     {
       name: "labelsが空だと横軸を描けないのでエラーになる",
@@ -132,6 +144,40 @@ describe("renderChart", () => {
     expect(
       html.match(/<circle class="chart-point chart-series-0"/g),
     ).toHaveLength(2);
+  });
+
+  it("正常系: 円グラフは0以外の値ごとに扇形を描き、中央に合計、凡例に値と割合を出す", () => {
+    const html = renderChart({
+      type: "pie",
+      unit: "冊",
+      labels: ["会場", "オンライン", "電子版", "見本誌", "その他", "なし"],
+      series: [{ name: "頒布数", values: [50, 20, 10, 10, 10, 0] }],
+    });
+    // 値が0の「なし」は扇形を描かない
+    expect(html.match(/<path class="chart-slice /g)).toHaveLength(5);
+    // 色は4色を順に使い、5つ目は1つ目の色に戻る
+    expect(
+      html.match(/<path class="chart-slice chart-series-0"/g),
+    ).toHaveLength(2);
+    expect(html).toContain(">100冊<");
+    // 1系列でも、円グラフはどの色が何かを示すため凡例を出す
+    expect(html).toContain('class="chart-legend"');
+    expect(html).toContain(">会場<");
+    expect(html).toContain("50冊（50%）");
+    expect(html).toContain("0冊（0%）");
+    // 縦軸の目盛りは描かない
+    expect(html).not.toContain("chart-grid");
+  });
+
+  it("正常系: 円グラフで1つの値が100%でも扇形の座標が壊れない", () => {
+    const html = renderChart({
+      type: "pie",
+      labels: ["a", "b"],
+      series: [{ name: "s", values: [3, 0] }],
+    });
+    expect(html.match(/<path class="chart-slice /g)).toHaveLength(1);
+    expect(html).not.toContain("NaN");
+    expect(html).toContain("3（100%）");
   });
 
   it("正常系: タイトルやラベルに含まれるHTMLはエスケープされる", () => {
