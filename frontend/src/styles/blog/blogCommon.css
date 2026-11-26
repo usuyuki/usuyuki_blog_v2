@@ -212,6 +212,55 @@
       white-space: nowrap;
     }
   }
+  /* 注釈: 本文中の参照(上付き数字)と、記事末尾の注釈一覧。sticky headerに隠れないようscroll-margin-topを付ける */
+  .blog-content .footnote-ref {
+    font-size: 0.75em;
+    line-height: 0;
+    margin-left: 1px;
+  }
+  .blog-content .footnote-ref a {
+    font-family: var(--font-en);
+    font-weight: 700;
+    color: var(--color-orange);
+    text-decoration: none;
+    padding: 0 2px;
+    scroll-margin-top: 90px;
+  }
+  .blog-content .footnote-ref a::before {
+    content: "[";
+  }
+  .blog-content .footnote-ref a::after {
+    content: "]";
+  }
+  .blog-content .footnotes {
+    margin-top: 3em;
+    padding-top: 1em;
+    border-top: var(--bw) solid var(--color-ink);
+    font-size: 0.9em;
+    line-height: 1.7;
+  }
+  .blog-content .footnotes-title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin: 0 0 0.8em;
+  }
+  .blog-content .footnotes-list {
+    margin: 0;
+    padding-left: 1.8em;
+  }
+  .blog-content .footnotes-list li {
+    scroll-margin-top: 90px;
+  }
+  .blog-content .footnotes-list li::marker {
+    font-family: var(--font-en);
+    font-weight: 700;
+    color: var(--color-orange);
+  }
+  .blog-content .footnote-backref {
+    text-decoration: none;
+    margin-left: 0.3em;
+  }
   .blog-content > hr {
     border: none;
     border-top: var(--bw) solid var(--color-ink);

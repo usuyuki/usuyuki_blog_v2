@@ -126,6 +126,7 @@ The frontend follows Atomic Design principles:
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ、fetchは5秒でタイムアウト)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
 - `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
+- `frontend/src/libs/helper/convertFootnotes.ts` - 注釈機能。Ghostの通常エディタ(段落カード)の本文中に `((注釈の本文))` と書くと、その位置に番号付きの上付き参照を出し、記事末尾に注釈一覧(`aside.footnotes`)を追加する。Markdownカードの脚注は参照と本文を同じカードに書く必要があり通常の文章に混ぜにくいため、専用記法にしている。注釈内の装飾・リンクは保持し、`(参考)`のような括弧は深さを数えて取り違えない。`<pre>`・`<code>`・タグ属性内・見出しは対象外(目次に影響しないため)。リンク処理(`addTargetBlankToLinks`)の後、`highlightCodeBlocks`の前に[slug].astroで実行する
 - `frontend/src/libs/helper/shikiTheme.ts` - `--color-ink`/`--color-orange`等の既存デザイントークンに合わせたカスタムShikiテーマ(`usuyuki-editorial`)
 - `frontend/src/libs/helper/ogpMeta.ts` - `buildFixedOgpMeta()`で固定OGP画像(`images/ogp/ogp.png`)のog:image/width/heightをまとめて返す。トップ・404・タグ一覧など固定画像を使う全ページ、および記事詳細で`feature_image`が無い/サイズ取得に失敗した場合のフォールバックで共用
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)

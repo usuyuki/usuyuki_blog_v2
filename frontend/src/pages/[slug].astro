@@ -25,6 +25,7 @@ import { addTargetBlankToLinks } from "~/libs/helper/addTargetBlankToLinks";
 import { getPublicTags } from "~/libs/helper/articleCell";
 import { formatDotDate } from "~/libs/helper/formatDotDate";
 import { generateTOC } from "~/libs/helper/generateTOC";
+import { convertFootnotes } from "~/libs/helper/convertFootnotes";
 import { highlightCodeBlocks } from "~/libs/helper/highlightCodeBlocks";
 import { judgeWpArticle } from "~/libs/helper/judgeWpArticle";
 import { getImageDimensions } from "~/libs/helper/getImageDimensions";
@@ -136,8 +137,11 @@ const headingProcessedHtml = isWpArticle
 const tocList: TOCType[] = generateTOC(headingProcessedHtml);
 // 本文内リンクは全て新しいタブで開く
 const linkProcessedHtml = addTargetBlankToLinks(headingProcessedHtml);
+// 本文中の((注釈))を番号付き参照に変換し、記事末尾に注釈一覧を追加する。
+// 注釈内のリンクにもtarget="_blank"が効くよう、リンク処理の後に行う
+const footnoteProcessedHtml = convertFootnotes(linkProcessedHtml);
 // コードブロックをシンタックスハイライト、mermaidブロックをクライアント描画用マークアップに変換
-const processedHtml = await highlightCodeBlocks(linkProcessedHtml);
+const processedHtml = await highlightCodeBlocks(footnoteProcessedHtml);
 
 const articleUrl = `${getFrontendUrl()}${Astro.url.pathname}`;
 ---
