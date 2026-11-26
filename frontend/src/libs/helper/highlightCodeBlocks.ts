@@ -18,8 +18,7 @@ const getHighlighter = () =>
 
 // Ghostのコードカードが出力する<pre><code class="language-XXX">を検出し、
 // - language-mermaid: <pre class="mermaid">に変換し、クライアント側のmermaid.js描画に委ねる
-// - language-chart: JSONをSSRでSVGのグラフ(<figure class="chart">)に変換する。JSONが不正なら元のまま。
-//   キャプション付きのコードカード(<figure class="kg-code-card">)はカードごと置き換える
+// - language-chart: JSONをSSRでSVGのグラフ(<figure class="chart">)に変換する。JSONが不正なら元のまま
 // - それ以外の言語指定あり: Shikiでハイライト済みHTMLに置換する(SSRで完結)
 // - 言語指定なし: 変換せずそのまま維持する
 export const highlightCodeBlocks = async (html: string): Promise<string> => {
@@ -56,9 +55,8 @@ export const highlightCodeBlocks = async (html: string): Promise<string> => {
 
     if (lang === CHART_LANGUAGE) {
       try {
-        // キャプション付きのコードカードは<figure class="kg-code-card">で包まれる。
-        // <pre>だけを置き換えるとグラフの<figure>が入れ子になり枠とキャプションが二重になるため、
-        // カードごと置き換え、キャプションはJSONにtitleが無いときのグラフのタイトルにする
+        // キャプション付きのコードカードは<figure>で包まれ、<pre>だけを置き換えるとfigureが入れ子になるため
+        // カードごと置き換える。キャプションはJSONにtitleが無いときのタイトルにする
         const codeCard = pre.parentElement?.matches("figure.kg-code-card")
           ? pre.parentElement
           : undefined;

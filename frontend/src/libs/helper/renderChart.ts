@@ -32,12 +32,6 @@ const PIE = { cx: WIDTH / 2, cy: HEIGHT / 2, outer: 132, inner: 76 };
 // blogCommon.cssで定義している系列色の数。これを超える系列・扇形は先頭の色から繰り返す
 const SERIES_COLOR_COUNT = 4;
 
-// 横軸ラベルの文字幅の見積もり(.chart-tickのfont-size: 14pxに合わせる)。全角は1文字=14、半角は約0.6倍
-const TICK_FONT_SIZE = 14;
-const HALF_WIDTH_RATIO = 0.6;
-// 隣り合う横軸ラベルの間に最低限空ける余白
-const X_LABEL_GAP = 6;
-
 // 系列・扇形の番号から、色を決めるクラス名を返す
 const seriesClass = (index: number): string =>
   `chart-series-${index % SERIES_COLOR_COUNT}`;
@@ -148,39 +142,33 @@ const round = (n: number): number => Math.round(n * 100) / 100;
 // 足し算で出た表示用の数値から浮動小数点の誤差を取り除く(0.1 + 0.2 → 0.3)
 const normalizeValue = (n: number): number => Number(n.toFixed(10));
 
-// 文字列を横軸ラベルとして描いたときの幅を見積もる
-const estimateTextWidth = (text: string): number =>
-  Array.from(text).reduce(
-    (width, char) =>
-      width +
-      (char.charCodeAt(0) < 0x100
-        ? TICK_FONT_SIZE * HALF_WIDTH_RATIO
-        : TICK_FONT_SIZE),
-    0,
+// 横軸ラベルを何個おきに出すかを決める。最長のラベルの幅(.chart-tickの14pxで、全角14・半角8.4と見積もる)
+// と余白6が区間幅に収まらなければ、重ならない間隔まで間引く
+const xLabelInterval = (labels: string[], bandWidth: number): number => {
+  const widths = labels.map((label) =>
+    Array.from(label).reduce(
+      (w, c) => w + (c.charCodeAt(0) < 0x100 ? 8.4 : 14),
+      0,
+    ),
   );
-
-// 横軸ラベルを何個おきに出すかを決める。全部出すと隣と重なる場合は間引き、重ならない間隔にする
-export const xLabelInterval = (labels: string[], bandWidth: number): number => {
-  const maxWidth = Math.max(...labels.map(estimateTextWidth));
-  return Math.max(1, Math.ceil((maxWidth + X_LABEL_GAP) / bandWidth));
+  return Math.max(1, Math.ceil((Math.max(...widths) + 6) / bandWidth));
 };
 
 // 各値の割合(%)を、合計がちょうど100になるよう最大剰余法で整数に丸める
-export const toPercentages = (values: number[]): number[] => {
+const toPercentages = (values: number[]): number[] => {
   const total = values.reduce((sum, value) => sum + value, 0);
   const exact = values.map((value) => (value / total) * 100);
-  const floored = exact.map(Math.floor);
-  let remaining = 100 - floored.reduce((sum, value) => sum + value, 0);
+  const result = exact.map(Math.floor);
+  const shortage = 100 - result.reduce((sum, value) => sum + value, 0);
   // 切り捨てで失った分を、端数の大きい順に1ずつ配る
-  const byRemainder = exact
-    .map((value, i) => ({ i, remainder: value - floored[i] }))
-    .sort((a, b) => b.remainder - a.remainder);
-  for (const { i } of byRemainder) {
-    if (remaining <= 0) break;
-    floored[i] += 1;
-    remaining -= 1;
-  }
-  return floored;
+  exact
+    .map((_, i) => i)
+    .sort((a, b) => exact[b] - result[b] - (exact[a] - result[a]))
+    .slice(0, shortage)
+    .forEach((i) => {
+      result[i] += 1;
+    });
+  return result;
 };
 
 // 縦軸の目盛り線と目盛りの数値
@@ -195,21 +183,19 @@ const renderYAxis = (ticks: number[], toY: (v: number) => number): string =>
     })
     .join("");
 
-// 横軸のラベル(各区間の中央)。ラベルが多い・長いときは重ならないよう間引く
+// 横軸のラベル(各区間の中央)。ラベルが多い・長いときは重ならないようinterval個おきに出す
 const renderXLabels = (
   labels: string[],
-  bandWidth: number,
   bandCenter: (i: number) => number,
-): string => {
-  const interval = xLabelInterval(labels, bandWidth);
-  return labels
+  interval: number,
+): string =>
+  labels
     .map((label, i) =>
-      i % interval !== 0
+      i % interval
         ? ""
         : `<text class="chart-tick" x="${round(bandCenter(i))}" y="${HEIGHT - MARGIN.bottom + 22}" text-anchor="middle">${escapeHtml(label)}</text>`,
     )
     .join("");
-};
 
 // 棒グラフ。系列が複数あれば下から順に積み上げ、上に合計値を出す
 const renderBars = (
@@ -352,7 +338,11 @@ const renderAxisChart = (spec: ChartSpec): string => {
     renderYAxis(ticks, toY) +
     marks +
     baseline +
-    renderXLabels(spec.labels, bandWidth, bandCenter)
+    renderXLabels(
+      spec.labels,
+      bandCenter,
+      xLabelInterval(spec.labels, bandWidth),
+    )
   );
 };
 
