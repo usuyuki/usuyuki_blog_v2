@@ -125,7 +125,21 @@ The frontend follows Atomic Design principles:
 - `frontend/src/libs/helper/formatDotDate.ts` - `2026.06.18` 形式の日付フォーマッタ
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ、fetchは5秒でタイムアウト)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
-- `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
+- `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、`language-chart`は`renderChart.ts`でSVGのグラフに、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
+- `frontend/src/libs/helper/renderChart.ts` - 記事本文のグラフ。Ghostのコードカードで言語を`chart`にしてJSONを書くと、SSR時にSVGの`<figure class="chart">`に変換する(クライアントJS・ライブラリ不要)。JSONが不正ならwarnログを出してコードブロックのまま残す。色はSVGに直書きせず`chart-series-0〜3`のクラスで付け、`blogCommon.css`でオレンジ→黒→グレー→薄いグレーの順に塗る(5つ目からは繰り返す)。スマホ幅では文字が潰れないよう最低幅440pxで枠内を横スクロールさせる。横軸のラベルが重なるときは間引く。円グラフの扇形が4n+1個なら最後を2色目にし(最初と同じ色で隣り合うため)、凡例の割合は合計が100%になるよう丸める。キャプション付きのコードカードはカードごと置き換える
+
+  | キー | 内容 |
+  | --- | --- |
+  | `type` | `bar`(系列が複数なら積み上げ、上に合計値)/ `line` / `pie`(ドーナツ型。seriesは1つだけで、labelsの各値を扇形にし、中央に合計、凡例に値と割合を出す) |
+  | `title` | 任意。グラフの見出し(無ければコードカードのキャプションを使う) |
+  | `unit` | 任意。棒グラフの値ラベルに付ける単位(例: `冊`) |
+  | `labels` | 横軸のラベル(文字列の配列) |
+  | `series` | `{"name": 系列名, "values": labelsと同数の0以上の数値}`の配列。2系列以上で凡例を出す |
+
+- `frontend/src/libs/helper/chartPreview.ts` - グラフのプレビューページ用の処理(`previewChart`: JSONを記事本文と同じ処理で描画し、失敗時は理由を返す / `CHART_PREVIEW_SAMPLES`: 棒・折れ線・円のサンプル)
+- `frontend/src/pages/dev/` - 執筆者用ページ。`/dev`が一覧、`/dev/chart-preview`がグラフのプレビュー(chartのJSONを貼ると記事本文と同じ見た目で描画し、PC幅/スマホ幅を切り替えられる)。Ghostの下書きはContent APIで取得できず公開するまで本番で確認できないため用意している。ページを増やしたら`dev/index.astro`の`DEV_PAGES`に足す
+- `frontend/src/libs/devPageAuth.ts` - `/dev`配下のアクセス判定(`middleware.ts`から呼ぶ)。`DEV_PAGES_AUTH_DISABLED=true`(開発用の`compose.yml`でだけ指定)なら認証なし、それ以外は`DEV_PAGES_BASIC_AUTH_USER`/`DEV_PAGES_BASIC_AUTH_PASSWORD`のBasic認証で、未設定なら404。`import.meta.env.DEV`は開発用コンテナでビルドすると本番用の成果物でもtrueになるため使わない。レスポンスには`X-Robots-Tag: noindex`と`Cache-Control: private, no-store`を付ける
+
 - `frontend/src/libs/helper/shikiTheme.ts` - `--color-ink`/`--color-orange`等の既存デザイントークンに合わせたカスタムShikiテーマ(`usuyuki-editorial`)
 - `frontend/src/libs/helper/ogpMeta.ts` - `buildFixedOgpMeta()`で固定OGP画像(`images/ogp/ogp.png`)のog:image/width/heightをまとめて返す。トップ・404・タグ一覧など固定画像を使う全ページ、および記事詳細で`feature_image`が無い/サイズ取得に失敗した場合のフォールバックで共用
 - `frontend/src/libs/rssClient.ts` - RSS feed processing for external blogs (Zenn, note, etc.)
@@ -189,6 +203,8 @@ astroLogger.systemLog('System startup completed');
 - `GHOST_FRONT_URL` - Ghost frontend URL for admin interface
 
 ### Optional Variables
+- `DEV_PAGES_BASIC_AUTH_USER` / `DEV_PAGES_BASIC_AUTH_PASSWORD` - 本番で`/dev`配下(グラフのプレビューなど)を開くためのBasic認証。未設定なら本番では`/dev`配下が404になる
+- `DEV_PAGES_AUTH_DISABLED` - `true`なら`/dev`配下を認証なしで開ける。開発用の`compose.yml`でだけ指定する(E2Eは`playwright.config.ts`で`false`にして認証を確かめる)
 - `TUNNEL_TOKEN` - Cloudflare tunnel token for production deployment
 - `EXTERNAL_BLOGS` - JSON array of external blog sources for article aggregation
   - `qiitaUserId` を指定するとQiita API v2で全記事取得（RSSより優先）

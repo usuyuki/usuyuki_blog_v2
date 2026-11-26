@@ -39,6 +39,14 @@ test.describe("記事詳細ページ", () => {
     expect(errors, "未捕捉のJSエラーが発生しています").toEqual([]);
   });
 
+  test("chartブロックがSVGのグラフとして描画される", async ({ page }) => {
+    await page.goto("/e2e-post-1");
+    const chart = page.locator("article.blog-content figure.chart");
+    await expect(chart).toBeVisible();
+    await expect(chart.locator("svg rect.chart-bar")).toHaveCount(3);
+    await expect(chart).toContainText("時間帯別の頒布数");
+  });
+
   test("前後記事ナビゲーションが表示される", async ({ page }) => {
     await page.goto("/e2e-post-2");
     const prevNext = page.locator("nav.prev-next");

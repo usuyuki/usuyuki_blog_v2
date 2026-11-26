@@ -50,6 +50,8 @@ services:
     environment:
       NODE_ENV: development
       GHOST_CONTENT_KEY: ${GHOST_CONTENT_KEY}
+      # /dev配下(グラフのプレビューなど)を開発環境では認証なしで開けるようにする
+      DEV_PAGES_AUTH_DISABLED: "true"
       GHOST_API_URL: ${GHOST_API_URL}
       FRONTEND_URL: ${FRONTEND_URL}
       EXTERNAL_BLOGS: ${EXTERNAL_BLOGS}

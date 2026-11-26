@@ -27,6 +27,27 @@ describe("highlightCodeBlocks", () => {
     expect(result).not.toContain('class="shiki');
   });
 
+  it("正常系: chartブロックはJSONからSVGのグラフに置換され、キャプション付きのコードカードはカードごと置き換わる", async () => {
+    // Ghostのコードカードは本文をエスケープして出力するため、JSONの"は&quot;になりうる
+    const html =
+      '<figure class="kg-card kg-code-card"><pre><code class="language-chart">{&quot;type&quot;:&quot;bar&quot;,&quot;labels&quot;:[&quot;a&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;s&quot;,&quot;values&quot;:[1]}]}</code></pre><figcaption>キャプション</figcaption></figure>';
+    const result = await highlightCodeBlocks(html);
+    expect(result).toContain('<figure class="chart">');
+    expect(result).toContain("<svg");
+    expect(result).not.toContain("<pre");
+    // figureを入れ子にせず、JSONにtitleが無いのでキャプションをタイトルにする
+    expect(result).not.toContain("kg-code-card");
+    expect(result).toContain(
+      '<figcaption class="chart-title">キャプション</figcaption>',
+    );
+  });
+
+  it("異常系: chartブロックに不正なJSONを入れると描画できないので、元のコードブロックのまま残る", async () => {
+    const html = '<pre><code class="language-chart">{broken</code></pre>';
+    const result = await highlightCodeBlocks(html);
+    expect(result).toBe(html);
+  });
+
   it("正常系: 言語指定なしのコードブロックは変換されずそのまま維持される", async () => {
     const html = "<pre><code>plain text</code></pre>";
     const result = await highlightCodeBlocks(html);

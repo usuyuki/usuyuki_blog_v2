@@ -49,6 +49,7 @@ const RICH_HTML = `
 }</code></pre>
 <pre><code class="language-mermaid">graph TD;
   A[開始] --&gt; B[終了];</code></pre>
+<pre><code class="language-chart">{&quot;type&quot;:&quot;bar&quot;,&quot;title&quot;:&quot;時間帯別の頒布数&quot;,&quot;unit&quot;:&quot;冊&quot;,&quot;labels&quot;:[&quot;11時&quot;,&quot;12時&quot;,&quot;13時&quot;],&quot;series&quot;:[{&quot;name&quot;:&quot;会場&quot;,&quot;values&quot;:[8,18,21]}]}</code></pre>
 `;
 
 function buildPost(n, { year, month, featured, tags: postTags }) {

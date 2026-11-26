@@ -53,6 +53,11 @@ export default defineConfig({
         FRONTEND_URL: baseURL,
         // 外部ブログ(Qiita/Zenn)へのアクセスを無効化して決定的にする
         EXTERNAL_BLOGS: "[]",
+        // 開発用コンテナ内で実行すると認証を無効にする設定を引き継ぐため、明示的に有効にする
+        DEV_PAGES_AUTH_DISABLED: "false",
+        // /dev配下のBasic認証をE2Eで確かめるための認証情報(e2e/devPages.spec.tsと揃える)
+        DEV_PAGES_BASIC_AUTH_USER: "e2e-user",
+        DEV_PAGES_BASIC_AUTH_PASSWORD: "e2e-password",
       },
     },
   ],

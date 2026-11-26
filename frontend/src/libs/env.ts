@@ -65,3 +65,25 @@ export function getNsfwBlocklist(): Set<string> {
       .filter((s: string) => s.length > 0),
   );
 }
+
+// /dev配下(プレビューページ)を本番で開くためのBasic認証の情報。
+// どちらかが未設定なら本番では/dev配下を404にする(devPageAuth.ts参照)
+export function getDevPagesCredentials():
+  | { user: string; password: string }
+  | undefined {
+  const user = isServer()
+    ? process.env.DEV_PAGES_BASIC_AUTH_USER
+    : import.meta.env.DEV_PAGES_BASIC_AUTH_USER;
+  const password = isServer()
+    ? process.env.DEV_PAGES_BASIC_AUTH_PASSWORD
+    : import.meta.env.DEV_PAGES_BASIC_AUTH_PASSWORD;
+  return user && password ? { user, password } : undefined;
+}
+
+// 開発用のcompose.ymlでだけtrueにし、/dev配下を認証なしで開けるようにする
+export function isDevPagesAuthDisabled(): boolean {
+  const value = isServer()
+    ? process.env.DEV_PAGES_AUTH_DISABLED
+    : import.meta.env.DEV_PAGES_AUTH_DISABLED;
+  return value === "true";
+}
