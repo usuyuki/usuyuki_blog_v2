@@ -17,6 +17,7 @@ export const previewChart = (source: string): ChartPreviewResult => {
   }
 };
 
+// サンプルをテキストエリアに表示するため、インデント付きのJSON文字列にする
 const toJson = (spec: unknown): string => JSON.stringify(spec, null, 2);
 
 // プレビューページで読み込めるサンプル(技術書典21の頒布数)

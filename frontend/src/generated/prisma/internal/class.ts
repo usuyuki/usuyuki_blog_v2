@@ -17,8 +17,8 @@ import type * as Prisma from "./prismaNamespace.ts"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.10.0",
-  "engineVersion": "0edf323efd1d98336f3f0a68684b56f689b900d3",
+  "clientVersion": "7.10.1",
+  "engineVersion": "d1b3f377ca835d73fd50954a5e22128b9ebdd6b8",
   "activeProvider": "mysql",
   "inlineSchema": "datasource db {\n  provider = \"mysql\"\n}\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\nmodel EmojiReaction {\n  id        BigInt   @id @default(autoincrement()) @db.UnsignedBigInt\n  slug      String   @db.VarChar(255)\n  emoji     String   @db.VarChar(10)\n  clientId  String   @map(\"client_id\") @db.VarChar(36)\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  @@unique([slug, emoji, clientId], name: \"uq_reaction\")\n  @@index([slug], name: \"idx_slug\")\n  @@map(\"emoji_reactions\")\n}\n",
   "runtimeDataModel": {

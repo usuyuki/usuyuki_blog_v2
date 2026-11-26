@@ -126,12 +126,12 @@ The frontend follows Atomic Design principles:
 - `frontend/src/libs/helper/articleCell.ts` - 記事セルのリンク・View Transitions名・サムネ代替・公開タグ抽出(`getPublicTags`)・画像フォールバック(`IMAGE_FALLBACK_ONERROR`)のヘルパー
 - `frontend/src/libs/helper/getImageDimensions.ts` - 画像URLをfetchしsharpで幅・高さを取得(`og:image:width`/`height`用、1時間キャッシュ、fetchは5秒でタイムアウト)。Misskeyなど外部サービスのOGPプレビュー生成がサイズ情報を要求するため記事詳細ページ(`[slug].astro`)で使用
 - `frontend/src/libs/helper/highlightCodeBlocks.ts` - 記事本文HTML中の`<pre><code class="language-XXX">`をjsdomで検出し、`language-mermaid`は`<pre class="mermaid">`(クライアント側`mermaidRenderer.ts`が描画)に、`language-chart`は`renderChart.ts`でSVGのグラフに、それ以外は[Shiki](https://shiki.style/)でSSR時にハイライト済みHTMLへ変換する。未対応言語は例外を吸収しプレーンテキストのまま維持([ADR-00002](./adr/00002-mermaid-and-syntax-highlight.md)参照)
-- `frontend/src/libs/helper/renderChart.ts` - 記事本文のグラフ。Ghostのコードカードで言語を`chart`にしてJSONを書くと、SSR時にSVGの`<figure class="chart">`に変換する(クライアントJS・ライブラリ不要)。JSONが不正ならwarnログを出してコードブロックのまま残す。色はSVGに直書きせず`chart-series-0〜3`のクラスで付け、`blogCommon.css`でオレンジ→黒→グレー→薄いグレーの順に塗る(5つ目からは繰り返す)。スマホ幅では文字が潰れないよう最低幅440pxで枠内を横スクロールさせる
+- `frontend/src/libs/helper/renderChart.ts` - 記事本文のグラフ。Ghostのコードカードで言語を`chart`にしてJSONを書くと、SSR時にSVGの`<figure class="chart">`に変換する(クライアントJS・ライブラリ不要)。JSONが不正ならwarnログを出してコードブロックのまま残す。色はSVGに直書きせず`chart-series-0〜3`のクラスで付け、`blogCommon.css`でオレンジ→黒→グレー→薄いグレーの順に塗る(5つ目からは繰り返す)。スマホ幅では文字が潰れないよう最低幅440pxで枠内を横スクロールさせる。横軸のラベルが多い・長いときは重ならないよう間引く。円グラフの扇形が4n+1個のときは最後と最初が同じ色で隣り合わないよう最後を2色目にし、凡例の割合は合計が100%になるよう最大剰余法で丸める。キャプション付きのコードカード(`figure.kg-code-card`)はカードごと置き換え、JSONに`title`が無ければキャプションをタイトルにする
 
   | キー | 内容 |
   | --- | --- |
   | `type` | `bar`(系列が複数なら積み上げ、上に合計値)/ `line` / `pie`(ドーナツ型。seriesは1つだけで、labelsの各値を扇形にし、中央に合計、凡例に値と割合を出す) |
-  | `title` | 任意。グラフの見出し |
+  | `title` | 任意。グラフの見出し(無ければコードカードのキャプションを使う) |
   | `unit` | 任意。棒グラフの値ラベルに付ける単位(例: `冊`) |
   | `labels` | 横軸のラベル(文字列の配列) |
   | `series` | `{"name": 系列名, "values": labelsと同数の0以上の数値}`の配列。2系列以上で凡例を出す |

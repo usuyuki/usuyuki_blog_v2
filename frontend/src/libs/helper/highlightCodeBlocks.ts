@@ -18,7 +18,8 @@ const getHighlighter = () =>
 
 // Ghostのコードカードが出力する<pre><code class="language-XXX">を検出し、
 // - language-mermaid: <pre class="mermaid">に変換し、クライアント側のmermaid.js描画に委ねる
-// - language-chart: JSONをSSRでSVGのグラフ(<figure class="chart">)に変換する。JSONが不正なら元のまま
+// - language-chart: JSONをSSRでSVGのグラフ(<figure class="chart">)に変換する。JSONが不正なら元のまま。
+//   キャプション付きのコードカード(<figure class="kg-code-card">)はカードごと置き換える
 // - それ以外の言語指定あり: Shikiでハイライト済みHTMLに置換する(SSRで完結)
 // - 言語指定なし: 変換せずそのまま維持する
 export const highlightCodeBlocks = async (html: string): Promise<string> => {
@@ -55,10 +56,22 @@ export const highlightCodeBlocks = async (html: string): Promise<string> => {
 
     if (lang === CHART_LANGUAGE) {
       try {
+        // キャプション付きのコードカードは<figure class="kg-code-card">で包まれる。
+        // <pre>だけを置き換えるとグラフの<figure>が入れ子になり枠とキャプションが二重になるため、
+        // カードごと置き換え、キャプションはJSONにtitleが無いときのグラフのタイトルにする
+        const codeCard = pre.parentElement?.matches("figure.kg-code-card")
+          ? pre.parentElement
+          : undefined;
+        const caption = codeCard
+          ?.querySelector(":scope > figcaption")
+          ?.textContent?.trim();
+        const spec = parseChartSpec(rawCode);
         const wrapper = document.createElement("div");
-        wrapper.innerHTML = renderChart(parseChartSpec(rawCode));
+        wrapper.innerHTML = renderChart(
+          spec.title || !caption ? spec : { ...spec, title: caption },
+        );
         const figure = wrapper.firstElementChild;
-        if (figure) pre.replaceWith(figure);
+        if (figure) (codeCard ?? pre).replaceWith(figure);
       } catch (error) {
         // JSONの誤りで記事全体を壊さないよう、書いた内容をコードブロックのまま見せる
         astroLogger.warn("Chart rendering failed, keeping plain code block", {

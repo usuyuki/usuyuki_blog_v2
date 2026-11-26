@@ -3,7 +3,7 @@
 // 環境変数で設定したユーザー名・パスワードのBasic認証を求め、未設定なら存在しないページとして扱う。
 // import.meta.env.DEVはビルドした環境で値が決まり、開発用コンテナでビルドすると本番用の成果物でも
 // trueになってしまうため使わない。設定を忘れても認証がかかる側に倒れるよう、無効化は明示的に指定させる。
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 
 export type DevPageAccess = "allow" | "not_found" | "unauthorized";
 
@@ -15,11 +15,11 @@ const DEV_PAGE_PREFIX = "/dev";
 export const isDevPagePath = (pathname: string): boolean =>
   pathname === DEV_PAGE_PREFIX || pathname.startsWith(`${DEV_PAGE_PREFIX}/`);
 
-// 文字列の比較にかかる時間からパスワードを推測されないよう、一定時間で比較する
+// 文字列の比較にかかる時間からパスワードを推測されないよう、一定時間で比較する。
+// 長さが違うと早く返す実装だと長さが漏れるため、両方をSHA-256で同じ長さにしてから比べる
 const safeEqual = (a: string, b: string): boolean => {
-  const bufferA = Buffer.from(a);
-  const bufferB = Buffer.from(b);
-  return bufferA.length === bufferB.length && timingSafeEqual(bufferA, bufferB);
+  const digest = (text: string) => createHash("sha256").update(text).digest();
+  return timingSafeEqual(digest(a), digest(b));
 };
 
 // "Basic base64(user:password)"形式のAuthorizationヘッダーから認証情報を取り出す

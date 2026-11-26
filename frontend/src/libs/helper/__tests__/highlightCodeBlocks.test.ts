@@ -37,6 +37,31 @@ describe("highlightCodeBlocks", () => {
     expect(result).not.toContain("<pre");
   });
 
+  it.each([
+    {
+      name: "キャプションはJSONにtitleが無ければグラフのタイトルになる",
+      json: '{"type":"bar","labels":["a"],"series":[{"name":"s","values":[1]}]}',
+      title: "キャプション",
+    },
+    {
+      name: "JSONにtitleがあればキャプションよりtitleを優先する",
+      json: '{"type":"bar","title":"JSONのタイトル","labels":["a"],"series":[{"name":"s","values":[1]}]}',
+      title: "JSONのタイトル",
+    },
+  ])(
+    "正常系: キャプション付きのchartコードカードはカードごと置き換え、figureを入れ子にしない($name)",
+    async ({ json, title }) => {
+      const html = `<figure class="kg-card kg-code-card"><pre><code class="language-chart">${json}</code></pre><figcaption>キャプション</figcaption></figure>`;
+      const result = await highlightCodeBlocks(html);
+      expect(result).not.toContain("kg-code-card");
+      expect(result.match(/<figure/g)).toHaveLength(1);
+      expect(result.match(/<figcaption/g)).toHaveLength(1);
+      expect(result).toContain(
+        `<figcaption class="chart-title">${title}</figcaption>`,
+      );
+    },
+  );
+
   it("異常系: chartブロックに不正なJSONを入れると描画できないので、元のコードブロックのまま残る", async () => {
     const html = '<pre><code class="language-chart">{broken</code></pre>';
     const result = await highlightCodeBlocks(html);

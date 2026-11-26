@@ -32,9 +32,24 @@ const PIE = { cx: WIDTH / 2, cy: HEIGHT / 2, outer: 132, inner: 76 };
 // blogCommon.cssで定義している系列色の数。これを超える系列・扇形は先頭の色から繰り返す
 const SERIES_COLOR_COUNT = 4;
 
+// 横軸ラベルの文字幅の見積もり(.chart-tickのfont-size: 14pxに合わせる)。全角は1文字=14、半角は約0.6倍
+const TICK_FONT_SIZE = 14;
+const HALF_WIDTH_RATIO = 0.6;
+// 隣り合う横軸ラベルの間に最低限空ける余白
+const X_LABEL_GAP = 6;
+
+// 系列・扇形の番号から、色を決めるクラス名を返す
 const seriesClass = (index: number): string =>
   `chart-series-${index % SERIES_COLOR_COUNT}`;
 
+// 円グラフの扇形の色。4色を順に使うと、扇形が4n+1個のとき最後と最初が同じ色で隣り合い
+// 1つの扇形に見えてしまうため、その場合だけ最後の扇形を2色目にする
+const sliceClass = (index: number, count: number): string =>
+  count > 1 && count % SERIES_COLOR_COUNT === 1 && index === count - 1
+    ? seriesClass(1)
+    : seriesClass(index);
+
+// SVG・HTMLのテキストや属性値に埋め込む文字列をエスケープする
 const escapeHtml = (text: string): string =>
   text
     .replace(/&/g, "&amp;")
@@ -42,6 +57,7 @@ const escapeHtml = (text: string): string =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+// 配列でないオブジェクトかどうかを判定する(JSONの検証用)
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
@@ -126,7 +142,46 @@ export const buildNiceTicks = (max: number): number[] => {
   );
 };
 
+// SVGの座標を小数第2位までに丸める(出力を短くするため)
 const round = (n: number): number => Math.round(n * 100) / 100;
+
+// 足し算で出た表示用の数値から浮動小数点の誤差を取り除く(0.1 + 0.2 → 0.3)
+const normalizeValue = (n: number): number => Number(n.toFixed(10));
+
+// 文字列を横軸ラベルとして描いたときの幅を見積もる
+const estimateTextWidth = (text: string): number =>
+  Array.from(text).reduce(
+    (width, char) =>
+      width +
+      (char.charCodeAt(0) < 0x100
+        ? TICK_FONT_SIZE * HALF_WIDTH_RATIO
+        : TICK_FONT_SIZE),
+    0,
+  );
+
+// 横軸ラベルを何個おきに出すかを決める。全部出すと隣と重なる場合は間引き、重ならない間隔にする
+export const xLabelInterval = (labels: string[], bandWidth: number): number => {
+  const maxWidth = Math.max(...labels.map(estimateTextWidth));
+  return Math.max(1, Math.ceil((maxWidth + X_LABEL_GAP) / bandWidth));
+};
+
+// 各値の割合(%)を、合計がちょうど100になるよう最大剰余法で整数に丸める
+export const toPercentages = (values: number[]): number[] => {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  const exact = values.map((value) => (value / total) * 100);
+  const floored = exact.map(Math.floor);
+  let remaining = 100 - floored.reduce((sum, value) => sum + value, 0);
+  // 切り捨てで失った分を、端数の大きい順に1ずつ配る
+  const byRemainder = exact
+    .map((value, i) => ({ i, remainder: value - floored[i] }))
+    .sort((a, b) => b.remainder - a.remainder);
+  for (const { i } of byRemainder) {
+    if (remaining <= 0) break;
+    floored[i] += 1;
+    remaining -= 1;
+  }
+  return floored;
+};
 
 // 縦軸の目盛り線と目盛りの数値
 const renderYAxis = (ticks: number[], toY: (v: number) => number): string =>
@@ -140,17 +195,21 @@ const renderYAxis = (ticks: number[], toY: (v: number) => number): string =>
     })
     .join("");
 
-// 横軸のラベル(各区間の中央)
+// 横軸のラベル(各区間の中央)。ラベルが多い・長いときは重ならないよう間引く
 const renderXLabels = (
   labels: string[],
+  bandWidth: number,
   bandCenter: (i: number) => number,
-): string =>
-  labels
-    .map(
-      (label, i) =>
-        `<text class="chart-tick" x="${round(bandCenter(i))}" y="${HEIGHT - MARGIN.bottom + 22}" text-anchor="middle">${escapeHtml(label)}</text>`,
+): string => {
+  const interval = xLabelInterval(labels, bandWidth);
+  return labels
+    .map((label, i) =>
+      i % interval !== 0
+        ? ""
+        : `<text class="chart-tick" x="${round(bandCenter(i))}" y="${HEIGHT - MARGIN.bottom + 22}" text-anchor="middle">${escapeHtml(label)}</text>`,
     )
     .join("");
+};
 
 // 棒グラフ。系列が複数あれば下から順に積み上げ、上に合計値を出す
 const renderBars = (
@@ -174,7 +233,7 @@ const renderBars = (
           return `<rect class="chart-bar ${seriesClass(seriesIndex)}" x="${x}" y="${round(top)}" width="${barWidth}" height="${height}"/>`;
         })
         .join("");
-      const label = `<text class="chart-value" x="${round(bandCenter(i))}" y="${round(toY(stacked) - 8)}" text-anchor="middle">${stacked}${unit}</text>`;
+      const label = `<text class="chart-value" x="${round(bandCenter(i))}" y="${round(toY(stacked) - 8)}" text-anchor="middle">${normalizeValue(stacked)}${unit}</text>`;
       return rects + label;
     })
     .join("");
@@ -252,16 +311,17 @@ const renderPie = (spec: ChartSpec): { svgBody: string; legend: string } => {
       angle += (value / total) * 2 * Math.PI;
       // 値が0の扇形は幅が無いので描かない(凡例には残す)
       if (value === 0) return "";
-      return `<path class="chart-slice ${seriesClass(i)}" d="${donutSlicePath(start, angle)}"/>`;
+      return `<path class="chart-slice ${sliceClass(i, values.length)}" d="${donutSlicePath(start, angle)}"/>`;
     })
     .join("");
   const center =
-    `<text class="chart-total" x="${PIE.cx}" y="${PIE.cy}" text-anchor="middle" dominant-baseline="middle">${total}${unit}</text>` +
+    `<text class="chart-total" x="${PIE.cx}" y="${PIE.cy}" text-anchor="middle" dominant-baseline="middle">${normalizeValue(total)}${unit}</text>` +
     `<text class="chart-tick" x="${PIE.cx}" y="${PIE.cy + 28}" text-anchor="middle">合計</text>`;
+  const percentages = toPercentages(values);
   const legend = `<ul class="chart-legend">${spec.labels
     .map((label, i) => {
-      const percent = Math.round((values[i] / total) * 100);
-      return `<li><span class="chart-swatch ${seriesClass(i)}"></span>${escapeHtml(label)}<span class="chart-legend-value">${values[i]}${unit}（${percent}%）</span></li>`;
+      const percent = percentages[i];
+      return `<li><span class="chart-swatch ${sliceClass(i, values.length)}"></span>${escapeHtml(label)}<span class="chart-legend-value">${values[i]}${unit}（${percent}%）</span></li>`;
     })
     .join("")}</ul>`;
   return { svgBody: slices + center, legend };
@@ -292,7 +352,7 @@ const renderAxisChart = (spec: ChartSpec): string => {
     renderYAxis(ticks, toY) +
     marks +
     baseline +
-    renderXLabels(spec.labels, bandCenter)
+    renderXLabels(spec.labels, bandWidth, bandCenter)
   );
 };
 
